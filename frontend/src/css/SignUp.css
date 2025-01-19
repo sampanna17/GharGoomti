@@ -37,8 +37,9 @@
 }
 
 .signup-logo .signup-logo-image {
-    width: 10vw;
+    width: 25vw;
     height: auto;
+    width: 100%;
 }
 
 .signup-right form {
