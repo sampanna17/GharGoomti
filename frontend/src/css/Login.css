@@ -1,0 +1,261 @@
+.login-main {
+    display: flex;
+    height: 100vh;
+}
+
+.login-left {
+    flex-grow: 1;
+    height: 100vh;
+    background-color: #E9E9E9;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+   
+}
+
+.corner-image {
+    position: absolute;
+    top: 20px;
+    right: 0px;
+    max-width: 400px;
+    height: auto !important;
+}
+
+.center-image {
+    position: absolute;
+    bottom: 0px;
+    left: 20px;
+    max-width: 360px;
+}
+
+.login-right {
+    height: 100vh;
+    flex-grow: 1;
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-right-container {    
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-right-container .login-logo .login-logo-image {
+    width: 10vw;
+    height: auto;
+}
+
+.login-right form {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-logo {
+    align-self: center;
+    padding-top: 20px;
+}
+
+.login-center {
+    margin: auto 0;
+}
+
+.login-logo img {
+    width: 50px;
+}
+
+.login-center h2 {
+    font-size: 3.5rem;
+}
+
+.login-center {
+    text-align: center;
+}
+
+.login-center p {
+    font-weight: 400;
+    font-size: 2rem;
+    margin-bottom: 40px;
+}
+
+form input[type='email'],
+form input[type='password'],
+form input[type='text'] {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 0px;
+    border-bottom: 1px solid black;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.pass-input-div {
+    position: relative;
+}
+
+.pass-input-div svg {
+    font-size: 20px;
+    position: absolute;
+    right: 10px;
+    bottom: 35px;
+    cursor: pointer;
+    outline: none;
+}
+
+form button[type='button'] {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+.login-center-options {
+    display: flex;
+    justify-content: space-between;
+}
+
+.remember-div {
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+}
+
+.remember-div label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 2px;
+}
+
+.forgot-pass-link {
+    text-decoration: none;
+    font-size: 1.3rem;
+}
+
+.forgot-pass-link:hover {
+    text-decoration: underline;
+}
+
+.login-center-buttons {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+
+.login-center-buttons button:nth-child(1) {
+    background-color: black;
+    color: white;
+    border: 3px solid black;
+}
+
+.login-center-buttons button:nth-child(1):hover {
+    color: #333;
+    background-color: white;
+}
+
+.login-center-buttons button:nth-child(2) {
+    background-color: #F0F0F0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 10px;
+}
+
+.login-center-buttons button:nth-child(2) img {
+    width: 30px;
+}
+
+.login-center-buttons button:nth-child(2):hover {
+    background-color: #c4c4c457;
+}
+
+.login-bottom-p {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 40px; 
+}
+
+.login-bottom-p a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-bottom-p a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+    .login-left {
+        display: none;
+    }
+
+    .login-right {
+        width: 100%;
+    }
+
+    .login-right-container {
+        width: 80%;
+    }
+
+    .login-center h2 {
+        font-size: 3rem;
+    }
+
+    .login-center p {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .login-right-container {
+        width: 90%;
+    }
+
+    .login-center h2 {
+        font-size: 2.5rem;
+    }
+
+    .login-center p {
+        font-size: 1.5rem;
+    }
+
+    .login-center-options {
+        flex-direction: column;
+        align-items: center;
+        row-gap: 10px;
+    }
+
+    .login-center-buttons {
+        margin-top: 20px;
+    }
+
+    .login-bottom-p {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .login-center h2 {
+        font-size: 2rem;
+    }
+
+    .login-center p {
+        font-size: 1.2rem;
+    }
+
+    .login-bottom-p {
+        font-size: 1.1rem;
+    }
+}

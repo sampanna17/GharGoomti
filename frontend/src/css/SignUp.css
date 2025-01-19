@@ -1,0 +1,256 @@
+
+.signup-main {
+    display: flex;
+    height: 100vh;
+    overflow: hidden; 
+}
+
+.signup-left {
+    flex-grow: 1;
+    height: 100vh;
+    background-color: #E9E9E9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+}
+
+.signup-right {
+    flex-grow: 1;
+    height: 100vh;
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px; 
+    box-sizing: border-box; 
+
+}
+
+.signup-right-container {
+    max-width: 600px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.signup-logo .signup-logo-image {
+    width: 10vw;
+    height: auto;
+}
+
+.signup-right form {
+    display: flex;
+    flex-direction: column;
+}
+
+.signup-logo {
+    align-self: center;
+    padding-top: 20px;
+}
+
+.signup-center {
+    margin: auto 0;
+}
+
+.signup-logo img {
+    width: 50px;
+}
+
+.signup-center h2 {
+    font-size: 3.5rem;
+    white-space: nowrap;
+    margin: 0 auto;
+}
+
+.signup-center {
+    text-align: center;
+}
+
+.signup-center p {
+    font-weight: 400;
+    font-size: 2rem;
+    margin-bottom: 40px;
+}
+
+.signup-name-fields {
+    display: flex;
+    gap: 10px;
+}
+
+.signup-name-fields input {
+    flex: 1;
+}
+
+form input[type='email'],
+form input[type='password'],
+form input[type='text'],
+form input[type='tel'],
+form input[type='number'] {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 0px;
+    border-bottom: 1px solid black;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.signup-pass-input-div {
+    position: relative;
+}
+
+.signup-pass-input-div svg {
+    font-size: 20px;
+    position: absolute;
+    right: 10px;
+    bottom: 35px;
+    cursor: pointer;
+    outline: none;
+}
+
+form button[type='submit'],
+form button[type='button'] {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 30px;
+    font-weight: 600;
+}
+
+.signup-center-options {
+    display: flex;
+    justify-content: space-between;
+}
+
+.signup-remember-div {
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+}
+
+.signup-remember-div label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 2px;
+}
+
+.signup-center-buttons {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+
+.signup-center-buttons button:nth-child(1) {
+    background-color: black;
+    color: white;
+    border: 3px solid black;
+}
+
+.signup-center-buttons button:nth-child(1):hover {
+    color: #333;
+    background-color: white;
+}
+
+.signup-center-buttons button:nth-child(2) {
+    background-color: #F0F0F0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 10px;
+}
+
+.signup-center-buttons button:nth-child(2) img {
+    width: 30px;
+}
+
+.signup-center-buttons button:nth-child(2):hover {
+    background-color: #c4c4c457;
+}
+
+.signup-bottom-p {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 40px;
+}
+
+.signup-bottom-p a {
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.signup-bottom-p a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 900px) {
+    .signup-left {
+      display: none;
+    }
+  
+    .signup-right {
+      width: 100%;
+    }
+  
+    .signup-right-container {
+      width: 80%;
+    }
+  
+    .signup-center h2 {
+      font-size: 2rem;
+    }
+  
+    .signup-center p {
+      font-size: 1.2rem;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .signup-right-container {
+      width: 90%;
+    }
+  
+    .signup-center h2 {
+      font-size: 1.8rem;
+    }
+  
+    .signup-center p {
+      font-size: 1rem;
+    }
+  
+    .signup-center-options {
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+  
+    .signup-center-buttons {
+      margin-top: 20px;
+    }
+  
+    .signup-bottom-p {
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    .signup-center h2 {
+      font-size: 1.5rem;
+    }
+  
+    .signup-center p {
+      font-size: 0.9rem;
+    }
+  
+    .signup-bottom-p {
+      font-size: 0.8rem;
+    }
+  }
