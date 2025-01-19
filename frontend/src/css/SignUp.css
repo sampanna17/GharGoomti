@@ -191,6 +191,14 @@ form button[type='button'] {
     text-decoration: underline;
 }
 
+.signup-success-message {
+  margin-top: 20px;
+  color: green;
+  font-weight: bold;
+  text-align: center;
+}
+
+
 /* Responsive Styles */
 @media (max-width: 900px) {
     .signup-left {

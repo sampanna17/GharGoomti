@@ -1,5 +1,6 @@
 import express from 'express';
-import { sendemail, registerUser } from '../controllers/authController.js';
+import {registerUser } from '../controllers/authController.js';
+import {sendemail } from '../utils/sendemail.js';
 
 
 const router = express.Router();

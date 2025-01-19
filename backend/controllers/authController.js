@@ -1,72 +1,67 @@
-import nodemailer from 'nodemailer';
-import { registerQuery } from '../config/query.js';
+import db from '../config/db.js'; // Import the database connection
+import { sendemail } from '../utils/sendemail.js'; // Import the email utility
+import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
 
-// Refactor `sendemail` to return a promise
-export const sendemail = async (to, subject, otp) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'piyasampanna@gmail.com',
-      pass: 'ugdalllppzqdwcjd', // Use an App Password for better security
-    },
-  });
-
-  const mailOptions = {
-    from: 'piyasampanna@gmail.com',
-    to,
-    subject,
-    text: `Your OTP is ${otp}`, // Include the OTP in the email body
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully!');
-    return true; // Indicate success
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error('Failed to send email.');
-  }
-};
-
-export const registerUser = (req, res) => {
-  const { userName, userAge, userContact, userEmail, role, password } = req.body;
+export const registerUser = async (req, res) => {
+  const { userFirstName, userLastName, userContact, userEmail, userAge, password, role } = req.body;
 
   // Validate the incoming data
-  if (!userName || !userAge || !userContact || !userEmail || !role || !password) {
+  if (!userFirstName || !userLastName || !userContact || !userEmail || !userAge || !password || !role) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
-  // Prepare the data object
-  const userData = {
-    userName,
-    userAge,
-    userContact,
-    userEmail,
-    role,
-    password,
-  };
+  try {
+    // Check if the email already exists
+    const [existingUser] = await db.query(
+      'SELECT * FROM users WHERE userEmail = ?',
+      [userEmail]
+    );
 
-  // Generate a random 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000);
-
-  // Insert user into the database
-  registerQuery(userData, async (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to register user', details: err.message });
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: 'Email already exists' });
     }
 
-    try {
-      // Send the email
-      await sendemail(userEmail, 'Registration Successful', otp);
-      res.status(201).json({
-        message: 'User registered successfully and email sent!',
-        data: results,
-      });
-    } catch (emailError) {
-      res.status(500).json({
-        message: 'User registered, but failed to send email.',
-        error: emailError.message,
-      });
-    }
-  });
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Prepare the data object
+    const userData = {
+      userFirstName,
+      userLastName,
+      userContact,
+      userEmail,
+      userAge,
+      password: hashedPassword, // Use the hashed password
+      role,
+    };
+
+    // Insert the new user into the database
+    const [results] = await db.query(
+      'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        userData.userFirstName,
+        userData.userLastName,
+        userData.userContact,
+        userData.userEmail,
+        userData.userAge,
+        userData.password,
+        userData.role,
+      ]
+    );
+
+    // Generate a random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    // Send the email with OTP
+    await sendemail(userEmail, 'Registration Successful', otp);
+
+    res.status(201).json({
+      message: 'User registered successfully and email sent!',
+      data: results,
+    });
+  } catch (error) {
+    console.error('Error during registration:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
