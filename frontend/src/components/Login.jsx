@@ -28,8 +28,7 @@ const Login = () => {
               <input type="email" placeholder="Email" />
               <div className="pass-input-div">
                 <input type={showPassword ? "text" : "password"} placeholder="Password" />
-                {showPassword ? <FaEyeSlash onClick={() => {setShowPassword(!showPassword)}} /> : <FaEye onClick={() => {setShowPassword(!showPassword)}} />}
-                
+                {showPassword ? <FaEyeSlash onClick={() => {setShowPassword(!showPassword)}} /> : <FaEye onClick={() => {setShowPassword(!showPassword)}} />}   
               </div>
 
               <div className="login-center-options">

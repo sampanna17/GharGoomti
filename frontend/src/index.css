@@ -6,14 +6,13 @@
   margin: 0px;
 }
 
-html{
+/* html{
   font-size: 10px;
-}
+} */
 
 body{
   font-family: "Poppins", sans-serif;
   height: 100vh;
-
 }
 
 @tailwind base;

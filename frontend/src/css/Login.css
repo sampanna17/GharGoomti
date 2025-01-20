@@ -1,6 +1,7 @@
 .login-main {
     display: flex;
     height: 100vh;
+    font-size: 10px;
 }
 
 .login-left {
@@ -71,7 +72,7 @@
 }
 
 .login-center h2 {
-    font-size: 3.5rem;
+    font-size: 1.5rem;
 }
 
 .login-center {
@@ -80,7 +81,7 @@
 
 .login-center p {
     font-weight: 400;
-    font-size: 2rem;
+    font-size: 1rem;
     margin-bottom: 40px;
 }
 
@@ -132,7 +133,7 @@ form button[type='button'] {
 }
 
 .remember-div label {
-    font-size: 1.3rem;
+    font-size: 0.5rem;
     font-weight: 500;
     cursor: pointer;
     margin-top: 2px;
@@ -140,7 +141,7 @@ form button[type='button'] {
 
 .forgot-pass-link {
     text-decoration: none;
-    font-size: 1.3rem;
+    font-size: 0.5rem;
 }
 
 .forgot-pass-link:hover {
@@ -158,6 +159,7 @@ form button[type='button'] {
     background-color: black;
     color: white;
     border: 3px solid black;
+    height: 6vh;
 }
 
 .login-center-buttons button:nth-child(1):hover {
@@ -171,6 +173,7 @@ form button[type='button'] {
     justify-content: center;
     align-items: center;
     column-gap: 10px;
+    height: 6vh;
 }
 
 .login-center-buttons button:nth-child(2) img {
@@ -183,17 +186,18 @@ form button[type='button'] {
 
 .login-bottom-p {
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1rem;
     margin-top: 40px; 
 }
 
 .login-bottom-p a {
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .login-bottom-p a:hover {
     text-decoration: underline;
+    color: blue;
 }
 
 @media (max-width: 900px) {

@@ -6,7 +6,7 @@ import SignUp from './components/SignUp';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Login />, // Default route (Login page)
+    element: <SignUp />, // Default route (SignUp page)
   },
   {
     path: '/login',

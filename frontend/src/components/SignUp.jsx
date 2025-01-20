@@ -2,10 +2,8 @@ import { useState } from "react";
 import Logo from "../assets/LOGO.png";
 import GoogleSvg from "../assets/icons8-google.svg";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { Link, useNavigate } from "react-router-dom";
 import "../css/SignUp.css";
-import { Link } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
-
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -20,6 +18,7 @@ const Signup = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [successMessage, setSuccessMessage] = useState(""); // State for the success message
 
   const handleChange = (e) => {
@@ -30,12 +29,67 @@ const Signup = () => {
     });
   };
 
+  // Validate form data
+  const validateForm = () => {
+    const {
+      userFirstName,
+      userLastName,
+      userContact,
+      userEmail,
+      userAge,
+      password,
+      confirmPassword,
+    } = formData;
+
+    if (
+      !userFirstName ||
+      !userLastName ||
+      !userContact ||
+      !userEmail ||
+      !userAge ||
+      !password ||
+      !confirmPassword
+    ) {
+      return "All fields are required.";
+    }
+
+    if (
+      !/^[a-zA-Z\s]+$/.test(userFirstName) ||
+      !/^[a-zA-Z\s]+$/.test(userLastName)
+    ) {
+      return "First and Last Name must contain only letters.";
+    }
+
+    if (!/^[0-9]{10}$/.test(userContact)) {
+      return "Phone Number must be a valid 10-digit number.";
+    }
+
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(userEmail)) {
+      return "Please enter a valid email address.";
+    }
+
+    if (!/^[0-9]{1,3}$/.test(userAge) || userAge < 1 || userAge > 120) {
+      return "Age must be a valid number between 1 and 120.";
+    }
+
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long.";
+    }
+
+    if (password !== confirmPassword) {
+      return "Passwords do not match.";
+    }
+
+    return null; // Validation passed
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Basic validation
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+    const errorMessage = validateForm();
+    if (errorMessage) {
+      setMessage({ text: errorMessage, type: "error" });
       return;
     }
 
@@ -57,20 +111,21 @@ const Signup = () => {
       });
 
       const data = await response.json();
-      console.log("Response status:", response.status);
-      console.log("Response data:", data);
-
       if (response.ok) {
-        setSuccessMessage("Signup successful! Redirecting to login...");
-        setTimeout(() => {
-          navigate("/login"); // Redirect to login page after 2 seconds
-        }, 2000);
+        setMessage({
+          text: "Signup successful! Redirecting to login...",
+          type: "success",
+        });
+        setTimeout(() => navigate("/login"), 2000);
       } else {
-        alert(data.message || "Signup failed");
+        setMessage({ text: data.message || "Signup failed.", type: "error" });
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+      setMessage({
+        text: "An error occurred. Please try again.",
+        type: "error",
+      });
     }
   };
 
@@ -105,14 +160,37 @@ const Signup = () => {
                   required
                 />
               </div>
+              <div className="signup-name-fields">
               <input
-                type="tel"
-                name="userContact"
-                placeholder="Phone Number"
-                value={formData.userContact}
-                onChange={handleChange}
-                required
-              />
+                    type="tel"
+                    name="userContact"
+                    placeholder="Phone Number"
+                    value={formData.userContact}
+                    onChange={(e) => {
+                      const inputValue = e.target.value.replace(/[^0-9]/g, ""); // Allow only numeric characters
+                      setFormData({ ...formData, userContact: inputValue });
+                    }}
+                    required
+                    pattern="[0-9]{10}" // Ensure only 10 digits
+                    title="Phone number"
+                    className="flex-1 outline-none text-gray-700 placeholder-gray-400"
+                  />
+                
+                <input
+                  type="text" // Use text instead of number
+                  name="userAge"
+                  placeholder="Age"
+                  value={formData.userAge}
+                  onChange={(e) => {
+                    const inputValue = e.target.value.replace(/[^0-9]/g, ""); // Allow only numeric characters
+                    setFormData({ ...formData, userAge: inputValue });
+                  }}
+                  required
+                  pattern="[0-9]*" // Allow only numeric input
+                  title="Please enter a valid age"
+                />
+              </div>
+
               <input
                 type="email"
                 name="userEmail"
@@ -121,14 +199,7 @@ const Signup = () => {
                 onChange={handleChange}
                 required
               />
-              <input
-                type="number"
-                name="userAge"
-                placeholder="Age"
-                value={formData.userAge}
-                onChange={handleChange}
-                required
-              />
+
               <div className="signup-pass-input-div">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -155,15 +226,11 @@ const Signup = () => {
                 />
                 {showConfirmPassword ? (
                   <FaEyeSlash
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   />
                 ) : (
                   <FaEye
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   />
                 )}
               </div>
@@ -184,11 +251,6 @@ const Signup = () => {
                 </button>
               </div>
             </form>
-
-            {/* Show success message*/}
-            {successMessage && (
-              <div className="signup-success-message">{successMessage}</div>
-            )}
           </div>
 
           <p className="signup-bottom-p">
@@ -196,6 +258,15 @@ const Signup = () => {
           </p>
         </div>
       </div>
+      {message.text && (
+        <div
+          className={`signup-message ${
+            message.type === "success" ? "success" : "error"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
     </div>
   );
 };
