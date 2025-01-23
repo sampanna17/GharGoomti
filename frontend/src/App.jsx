@@ -1,29 +1,28 @@
-import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
-import Login from './components/Login';
-import SignUp from './components/SignUp';
 
-// Define your routes
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <SignUp />, // Default route (SignUp page)
-  },
-  {
-    path: '/login',
-    element: <Login />, // Login page
-  },
-  {
-    path: '/signup',
-    element: <SignUp />, // Signup page
-  },
-]);
+import { BrowserRouter, Routes, Route, Navigate  } from 'react-router-dom';
 
-function App() {
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import PrivateRoute from './components/PrivateRoute';
+import Home from './pages/Home';
+import EmailVerificationPage from './pages/EmailVerificationPage';
+import ForgotPassword from './pages/ForgetPassword';
+import ResetPassword from './pages/ResetPassword';
+
+export default function App() {
   return (
-    <RouterProvider router={router}>
-      <Outlet /> {/* Renders the matched route */}
-    </RouterProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />}/>
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
+        <Route path="/home" element={<Home />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={<SignUp />} />
+        <Route path='/forgot-password' element={< ForgotPassword/>} />
+        <Route path='/reset-password' element={< ResetPassword/>} />
+        <Route element={<PrivateRoute />}>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;

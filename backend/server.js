@@ -12,7 +12,14 @@ db
 
 const app = express();
 
-app.use(cors());
+app.use(
+    cors({
+        origin: "http://localhost:5173", // Frontend URL
+        methods: ["GET", "POST"],
+        credentials: true, // Allow cookies to be sent with the request
+    })
+);
+
 app.use(bodyParser.json());
 
 app.use('/api/auth', authroute);

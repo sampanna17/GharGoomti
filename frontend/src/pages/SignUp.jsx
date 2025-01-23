@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Logo from "../assets/LOGO.png";
-import GoogleSvg from "../assets/icons8-google.svg";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/SignUp.css";
@@ -19,7 +18,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-  const [successMessage, setSuccessMessage] = useState(""); // State for the success message
+  const [successMessage, setSuccessMessage] = useState(""); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -116,7 +115,7 @@ const Signup = () => {
           text: "Signup successful! Redirecting to login...",
           type: "success",
         });
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => navigate("/verify-email"), 1000);
       } else {
         setMessage({ text: data.message || "Signup failed.", type: "error" });
       }
@@ -245,10 +244,6 @@ const Signup = () => {
               </div>
               <div className="signup-center-buttons">
                 <button type="submit">Sign Up</button>
-                <button type="button">
-                  <img src={GoogleSvg} alt="" />
-                  Sign Up with Google
-                </button>
               </div>
             </form>
           </div>
