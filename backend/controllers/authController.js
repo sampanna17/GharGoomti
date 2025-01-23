@@ -4,6 +4,7 @@ import { sendResetEmail, mailTemplate } from '../utils/sendResetEmail.js';
 import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -104,31 +105,28 @@ export const verifyEmail = async (req, res) => {
   }
 
   try {
-    // Retrieve the OTP and expiry time from the database
-    const [user] = await db.query("SELECT otp, otp_expiry FROM users WHERE email = ?", [email]);
+    // Retrieve the OTP from the database
+    const [user] = await db.query("SELECT otp FROM users WHERE userEmail = ?", [email]);
 
     if (!user.length) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const { otp: storedOtp, otp_expiry } = user[0];
+    const { otp: storedOtp } = user[0];
 
     // Check if the OTP matches
     if (otp !== storedOtp) {
       return res.status(400).json({ error: "Invalid OTP" });
     }
 
-    // Check if the OTP has expired
-    const currentTime = new Date();
-    const expiryTime = new Date(otp_expiry);
+    // Clear the OTP in the database
+    await db.query("UPDATE users SET otp = NULL WHERE userEmail = ?", [email]);
 
-    if (currentTime > expiryTime) {
-      return res.status(400).json({ error: "OTP has expired" });
-    }
-
-    await db.query("UPDATE users SET otp = NULL, otp_expiry = NULL WHERE email = ?", [email]);
-
-    res.status(200).json({ message: "Email verified successfully!" });
+    // Return success response with user data
+    res.status(200).json({ 
+      message: "Email verified successfully!", 
+      user: { email } // Include user data if needed
+    });
   } catch (error) {
     console.error("Error verifying OTP:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -231,13 +229,15 @@ export const signOut = async (req, res, next) => {
     next(error);
   }
 };
-
 export const forgotPassword = async (req, res) => {
   try {
     const { userEmail } = req.body;
 
     // Fetch user by email
-    const user = await db.get_user_by_email(userEmail);
+    const [user] = await db.query(
+      `SELECT userID, userEmail FROM users WHERE userEmail = ?`,
+      [userEmail]
+    );
 
     if (!user || user.length === 0) {
       return res.status(404).json({
@@ -254,7 +254,13 @@ export const forgotPassword = async (req, res) => {
       .digest("hex");
 
     // Update the user's reset token and expiry in the database
-    await db.update_forgot_password_token(user[0].userID, resetToken);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 1000).toISOString(); // 24 hours expiry
+    await db.query(
+      `UPDATE users 
+       SET reset_password_token = ?, reset_token_expiry = ? 
+       WHERE userID = ?`,
+      [resetToken, expiresAt, user[0].userID]
+    );
 
     // Prepare the email content
     const mailOption = {
@@ -262,7 +268,7 @@ export const forgotPassword = async (req, res) => {
       subject: "Forgot Password Link",
       message: mailTemplate(
         "We have received a request to reset your password. Please reset your password using the link below.",
-        `${process.env.FRONTEND_URL}/resetPassword?id=${user[0].userID}&token=${resetToken}`,
+        `${process.env.FRONTEND_URL}/reset-password?id=${user[0].userID}&token=${resetToken}`,
         "Reset Password"
       ),
     };
@@ -284,40 +290,69 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+const NumSaltRounds = 10; 
 export const resetPassword = async (req, res) => {
   try {
-    const { userID , password, reset_password_token } = req.body;
-    const userToken = await db.get_password_reset_token(userID);
-    if (!res || res.length === 0) {
-      res.json({
+    const { userID, password, reset_password_token } = req.body;
+
+    // Fetch the reset token for the user
+    const [userToken] = await db.query(
+      `SELECT reset_password_token 
+       FROM users 
+       WHERE userID = ?`,
+      [userID]
+    );
+
+    // Debugging: Log the tokens
+    console.log("Database Token:", userToken[0].reset_password_token);
+    console.log("Request Token:", reset_password_token);
+
+    // Check if the user exists and has a reset token
+    if (!userToken || userToken.length === 0) {
+      return res.status(404).json({
         success: false,
-        message: "Some problem occurred!",
+        message: "Invalid reset link!",
       });
-    } else {
-      const currDateTime = new Date();
-      const expiresAt = new Date(userToken[0].expires_at);
-      if (currDateTime > expiresAt) {
-        res.json({
-          success: false,
-          message: "Reset Password link has expired!",
-        });
-      } else if (userToken[0].reset_password_token !== reset_password_token) {
-        res.json({
-          success: false,
-          message: "Reset Password link is invalid!",
-        });
-      } else {
-        await db.update_password_reset_token(userID);
-        const salt = await bcrypt.genSalt(NumSaltRounds);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        await db.update_user_password(userID, hashedPassword);
-        res.json({
-          success: true,
-          message: "Your password reset was successfully!",
-        });
-      }
     }
+
+    // Check if the reset token matches
+    if (userToken[0].reset_password_token !== reset_password_token) {
+      return res.status(400).json({
+        success: false,
+        message: "Reset Password link is invalid!",
+      });
+    }
+
+    // Clear the reset token and expiry time
+    await db.query(
+      `UPDATE users 
+       SET reset_password_token = NULL, reset_token_expiry = NULL 
+       WHERE userID = ?`,
+      [userID]
+    );
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(NumSaltRounds);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update the user's password
+    await db.query(
+      `UPDATE users 
+       SET password = ? 
+       WHERE userID = ?`,
+      [hashedPassword, userID]
+    );
+
+    // Send success response
+    res.status(200).json({
+      success: true,
+      message: "Your password has been reset successfully!",
+    });
   } catch (err) {
-    console.log(err);
+    console.error("Error in resetPassword:", err);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred. Please try again.",
+    });
   }
 };

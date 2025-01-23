@@ -7,8 +7,7 @@ const ForgotPassword = () => {
         e.preventDefault();
         const data = new FormData(e.currentTarget);
         const userEmail = data.get("email");
-        
-        // Use REACT_APP_BACKEND_URL here
+
         const url = `${import.meta.env.VITE_BACKEND_URL}/api/auth/forgotPassword`;
 
         try {

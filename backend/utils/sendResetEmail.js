@@ -1,23 +1,23 @@
 import nodemailer from 'nodemailer';
 
-const sendResetEmail = async (to, subject, otp) => {
+const sendResetEmail = async ({ email, subject, message }) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'piyasampanna@gmail.com',
-      pass: 'ugdalllppzqdwcjd',
+      user: 'piyasampanna@gmail.com', // Replace with your Gmail email
+      pass: 'ugdalllppzqdwcjd', // Replace with your Gmail app password
     },
   });
 
   const mailOptions = {
-    from: 'piyasampanna@gmail.com',
-    to,
+    from: 'piyasampanna@gmail.com', // Replace with your Gmail email
+    to: email, // Use the `email` property from the `mailOption` object
     subject,
-    text: `Your OTP is ${otp}`,
+    html: message, // Use `html` for rich content
   };
 
   try {
-    await transporter.sendResetEmail(mailOptions);
+    await transporter.sendMail(mailOptions); // Corrected method name
     console.log('Email sent successfully!');
     return true;
   } catch (error) {

@@ -1,39 +1,43 @@
-
-import {useSearchParams,useNavigate} from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { toast } from "react-toastify";
+import { useState } from "react"; // Add useState for loading state
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     const userId = searchParams.get("id");
     const token = searchParams.get("token");
+    const [isLoading, setIsLoading] = useState(false); // Add loading state
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true); // Set loading to true
+
         const data = new FormData(e.currentTarget);
-        const newpassword = data.get("newpassword");
-        const confirmpassword = data.get("confirmpassword");
-        if (newpassword !== confirmpassword)
-            toast.error(`New Password and 
-                         Confirm Password do not match !`, {
+        const newPassword = data.get("newpassword");
+        const confirmPassword = data.get("confirmpassword");
+
+        // Check if passwords match
+        if (newPassword !== confirmPassword) {
+            toast.error("New Password and Confirm Password do not match!", {
                 autoClose: 5000,
                 position: "top-right",
             });
-        else {
-            const url =  "http://localhost:8000/api/auth/resetPassword";
+            setIsLoading(false); // Reset loading state
+            return;
+        }
+
+        try {
+            const url = "http://localhost:8000/api/auth/resetPassword";
             const res = await axios.post(url, {
-                password: newpassword,
-                token: token,
-                userId: userId,
+                userID: userId, 
+                password: newPassword,
+                reset_password_token: token,
             });
-            if (res.data.success === false) {
-                toast.error(res.data.message, {
-                    autoClose: 5000,
-                    position: "top-right",
-                });
-            } else {
+
+            if (res.data.success) {
                 toast.success(res.data.message, {
                     autoClose: 5000,
                     position: "top-right",
@@ -41,7 +45,20 @@ const ResetPassword = () => {
                 setTimeout(() => {
                     navigate("/login");
                 }, 2000);
+            } else {
+                toast.error(res.data.message, {
+                    autoClose: 5000,
+                    position: "top-right",
+                });
             }
+        } catch (error) {
+            console.error("Error resetting password:", error);
+            toast.error("An error occurred. Please try again.", {
+                autoClose: 5000,
+                position: "top-right",
+            });
+        } finally {
+            setIsLoading(false); // Reset loading state
         }
     };
 
@@ -72,7 +89,7 @@ const ResetPassword = () => {
                             />
                         </div>
                         <div className="mb-4 mt-8">
-                            <label htmlFor="confirmpassword" className=" block text-sm font-medium text-gray-700">
+                            <label htmlFor="confirmpassword" className="block text-sm font-medium text-gray-700">
                                 Confirm Password
                             </label>
                             <input
@@ -85,9 +102,10 @@ const ResetPassword = () => {
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            disabled={isLoading} // Disable button when loading
+                            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-300"
                         >
-                            Submit
+                            {isLoading ? "Resetting..." : "Submit"}
                         </button>
                     </form>
                 </div>

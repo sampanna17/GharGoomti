@@ -84,14 +84,13 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Basic validation
+  
     const errorMessage = validateForm();
     if (errorMessage) {
       setMessage({ text: errorMessage, type: "error" });
       return;
     }
-
+  
     try {
       const response = await fetch("http://localhost:8000/api/auth/register", {
         method: "POST",
@@ -108,14 +107,15 @@ const Signup = () => {
           role: "Buyer", // Default role
         }),
       });
-
+  
       const data = await response.json();
       if (response.ok) {
         setMessage({
-          text: "Signup successful! Redirecting to login...",
+          text: "Signup successful! Redirecting to email verification...",
           type: "success",
         });
-        setTimeout(() => navigate("/verify-email"), 1000);
+        // Pass userEmail as state when navigating
+        setTimeout(() => navigate("/verify-email", { state: { userEmail: formData.userEmail } }), 1000);
       } else {
         setMessage({ text: data.message || "Signup failed.", type: "error" });
       }
