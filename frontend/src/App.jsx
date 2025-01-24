@@ -24,7 +24,6 @@ export default function App() {
         <Route path='/reset-password' element={< ResetPassword/>} />
         <Route path='/area-converter' element={< AreaConverter/>} />
         <Route path='/' element={< HomeLoanEMICalculator/>} />
-        
         <Route element={<PrivateRoute />}>
         </Route>
       </Routes>

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
+import Loan from "../assets/loan.png";
 
 const HomeLoanEMICalculator = () => {
     const [loanAmount, setLoanAmount] = useState("");
@@ -10,45 +12,78 @@ const HomeLoanEMICalculator = () => {
     const [isMonthly, setIsMonthly] = useState(true);
 
     const calculateEMI = () => {
-        if (loanAmount && interestRate && loanTenure) {
-            const principal = parseFloat(loanAmount);
-            const rateOfInterest = parseFloat(interestRate) / 100 / 12;
-            const tenureInMonths = parseInt(loanTenure) * 12;
-    
-            let emiAmount;
-            let totalInterestAmount;
-            let totalAmountToPay;
-    
-            if (isMonthly) {
-                emiAmount =
-                    (principal *
-                        rateOfInterest *
-                        Math.pow(1 + rateOfInterest, tenureInMonths)) /
-                    (Math.pow(1 + rateOfInterest, tenureInMonths) - 1);
-                totalInterestAmount = emiAmount * tenureInMonths - principal;
-                totalAmountToPay = emiAmount * tenureInMonths;
-                setEmi(Math.round(emiAmount)); 
-            } else {
-                // For Yearly EMI
-                const yearlyRate = parseFloat(interestRate) / 100; // Yearly Interest Rate
-                const tenureInYears = parseInt(loanTenure);
-                emiAmount =
-                    (principal * yearlyRate) /
-                    (1 - Math.pow(1 + yearlyRate, -tenureInYears)); // Formula for Yearly EMI
-                totalInterestAmount = emiAmount * tenureInYears - principal;
-                totalAmountToPay = emiAmount * tenureInYears;
-                setEmi(Math.round(emiAmount)); // Yearly EMI (rounded)
-            }
-    
-            setTotalInterest(Math.round(totalInterestAmount)); 
-            setTotalAmount(Math.round(totalAmountToPay)); 
+        if (!loanAmount || !interestRate || !loanTenure) {
+            toast.error("Please fill all the fields.", {
+                autoClose: 5000,
+                position: "top-right",
+            });
+            return;
         }
+
+        // Validate loan amount and interest rate
+        if (parseFloat(loanAmount) < 10000) {
+            toast.error("Loan amount must be greater than 10,000.", {
+                autoClose: 5000,
+                position: "top-right",
+            });
+            return;
+        }
+        if (parseFloat(interestRate) <= 1) {
+            toast.error("Interest rate must be greater than 1%.", {
+                autoClose: 5000,
+                position: "top-right",
+            });
+            return;
+        }
+        if (parseFloat(loanTenure) >= 30) {
+            toast.error("Tenure must be less than 30 Years", {
+                autoClose: 5000,
+                position: "top-right",
+            });
+            return;
+        }
+
+        const principal = parseFloat(loanAmount);
+        const rateOfInterest = parseFloat(interestRate) / 100 / 12;
+        const tenureInMonths = parseInt(loanTenure) * 12;
+
+        let emiAmount;
+        let totalInterestAmount;
+        let totalAmountToPay;
+
+        if (isMonthly) {
+            emiAmount =
+                (principal *
+                    rateOfInterest *
+                    Math.pow(1 + rateOfInterest, tenureInMonths)) /
+                (Math.pow(1 + rateOfInterest, tenureInMonths) - 1);
+            totalInterestAmount = emiAmount * tenureInMonths - principal;
+            totalAmountToPay = emiAmount * tenureInMonths;
+            setEmi(Math.round(emiAmount)); 
+        } else {
+            // For Yearly EMI
+            const yearlyRate = parseFloat(interestRate) / 100; // Yearly Interest Rate
+            const tenureInYears = parseInt(loanTenure);
+            emiAmount =
+                (principal * yearlyRate) /
+                (1 - Math.pow(1 + yearlyRate, -tenureInYears)); // Formula for Yearly EMI
+            totalInterestAmount = emiAmount * tenureInYears - principal;
+            totalAmountToPay = emiAmount * tenureInYears;
+            setEmi(Math.round(emiAmount)); // Yearly EMI (rounded)
+        }
+
+        setTotalInterest(Math.round(totalInterestAmount)); // Total Interest Payable (rounded)
+        setTotalAmount(Math.round(totalAmountToPay)); // Total Amount to Pay (rounded)
+        toast.success("EMI calculated successfully!", {
+            autoClose: 5000,
+            position: "top-right",
+        });
     };
-    
 
     return (
+      
         <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row w-full max-w-screen-xl p-6 bg-white rounded-lg shadow-lg border-t-2 border-gray-300">
+            <div className="flex flex-col lg:flex-row w-full max-w-screen-xl p-6 bg-white rounded-lg shadow-lg border-gray-300">
                 {/* Left section: EMI calculator form */}
                 <div className="flex-1 p-6 bg-white rounded-lg lg:mr-6 mb-6 lg:mb-0">
                     <div>
@@ -73,6 +108,7 @@ const HomeLoanEMICalculator = () => {
                                 onChange={(e) => setLoanAmount(e.target.value)}
                                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none"
                                 placeholder="Enter loan amount"
+                                
                             />
                         </div>
 
@@ -178,8 +214,16 @@ const HomeLoanEMICalculator = () => {
                 </div>
 
                 {/* Right section: Results */}
+
                 <div className="flex-1 p-6 bg-white rounded-lg mt-6 lg:mt-0">
-                    <div className="space-y-10 mt-12 flex-1">
+                    <div className="flex justify-end">
+                        <img
+                            src={Loan}
+                            alt="Area conversion"
+                            className="w-16 h-16"
+                        />
+                    </div>
+                    <div className="space-y-10 -mt-2 flex-1">
                         {/* Loan EMI */}
                         <div className="flex flex-col">
                             <h3 className="block text-gray-700 font-semibold mb-2">Loan EMI</h3>
@@ -212,6 +256,7 @@ const HomeLoanEMICalculator = () => {
             </div>
         </div>
     );
+
 };
 
 export default HomeLoanEMICalculator;
