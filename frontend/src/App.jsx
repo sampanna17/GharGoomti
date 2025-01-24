@@ -8,18 +8,21 @@ import Home from './pages/Home';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import ForgotPassword from './pages/ForgetPassword';
 import ResetPassword from './pages/ResetPassword';
+import AreaConverter from './pages/ConverterPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />}/>
+        {/* <Route path="/" element={<Navigate to="/home" />}/> */}
         <Route path="/verify-email" element={<EmailVerificationPage />} />
         <Route path="/home" element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<SignUp />} />
         <Route path='/forgot-password' element={< ForgotPassword/>} />
         <Route path='/reset-password' element={< ResetPassword/>} />
+        <Route path='/' element={< AreaConverter/>} />
+        
         <Route element={<PrivateRoute />}>
         </Route>
       </Routes>
