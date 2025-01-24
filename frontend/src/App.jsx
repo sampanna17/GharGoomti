@@ -9,6 +9,7 @@ import EmailVerificationPage from './pages/EmailVerificationPage';
 import ForgotPassword from './pages/ForgetPassword';
 import ResetPassword from './pages/ResetPassword';
 import AreaConverter from './pages/ConverterPage';
+import HomeLoanEMICalculator from './pages/EmiCalculater';
 
 export default function App() {
   return (
@@ -21,7 +22,8 @@ export default function App() {
         <Route path='/signup' element={<SignUp />} />
         <Route path='/forgot-password' element={< ForgotPassword/>} />
         <Route path='/reset-password' element={< ResetPassword/>} />
-        <Route path='/' element={< AreaConverter/>} />
+        <Route path='/area-converter' element={< AreaConverter/>} />
+        <Route path='/' element={< HomeLoanEMICalculator/>} />
         
         <Route element={<PrivateRoute />}>
         </Route>
