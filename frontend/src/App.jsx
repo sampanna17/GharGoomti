@@ -15,7 +15,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* <Route path="/" element={<Navigate to="/home" />}/> */}
+        <Route path="/" element={<Navigate to="/home" />}/>
         <Route path="/verify-email" element={<EmailVerificationPage />} />
         <Route path="/home" element={<Home />} />
         <Route path='/login' element={<Login />} />
@@ -23,7 +23,7 @@ export default function App() {
         <Route path='/forgot-password' element={< ForgotPassword/>} />
         <Route path='/reset-password' element={< ResetPassword/>} />
         <Route path='/area-converter' element={< AreaConverter/>} />
-        <Route path='/' element={< HomeLoanEMICalculator/>} />
+        <Route path='/emi-calculator' element={< HomeLoanEMICalculator/>} />
         <Route element={<PrivateRoute />}>
         </Route>
       </Routes>

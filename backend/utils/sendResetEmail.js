@@ -30,38 +30,54 @@ const mailTemplate = (content, buttonUrl, buttonText) => {
   return `
     <!DOCTYPE html>
     <html>
-      <body style="margin: 0; padding: 0; text-align: center; font-family: Arial, sans-serif; color: #000; background-color: #f4f4f4;">
+      <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; color: #333; text-align: center;">
         <div style="
           max-width: 600px;
-          margin: 20px auto;
+          margin: 30px auto;
           background-color: #ffffff;
-          padding: 20px;
+          padding: 25px 20px;
           border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
           text-align: left;
         ">
-          <p style="font-size: 16px; line-height: 1.5;">
+          <!-- Content Section -->
+          <p style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 20px;">
             ${content}
           </p>
-          <a href="${buttonUrl}" target="_blank" style="text-decoration: none;">
-            <button style="
-              background-color: #444394;
-              border: none;
-              width: 200px;
-              height: 40px;
-              border-radius: 6px;
-              color: #ffffff;
-              font-size: 16px;
-              cursor: pointer;
-              margin: 10px 0;
-            ">
-              ${buttonText}
-            </button>
-          </a>
-          <p style="font-size: 14px; line-height: 1.5;">
-            If you are unable to click the above button, copy and paste the URL below into your browser:
+
+          <!-- Button Section -->
+          <div style="text-align: center; margin-bottom: 20px;">
+            <a href="${buttonUrl}" target="_blank" style="text-decoration: none;">
+              <button style="
+                background-color: #444394;
+                border: none;
+                width: 220px;
+                height: 45px;
+                border-radius: 6px;
+                color: #ffffff;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                transition: background-color 0.3s ease;
+              " onmouseover="this.style.backgroundColor='#37317f'" onmouseout="this.style.backgroundColor='#444394'">
+                ${buttonText}
+              </button>
+            </a>
+          </div>
+
+          <!-- Alternate Link Section -->
+          <p style="font-size: 14px; line-height: 1.5; color: #777; text-align: center; margin: 0 0 10px;">
+            If the button above doesn’t work, please copy and paste the following URL into your browser:
           </p>
-          <a href="${buttonUrl}" target="_blank" style="font-size: 14px; color: #444394; text-decoration: none; word-break: break-all;">
+          <a href="${buttonUrl}" target="_blank" style="
+            font-size: 14px;
+            color: #444394;
+            text-decoration: none;
+            word-break: break-word;
+            display: inline-block;
+            margin: 10px 0;
+          ">
             ${buttonUrl}
           </a>
         </div>
