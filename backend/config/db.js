@@ -10,7 +10,6 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-// Test the connection (optional)
 (async () => {
   try {
     const connection = await db.getConnection();

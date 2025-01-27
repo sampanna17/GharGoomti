@@ -10,12 +10,16 @@ import ForgotPassword from './pages/ForgetPassword';
 import ResetPassword from './pages/ResetPassword';
 import AreaConverter from './pages/ConverterPage';
 import HomeLoanEMICalculator from './pages/EmiCalculater';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import PropertyDetails from './pages/Admin/PropertyDetails';
+import UserDetails from './pages/Admin/userDetails';
+import AdminProfile from './pages/Admin/adminprofile';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />}/>
+        {/* <Route path="/" element={<Navigate to="/home" />}/> */}
         <Route path="/verify-email" element={<EmailVerificationPage />} />
         <Route path="/home" element={<Home />} />
         <Route path='/login' element={<Login />} />
@@ -24,6 +28,13 @@ export default function App() {
         <Route path='/reset-password' element={< ResetPassword/>} />
         <Route path='/area-converter' element={< AreaConverter/>} />
         <Route path='/emi-calculator' element={< HomeLoanEMICalculator/>} />
+
+        {/* Route path for admin*/}
+        <Route path='/' element={< AdminDashboard/>} />
+        <Route path='/admin/properties' element={< PropertyDetails/>} />
+        <Route path='/admin/users' element={< UserDetails/>} />
+        <Route path='/admin/profile' element={< AdminProfile/>} />
+
         <Route element={<PrivateRoute />}>
         </Route>
       </Routes>

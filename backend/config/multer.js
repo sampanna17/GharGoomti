@@ -3,7 +3,7 @@ import path from 'path';
 import multer from 'multer';
 
 // Define the path to the uploads directory
-const uploadDir = path.join(process.cwd(), 'uploads', 'images'); // Use process.cwd() for better portability
+const uploadDir = path.join(process.cwd(), 'uploads', 'images'); 
 
 // Check if the directory exists; if not, create it
 if (!fs.existsSync(uploadDir)) {
@@ -18,15 +18,13 @@ if (!fs.existsSync(uploadDir)) {
 // Configure multer storage for images
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir); // Use the created directory
+        cb(null, uploadDir); 
     },
     filename: (req, file, cb) => {
-        // Use timestamp and original extension as filename to avoid overwriting
         cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-// Set up multer with a maximum file size limit (optional, but good practice)
 const upload = multer({
     storage: storage,
     limits: {

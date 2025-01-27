@@ -1,0 +1,20 @@
+
+const Navbar = () => {
+  return (
+    <div className="bg-white shadow-md p-4 flex justify-between items-center">
+      <h2 className="text-xl font-semibold">Welcome, Admin</h2>
+      <div className="flex items-center space-x-4">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="px-4 py-2 border rounded-lg focus:outline-none"
+        />
+        <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          Logout
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Navbar;
