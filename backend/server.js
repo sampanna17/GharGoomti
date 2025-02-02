@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
+import session from 'express-session'; 
 import authroute from './routes/authRoute.js';
 import db from './config/db.js'
 
@@ -11,6 +12,15 @@ dotenv.config();
 db
 
 const app = express();
+
+app.use(
+    session({
+        secret: "JWT_SECRET",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { maxAge: 30 * 60 * 1000 }, // 30 min expiry
+    })
+);
 
 app.use(
     cors({
@@ -25,8 +35,6 @@ app.use(bodyParser.json());
 app.use('/api/auth', authroute);
 
 const PORT = 8000;
-
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 
 

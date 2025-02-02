@@ -1,6 +1,6 @@
 
 import { BrowserRouter, Routes, Route, Navigate  } from 'react-router-dom';
-
+import { AuthProvider } from "./context/AuthContext";
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import PrivateRoute from './components/PrivateRoute';
@@ -19,7 +19,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* <Route path="/" element={<Navigate to="/home" />}/> */}
+        <Route path="/" element={<Navigate to="/home" />}/>
         <Route path="/verify-email" element={<EmailVerificationPage />} />
         <Route path="/home" element={<Home />} />
         <Route path='/login' element={<Login />} />
@@ -30,9 +30,10 @@ export default function App() {
         <Route path='/emi-calculator' element={< HomeLoanEMICalculator/>} />
 
         {/* Route path for admin*/}
-        <Route path='/' element={< AdminDashboard/>} />
+        <Route path='/admin/dashboard' element={< AdminDashboard/>} />
         <Route path='/admin/properties' element={< PropertyDetails/>} />
         <Route path='/admin/users' element={< UserDetails/>} />
+        <Route path='/admin/notifications' element={< AdminProfile/>} />
         <Route path='/admin/profile' element={< AdminProfile/>} />
 
         <Route element={<PrivateRoute />}>

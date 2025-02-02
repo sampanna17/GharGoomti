@@ -14,11 +14,18 @@ router.post('/sendmail',sendemail)
 router.post('/register', registerUser);
 router.post('/signin', signin);
 router.post('/google', google);
-router.post('/signout', signOut);
 router.post('/verify-email', verifyEmail);
 router.post('/forgotPassword', forgotPassword);
 router.post('/resetPassword', resetPassword);
 router.post('/sendResetEmail', sendResetEmail);
+
+router.post("/signout", (req, res) => {
+    req.session.destroy((err) => {
+        if (err) return res.status(500).json({ message: "Logout failed" });
+        res.clearCookie("connect.sid"); // Remove session cookie
+        res.json({ message: "Logged out successfully" });
+    });
+});
 
 // Property routes
 router.post('/property', addProperty); // Add a new property

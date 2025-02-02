@@ -242,7 +242,7 @@ const AreaConverter = () => {
                                 <h3 className="text-xl font-semibold text-gray-900">Conversion Rate</h3>
                                 <ul className="text-lg text-gray-700 list-inside list-disc space-y-2">
                                     <li>
-                                        <strong>1 Ropani</strong> = 74 feet × 74 feet
+                                        <strong>1 Ropani</strong> = 74 feet x 74 feet
                                     </li>
                                     <li>
                                         <strong>1 Bigha</strong> = 13 Ropani
