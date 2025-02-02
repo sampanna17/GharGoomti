@@ -4,7 +4,7 @@ import { FaArrowRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 
 const Footer = () => {
     return (
         <div className="w-full bg-[#1B4237] flex flex-col items-center justify-center p-6">
-            <div className="flex flex-col items-center max-w-md w-full">
+            <div className="flex flex-col items-center max-w-md w-full mb-8">
                 <div className="mb-6">
                     <img
                         src={Logo}
@@ -41,26 +41,35 @@ const Footer = () => {
                             Copyright © 2024 Ghar Goomti
                         </p>
                         <div className="flex gap-4">
-                            <button
+                            <a
+                                href="https://www.facebook.com/sampanna.piya/"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-white/60 hover:text-white transition-colors"
                             >
                                 <FaFacebookF className="w-5 h-5" />
-                            </button>
+                            </a>
                             <button
                                 className="text-white/60 hover:text-white transition-colors"
                             >
                                 <FaTwitter className="w-5 h-5" />
                             </button>
-                            <button
+                            <a
+                                href="https://www.instagram.com/sampanna_piya/"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-white/60 hover:text-white transition-colors"
                             >
                                 <FaInstagram className="w-5 h-5" />
-                            </button>
-                            <button
+                            </a>
+                            <a
+                                href="https://www.linkedin.com/in/sampanna-piya"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-white/60 hover:text-white transition-colors"
                             >
                                 <FaLinkedinIn className="w-5 h-5" />
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

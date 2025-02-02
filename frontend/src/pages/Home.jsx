@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navbar } from "../components/NavBar";
 import GotoTop from "../components/GoToTop";
 import iconBuySell from "../assets/iconBuySell.png";
 import iconRent from "../assets/iconRent.png";
 import HoverArrowText from '../components/HoverArrowText';
-import Footer from "../components/Footer";
 import { RiArrowRightUpLine } from 'react-icons/ri';
+import { HeroSection } from "./HeroSection";
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -60,9 +59,8 @@ export default function Home() {
 
   return (
     <>
-      <Navbar />
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        {/* Navigation Bar */}
+      <div className="min-h-screen flex flex-col items-center justify-center mt-28">
+        
         <header className="w-full py-4 shadow-md">
           <div className="max-w-7xl mx-auto text-white flex justify-between items-center">
             <h1 className="text-black text-3xl font-bold">Welcome to Ghar Goomti</h1>
@@ -86,16 +84,16 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-grow flex items-center justify-center">
+        <main className="flex-grow flex items-center justify-center mt-10">
           <div className="text-center">
             {/* Displaying login status */}
-            <h2 className="text-2xl font-semibold mb-4">
+            <h2 className="text-2xl font-semibold">
               {isLoggedIn ? "You are logged in!" : "You are not logged in."}
             </h2>
-
           </div>
         </main>
+
+        <HeroSection />
 
         <div className="py-12">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,7 +184,6 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <Footer />
       <GotoTop />
     </>
   );

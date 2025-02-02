@@ -1,5 +1,4 @@
-
-import { BrowserRouter, Routes, Route, Navigate  } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from "./context/AuthContext";
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
@@ -14,29 +13,36 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import PropertyDetails from './pages/Admin/PropertyDetails';
 import UserDetails from './pages/Admin/userDetails';
 import AdminProfile from './pages/Admin/adminprofile';
+import Layout from "./components/Layout";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />}/>
+        <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/verify-email" element={<EmailVerificationPage />} />
-        <Route path="/home" element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<SignUp />} />
-        <Route path='/forgot-password' element={< ForgotPassword/>} />
-        <Route path='/reset-password' element={< ResetPassword/>} />
-        <Route path='/area-converter' element={< AreaConverter/>} />
-        <Route path='/emi-calculator' element={< HomeLoanEMICalculator/>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Route path for admin*/}
-        <Route path='/admin/dashboard' element={< AdminDashboard/>} />
-        <Route path='/admin/properties' element={< PropertyDetails/>} />
-        <Route path='/admin/users' element={< UserDetails/>} />
-        <Route path='/admin/notifications' element={< AdminProfile/>} />
-        <Route path='/admin/profile' element={< AdminProfile/>} />
+        {/* Routes wrapped in Layout */}
+        <Route element={<Layout />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/area-converter" element={<AreaConverter />} />
+          <Route path="/emi-calculator" element={<HomeLoanEMICalculator />} />
+        </Route>
 
+        {/* Admin Routes */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/properties" element={<PropertyDetails />} />
+        <Route path="/admin/users" element={<UserDetails />} />
+        <Route path="/admin/notifications" element={<AdminProfile />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
+
+        {/* Private Route (add your protected routes here) */}
         <Route element={<PrivateRoute />}>
+          {/* Add any private routes inside here */}
         </Route>
       </Routes>
     </BrowserRouter>

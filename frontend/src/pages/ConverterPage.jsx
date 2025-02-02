@@ -116,8 +116,8 @@ const AreaConverter = () => {
     };
 
     return (
-        <main className="w-full min-h-screen  bg-gray-50 p-8">
-            <div className="max-w-4xl mx-auto space-y-8">
+        <main className="w-full p-8 mt-28">
+            <div className="max-w-4xl mx-auto space-y-14 mb-4">
                 {/* Ropani System */}
                 <section>
                     <h2 className="text-2xl font-medium text-gray-900 mb-4">
@@ -186,7 +186,7 @@ const AreaConverter = () => {
             </div>
 
             {/* Information Section */}
-            <section className="w-full bg-gray-50 py-12">
+            <section className="w-full py-12">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 className="text-3xl font-semibold text-gray-900 text-center mb-8">
                         Area Converter Information
