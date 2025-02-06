@@ -83,7 +83,7 @@ const HomeLoanEMICalculator = () => {
     return (
       
         <div className="flex justify-center items-center min-h-screen bg-white px-4 sm:px-6 lg:px-8 mt-12">
-            <div className="flex flex-col lg:flex-row w-full max-w-screen-xl p-6 bg-white rounded-lg shadow-lg border-gray-300 border-t">
+            <div className="flex flex-col lg:flex-row w-full max-w-screen-xl p-6 bg-white rounded-lg shadow-lg border-x-gray-100 border-t">
                 {/* Left section: EMI calculator form */}
                 <div className="flex-1 p-6 bg-white rounded-lg lg:mr-6 mb-6 lg:mb-0">
                     <div>

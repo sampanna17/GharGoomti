@@ -95,6 +95,10 @@ export default function Home() {
 
         <HeroSection />
 
+        {/* Featured properties Section */}
+
+
+        {/* Property Services Section */}
         <div className="py-12">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
@@ -146,7 +150,7 @@ export default function Home() {
                   <button className="mt-6 border  text-black  px-4 py-2 rounded-full hover:border-gray-400 group">
                     <HoverArrowText
                       text="Sell Property"
-                      to="/rent-property"
+                      to="/add-property"
                       IconStart={RiArrowRightUpLine}
                       IconEnd={RiArrowRightUpLine}
                       customClass="-ml-2"
@@ -169,7 +173,7 @@ export default function Home() {
                   <button className="mt-6 border  text-black  px-4 py-2 rounded-full hover:border-gray-400 group">
                     <HoverArrowText
                       text="Rent Property"
-                      to="/rent-property"
+                      to="/add-property"
                       IconStart={RiArrowRightUpLine}
                       IconEnd={RiArrowRightUpLine}
                       customClass="-ml-2"

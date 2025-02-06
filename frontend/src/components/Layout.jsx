@@ -1,9 +1,10 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Navbar } from './NavBar';
 import Footer from "./Footer";
 import GotoTop from "./GoToTop";
 
 const Layout = () => {
+  const location = useLocation();
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -12,7 +13,8 @@ const Layout = () => {
         <GotoTop/>
 
       </main>
-      <Footer />
+      {/* <Footer /> */}
+      {location.pathname !== "/chats" && <Footer />}
     </div>
   );
 };

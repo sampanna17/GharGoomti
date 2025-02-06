@@ -7,7 +7,7 @@ const Sidebar = () => {
       <h1 className="text-2xl font-bold mb-16">Admin Dashboard</h1>
       <ul>
         <li className="mb-10">
-          <Link to="/" className="hover:text-gray-400">Dashboard</Link>
+          <Link to="/admin/dashboard" className="hover:text-gray-400">Dashboard</Link>
         </li>
         <li className="mb-10">
           <Link to="/admin/properties" className="hover:text-gray-400">Properties</Link>

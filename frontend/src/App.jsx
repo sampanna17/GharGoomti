@@ -14,11 +14,17 @@ import PropertyDetails from './pages/Admin/PropertyDetails';
 import UserDetails from './pages/Admin/userDetails';
 import AdminProfile from './pages/Admin/adminprofile';
 import Layout from "./components/Layout";
+import BookmarkPage from './pages/BookmarkPage';
+import Chats  from './pages/ChatPgae';
+import ListProperties from './pages/ListProperties';
+import AddProperty from './pages/Addproperty';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* Auth Routes */}
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/verify-email" element={<EmailVerificationPage />} />
         <Route path="/login" element={<Login />} />
@@ -31,6 +37,11 @@ export default function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/area-converter" element={<AreaConverter />} />
           <Route path="/emi-calculator" element={<HomeLoanEMICalculator />} />
+          <Route path="/bookmarks" element={<BookmarkPage />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/properties" element={<ListProperties />} />
+          <Route path="/add-property" element={<AddProperty />} />
+
         </Route>
 
         {/* Admin Routes */}
@@ -39,7 +50,7 @@ export default function App() {
         <Route path="/admin/users" element={<UserDetails />} />
         <Route path="/admin/notifications" element={<AdminProfile />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
-
+       
         {/* Private Route (add your protected routes here) */}
         <Route element={<PrivateRoute />}>
           {/* Add any private routes inside here */}

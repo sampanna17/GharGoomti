@@ -6,7 +6,7 @@ export const HeroSection = () => {
             className="w-full h-[515px] bg-cover bg-center bg-no-repeat flex flex-col items-center justify-center text-center relative"
             style={{ backgroundImage: `url(${Frame})` }}
         >
-            <div className="-mt-40">
+            <div className="-mt-48">
                 <button className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm hover:bg-gray-50 transition-colors">
                     LET US GUIDE YOUR HOME
                 </button>

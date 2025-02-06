@@ -38,7 +38,7 @@ const UserDetails = () => {
             <Sidebar />
             <div className="flex-1">
                 <Navbar />
-                <div className="p-6 bg-gray-100">
+                <div className="p-6">
                     {/* User List */}
                     {!selectedUser ? (
                         <div className="bg-white rounded-lg shadow-lg p-6">
