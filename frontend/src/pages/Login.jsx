@@ -12,6 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); 
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -24,37 +25,25 @@ const Login = () => {
     }
   
     try {
-      const res = await fetch("http://localhost:8000/api/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userEmail: email, password }),
-      });
-  
-      // Handle unexpected non-JSON responses gracefully
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        throw new Error("Invalid JSON response from server");
-      }
-  
-      if (res.ok) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("isLoggedIn", "true"); // Set login state
-        document.cookie = `access_token=${data.token}; path=/`;
-      
-        navigate("/home");
-      } else {
-        setError(data.error || "Something went wrong. Please try again.");
-      }
+      const res = await axios.post(
+        "http://localhost:8000/api/auth/signin",
+        { userEmail: email, password, rememberMe }, 
+        { withCredentials: true } 
+      );
+
+      const { user } = res.data;
+
+      // Store user details in localStorage
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("isLoggedIn", "true"); 
+
+      navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "Unable to log in. Please try again later.");
+      setError(err.response?.data?.error || "Unable to log in. Please try again.");
     }
   };
-  
+
   return (
     <div className="login-main">
       <div className="login-left">
@@ -67,7 +56,7 @@ const Login = () => {
             <img src={Logo} alt="logo" className="login-logo-image" />
           </div>
           <div className="login-center">
-            <h2>Welcome back to Ghar Goomti!</h2>
+            <h2>Welcome back to Ghar Gomti!</h2>
             <p>Please enter your details</p>
             {error && <p className="text-red-500">{error}</p>}
             <form onSubmit={handleLogin}>
@@ -76,6 +65,7 @@ const Login = () => {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
               <div className="pass-input-div">
                 <input
@@ -83,6 +73,7 @@ const Login = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 {showPassword ? (
                   <FaEyeSlash onClick={() => setShowPassword(!showPassword)} />
@@ -93,7 +84,12 @@ const Login = () => {
 
               <div className="login-center-options">
                 <div className="remember-div">
-                  <input type="checkbox" id="remember-checkbox" />
+                  <input
+                    type="checkbox"
+                    id="remember-checkbox"
+                    checked={rememberMe}
+                    onChange={() => setRememberMe(!rememberMe)}
+                  />
                   <label htmlFor="remember-checkbox">Remember for 30 days</label>
                 </div>
                 <Link to="/forgot-password" className="forgot-pass-link">

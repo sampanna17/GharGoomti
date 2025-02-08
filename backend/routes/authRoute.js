@@ -1,5 +1,5 @@
 import express from 'express';
-import {forgotPassword, google, registerUser, resetPassword, signin, signOut, verifyEmail } from '../controllers/authController.js';
+import {forgotPassword, google, refreshToken, registerUser, resetPassword, signin, signOut, verifyEmail } from '../controllers/authController.js';
 import {sendemail } from '../utils/sendemail.js';
 import {sendResetEmail} from '../utils/sendResetEmail.js';
 import { bookmarkProperty, getBookmarks, removeBookmarks } from '../controllers/bookmarkController.js';
@@ -13,19 +13,13 @@ const router = express.Router();
 router.post('/sendmail',sendemail)
 router.post('/register', registerUser);
 router.post('/signin', signin);
+router.post("/refresh-token", refreshToken);
 router.post('/google', google);
 router.post('/verify-email', verifyEmail);
 router.post('/forgotPassword', forgotPassword);
 router.post('/resetPassword', resetPassword);
 router.post('/sendResetEmail', sendResetEmail);
-
-router.post("/signout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) return res.status(500).json({ message: "Logout failed" });
-        res.clearCookie("connect.sid"); // Remove session cookie
-        res.json({ message: "Logged out successfully" });
-    });
-});
+router.post("/signout", signOut);
 
 // Property routes
 router.post('/property', addProperty); // Add a new property

@@ -1,5 +1,6 @@
 import Logo from "../assets/LOGO.png";
-import { FaArrowRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
+import { FaArrowRight, FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
+import { RiTwitterXFill } from "react-icons/ri";
 
 const Footer = () => {
     return (
@@ -38,7 +39,7 @@ const Footer = () => {
                 <div className="w-full pt-8 border-t border-white/20">
                     <div className="flex justify-between items-center">
                         <p className="text-white/60 text-sm">
-                            Copyright © 2024 Ghar Goomti
+                            Copyright © 2025 Ghar Goomti
                         </p>
                         <div className="flex gap-4">
                             <a
@@ -52,7 +53,7 @@ const Footer = () => {
                             <button
                                 className="text-white/60 hover:text-white transition-colors"
                             >
-                                <FaTwitter className="w-5 h-5" />
+                                <RiTwitterXFill className="w-5 h-5" />
                             </button>
                             <a
                                 href="https://www.instagram.com/sampanna_piya/"

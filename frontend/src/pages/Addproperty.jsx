@@ -1,6 +1,12 @@
 import { useState } from "react";
 import FloatingLabelInput from "../components/FloatingLabel";
 
+const formatNumber = (value) => {
+    if (!value) return "";
+    const num = value.toString().replace(/\D/g, "");
+    return new Intl.NumberFormat("en-IN").format(num);
+};
+
 export default function AddProperty() {
     const [inputs, setInputs] = useState({
         title: "",
@@ -27,6 +33,11 @@ export default function AddProperty() {
         setInputs({ ...inputs, [e.target.name]: e.target.value });
     };
 
+    const handlePriceChange = (e) => {
+        const rawValue = e.target.value.replace(/\D/g, "");
+        setInputs({ ...inputs, price: rawValue });
+    };
+
     const handleFileChange = (e) => {
         setInputs({ ...inputs, images: Array.from(e.target.files) });
     };
@@ -50,15 +61,18 @@ export default function AddProperty() {
                         onChange={handleChange}
                         required
                     />
+
                     <FloatingLabelInput
-                        type="number"
+                        type="text"
                         name="price"
                         id="price"
                         label="Price"
                         required
-                        value={inputs.price}
-                        onChange={handleChange}
+                        value={inputs.price ? formatNumber(inputs.price) : ""}
+                        onChange={handlePriceChange}
+                        className=" "        
                     />
+
                     <FloatingLabelInput
                         type="text"
                         name="address"
@@ -68,6 +82,7 @@ export default function AddProperty() {
                         onChange={handleChange}
                         required
                     />
+
                     <FloatingLabelInput
                         type="text"
                         name="city"

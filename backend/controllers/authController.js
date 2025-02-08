@@ -134,56 +134,81 @@ export const verifyEmail = async (req, res) => {
 };
 
 export const signin = async (req, res) => {
-  const { userEmail, password } = req.body;
+  const { userEmail, password, rememberMe } = req.body;
 
-  // Validate input fields
   if (!userEmail || !password) {
-    return res.status(400).json({ error: 'Email and password are required!' });
+    return res.status(400).json({ error: "Email and password are required!" });
   }
 
   try {
-    // Check if the user exists in the database
-    const [rows] = await db.query('SELECT * FROM users WHERE userEmail = ?', [userEmail]);
+    // Check if the user exists
+    const [rows] = await db.query("SELECT * FROM users WHERE userEmail = ?", [userEmail]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: "User not found!" });
     }
 
     const validUser = rows[0];
 
-    // Check if the password field is present
     if (!validUser.password) {
-      return res.status(500).json({ error: 'Password field is missing in the database!' });
+      return res.status(500).json({ error: "Password field is missing in the database!" });
     }
 
-    // Compare the provided password with the hashed password in the database
+    // Compare password
     const isPasswordValid = bcrypt.compareSync(password, validUser.password);
-
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Wrong credentials!' });
+      return res.status(401).json({ error: "Wrong credentials!" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ id: validUser.id }, process.env.JWT_SECRET, {
-      expiresIn: '1d', // Token expires in 1 day
+    // Generate JWT tokens
+    const accessToken = jwt.sign({ id: validUser.id }, process.env.JWT_SECRET, {
+      expiresIn: "15m", // Access Token (Short-lived)
     });
 
-    // Exclude the password field before sending the response
+    const refreshToken = jwt.sign({ id: validUser.id }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: rememberMe ? "30d" : "1d", 
+    });
+
+    // Store refresh token in HttpOnly cookie
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000, 
+    });
+
     const { password: hashedPassword, ...userDetails } = validUser;
 
-    // Send response with token and user details
-    res
-      .cookie('access_token', token, {
-        httpOnly: true, // Prevent client-side access to the token
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        sameSite: 'None', // Required for cross-origin cookies
-      })
-      .status(200)
-      .json({ message: 'Login successful!', user: userDetails });
+    res.status(200).json({ message: "Login successful!", user: userDetails });
   } catch (error) {
-    console.error('Error during sign-in:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error during sign-in:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
+};
+
+export const refreshToken = (req, res) => {
+  const refreshToken = req.cookies.refresh_token;
+  if (!refreshToken) return res.status(403).json({ error: "Refresh token required" });
+
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ error: "Invalid refresh token" });
+
+    const newAccessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, { expiresIn: "15m" });
+
+    res.cookie("access_token", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    });
+
+    res.json({ accessToken: newAccessToken });
+  });
 };
 
 export const google = async (req, res) => {
@@ -223,8 +248,11 @@ export const google = async (req, res) => {
 
 export const signOut = async (req, res, next) => {
   try {
-    res.clearCookie('access_token');
-    res.status(200).json('User has been logged out!');
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ message: "Logout failed" });
+      res.clearCookie("connect.sid"); // Remove session cookie
+      res.json({ message: "Logged out successfully" });
+  });
   } catch (error) {
     next(error);
   }

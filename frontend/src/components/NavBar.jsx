@@ -37,26 +37,26 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-6 pt-4">
           <span
             onClick={navigateToHome}
-            className="cursor-pointer text-gray-600 hover:text-blue-600"
+            className="cursor-pointer text-gray-600 hover:text-blue-800"
           >
             Home
           </span>
           <span
             onClick={navigateToProperties}
-            className="cursor-pointer text-gray-600 hover:text-blue-600"
+            className="cursor-pointer text-gray-600 hover:text-blue-800"
           >
             Properties
           </span>
           <span
-            onClick={navigateToAddProperty} 
-            className="cursor-pointer text-gray-600 hover:text-blue-600"
+            onClick={navigateToAddProperty}
+            className="cursor-pointer text-gray-600 hover:text-blue-800"
           >
             Sell/Rent
           </span>
           <div className="relative">
             <span
               onClick={toggleDropdown}
-              className="cursor-pointer text-gray-600 hover:text-blue-600 flex items-center gap-2"
+              className="cursor-pointer text-gray-600 hover:text-blue-800 flex items-center gap-2"
             >
               Tools <ChevronDown className="w-4 h-4 text-gray-600" />
             </span>
@@ -90,10 +90,13 @@ export const Navbar = () => {
 
           <div className="relative group">
             <Heart
-              className="w-5 h-5 text-gray-600 cursor-pointer transition-all duration-300 group-hover:fill-red-800 group-hover:stroke-red-800"
+              className="w-5 h-5 text-gray-600 cursor-pointer transition-all duration-500
+             group-hover:fill-red-800 group-hover:stroke-red-800"
               strokeWidth={2}
+              fill="transparent"
               onClick={navigateToBookmarks} // Navigate to /bookmarks on click
             />
+
           </div>
           <MessageSquareMore
             className="w-5 h-5 text-gray-600 cursor-pointer"
