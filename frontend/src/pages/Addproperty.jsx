@@ -1,11 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FloatingLabelInput from "../components/FloatingLabel";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const formatNumber = (value) => {
     if (!value) return "";
     const num = value.toString().replace(/\D/g, "");
     return new Intl.NumberFormat("en-IN").format(num);
 };
+
+function LocationPicker({ setLatitude, setLongitude }) {
+    useMapEvents({
+        click(e) {
+            setLatitude(e.latlng.lat);
+            setLongitude(e.latlng.lng);
+        },
+    });
+    return null;
+}
+
+function MapUpdater({ latitude, longitude }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (latitude && longitude) {
+            map.setView([latitude, longitude], 15);
+        }
+    }, [latitude, longitude, map]);
+
+    return null;
+}
 
 export default function AddProperty() {
     const [inputs, setInputs] = useState({
@@ -42,11 +66,6 @@ export default function AddProperty() {
         setInputs({ ...inputs, images: Array.from(e.target.files) });
     };
 
-    const removeFile = (index) => {
-        const updatedImages = inputs.images.filter((_, i) => i !== index);
-        setInputs({ ...inputs, images: updatedImages });
-    };
-
     return (
         <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg border border-gray-300 mt-32 mb-6 flex">
             {/* Left Side: Grid for Input Fields (60%) */}
@@ -70,7 +89,7 @@ export default function AddProperty() {
                         required
                         value={inputs.price ? formatNumber(inputs.price) : ""}
                         onChange={handlePriceChange}
-                        className=" "        
+                        className=" "
                     />
 
                     <FloatingLabelInput
@@ -217,39 +236,42 @@ export default function AddProperty() {
 
             {/* Right Side: File Upload and Preview (40%) */}
             <div className="flex-[40%] pl-4">
-                <div className="col-span-2">
+                <div className="col-span-2 h-56">
                     <label className="block mb-2 font-medium">Upload Images</label>
                     <input
                         type="file"
                         multiple
                         onChange={handleFileChange}
-                        className="block w-full border p-2 rounded"
+                        className="block w-full border p-2 rounded h-48"
                     />
                 </div>
-
-                {/* File Preview Section */}
-                {inputs.images.length > 0 && (
-                    <div className="mt-4">
-                        <h3 className="font-medium mb-2">Selected Files:</h3>
-                        <div className="grid grid-cols-3 gap-2">
-                            {inputs.images.map((file, index) => (
-                                <div key={index} className="relative group">
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        alt="Preview"
-                                        className="w-full h-32 object-cover rounded border border-gray-300"
-                                    />
-                                    <button
-                                        onClick={() => removeFile(index)}
-                                        className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                {/* Map Section */}
+                <div className="mt-4 ">
+                    <h3 className="font-medium mb-2">Select Location</h3>
+                    <MapContainer
+                        center={[27.707968688566616, 85.31966610552367]}
+                        zoom={15}
+                        scrollWheelZoom={true}
+                        style={{ height: "250px", width: "100%" }}
+                        className="rounded"
+                    >
+                        <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        {inputs.latitude && inputs.longitude && (
+                            <Marker position={[inputs.latitude, inputs.longitude]}>
+                                <Popup>
+                                    Latitude: {inputs.latitude} <br /> Longitude: {inputs.longitude}
+                                </Popup>
+                            </Marker>
+                        )}
+                        <MapUpdater latitude={parseFloat(inputs.latitude)} longitude={parseFloat(inputs.longitude)} />
+                        <LocationPicker
+                            setLatitude={(lat) => setInputs((prev) => ({ ...prev, latitude: lat.toString() }))}
+                            setLongitude={(lng) => setInputs((prev) => ({ ...prev, longitude: lng.toString() }))}
+                        />
+                    </MapContainer>
+                </div>
             </div>
         </div>
     );
