@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import FloatingLabelInput from "../components/FloatingLabel";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import ImageUploader from "../components/ImageUploader";
 
 const formatNumber = (value) => {
     if (!value) return "";
@@ -24,7 +25,7 @@ function MapUpdater({ latitude, longitude }) {
 
     useEffect(() => {
         if (latitude && longitude) {
-            map.setView([latitude, longitude], 15);
+            map.setView([latitude, longitude], 16);
         }
     }, [latitude, longitude, map]);
 
@@ -237,14 +238,18 @@ export default function AddProperty() {
             {/* Right Side: File Upload and Preview (40%) */}
             <div className="flex-[40%] pl-4">
                 <div className="col-span-2 h-56">
-                    <label className="block mb-2 font-medium">Upload Images</label>
-                    <input
-                        type="file"
-                        multiple
-                        onChange={handleFileChange}
-                        className="block w-full border p-2 rounded h-48"
-                    />
+                <ImageUploader />
+                    {/* <label className="block mb-2 font-medium">Upload Images</label>
+                    <div className="flex items-end justify-center w-full border p-2 rounded h-48">
+                        <input
+                            type="file"
+                            multiple
+                            onChange={handleFileChange}
+                            className="mb-2"
+                        />
+                    </div> */}
                 </div>
+
                 {/* Map Section */}
                 <div className="mt-4 ">
                     <h3 className="font-medium mb-2">Select Location</h3>
@@ -254,6 +259,8 @@ export default function AddProperty() {
                         scrollWheelZoom={true}
                         style={{ height: "250px", width: "100%" }}
                         className="rounded"
+                        attributionControl={false}
+                        zoomControl={false}
                     >
                         <TileLayer
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
