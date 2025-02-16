@@ -63,7 +63,7 @@ const ImageUploader = () => {
             <div className="relative flex items-center w-full mt-3">
               {canShowPrevArrow && (
                 <button
-                  className="absolute left-0 bg-gray-800 text-white rounded-full p-2"
+                  className="absolute left-0 bg-gray-800 text-white rounded-full p-2 z-50"
                   onClick={prevSlide}
                 >
                   <ChevronLeft size={20} />

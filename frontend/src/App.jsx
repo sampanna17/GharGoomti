@@ -15,13 +15,15 @@ import UserDetails from './pages/Admin/userDetails';
 import AdminProfile from './pages/Admin/adminprofile';
 import Layout from "./components/Layout";
 import BookmarkPage from './pages/BookmarkPage';
-import Chats  from './pages/ChatPgae';
+import Chats from './pages/ChatPgae';
 import ListProperties from './pages/ListProperties';
 import AddProperty from './pages/Addproperty';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
 
         {/* Auth Routes */}
@@ -50,7 +52,7 @@ export default function App() {
         <Route path="/admin/users" element={<UserDetails />} />
         <Route path="/admin/notifications" element={<AdminProfile />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
-       
+
         {/* Private Route (add your protected routes here) */}
         <Route element={<PrivateRoute />}>
           {/* Add any private routes inside here */}

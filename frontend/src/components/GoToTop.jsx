@@ -3,6 +3,7 @@ import { CiDesktopMouse2 } from "react-icons/ci";
 import { FaChevronUp } from "react-icons/fa";
 
 const GotoTop = () => {
+
     const [isVisible, setIsVisible] = useState(false);
     const [hasScrolled, setHasScrolled] = useState(false);
 
