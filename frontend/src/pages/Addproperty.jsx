@@ -65,10 +65,8 @@ export default function AddProperty() {
                 <div className="grid grid-cols-2 gap-4">
                     <FloatingLabelInput name="title" label="Title" value={inputs.title} onChange={handleChange} required />
                     <FloatingLabelInput name="price" label="Price" value={formatNumber(inputs.price)} onChange={handleChange} required />
-
                     <FloatingLabelInput name="address" label="Address" value={inputs.address} onChange={handleChange} required />
                     <FloatingLabelInput name="city" label="City" value={inputs.city} onChange={handleChange} required />
-
                     <FloatingLabelInput name="bedroom" type="number" label="Bedrooms" value={inputs.bedroom} onChange={handleChange} required />
                     <FloatingLabelInput name="bathroom" type="number" label="Bathrooms" value={inputs.bathroom} onChange={handleChange} required />
                     <FloatingLabelInput name="kitchen" type="number" label="Kitchens" value={inputs.kitchen} onChange={handleChange} required />
@@ -85,6 +83,7 @@ export default function AddProperty() {
                         <option value="building" className="text-black"> Building</option>
                         <option value="flat" className="text-black">Flat</option>
                     </select>
+
                     <select
                         name="property"
                         value={inputs.property}
@@ -97,6 +96,7 @@ export default function AddProperty() {
                         <option value="rent" className="text-black">Rent</option>
                         <option value="sale" className="text-black">Sale</option>
                     </select>
+                    
                     <FloatingLabelInput name="size" type="number" label="Size (sq ft)" value={inputs.size} onChange={handleChange} required />
 
                     <select

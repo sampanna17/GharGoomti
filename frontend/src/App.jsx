@@ -19,6 +19,7 @@ import Chats from './pages/ChatPgae';
 import ListProperties from './pages/ListProperties';
 import AddProperty from './pages/Addproperty';
 import ScrollToTop from './components/ScrollToTop';
+import SinglePage from './pages/singlePage/SinglePage';
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/chats" element={<Chats />} />
           <Route path="/properties" element={<ListProperties />} />
           <Route path="/add-property" element={<AddProperty />} />
+          <Route path="/single-page" element={<SinglePage />} />
 
         </Route>
 
@@ -53,9 +55,8 @@ export default function App() {
         <Route path="/admin/notifications" element={<AdminProfile />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
 
-        {/* Private Route (add your protected routes here) */}
+        {/* Private Route*/}
         <Route element={<PrivateRoute />}>
-          {/* Add any private routes inside here */}
         </Route>
       </Routes>
     </BrowserRouter>

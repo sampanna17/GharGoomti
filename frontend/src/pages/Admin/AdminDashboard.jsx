@@ -1,7 +1,7 @@
-import Sidebar from "../../components/Sidebar.jsx";
+import Sidebar from "../../components/AdminSideBar.jsx";
 import Navbar from "../../components/AdminNav.jsx";
-import StatsCard from "../../components/StatsCard.jsx";
-import PropertyTable from "../../components/PropertyTable.jsx";
+import StatsCard from "../../components/AdminStatsCard.jsx";
+import PropertyTable from "../../components/AdminPropertyTable.jsx";
 
 const AdminDashboard = () => {
   return (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/AdminSideBar";
 import Navbar from "../../components/AdminNav";
 import PaginationComponent from "../../components/PaginationComponent";
 

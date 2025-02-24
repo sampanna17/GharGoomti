@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaMapMarkerAlt, FaCamera } from "react-icons/fa";
 import { MdSave } from "react-icons/md";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/AdminSideBar";
 import Navbar from "../../components/AdminNav";
 
 const AdminProfile = () => {

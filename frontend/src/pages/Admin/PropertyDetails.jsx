@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import Navbar from "../../components/AdminNav";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/AdminSideBar";
 import PaginationComponent from "../../components/PaginationComponent";
 
 const PropertyDetails = () => {
