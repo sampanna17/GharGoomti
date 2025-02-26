@@ -121,7 +121,7 @@ export default function AddProperty() {
 
                     <textarea name="desc" placeholder="Description" value={inputs.desc} onChange={handleChange} className="col-span-2 h-20 p-2 border rounded border-gray-300"></textarea>
 
-                    <button className="col-span-2 bg-blue-950 text-white p-2 rounded">Submit</button>
+                    <button className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300">Submit</button>
                 </div>
             </div>
 

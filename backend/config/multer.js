@@ -2,10 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 
-// Define the path to the uploads directory
+// Define the path to upload
 const uploadDir = path.join(process.cwd(), 'uploads', 'images'); 
 
-// Check if the directory exists; if not, create it
 if (!fs.existsSync(uploadDir)) {
     try {
         fs.mkdirSync(uploadDir, { recursive: true });
@@ -15,7 +14,7 @@ if (!fs.existsSync(uploadDir)) {
     }
 }
 
-// Configure multer storage for images
+// Configure multer storage 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadDir); 
@@ -31,7 +30,7 @@ const upload = multer({
         fileSize: 5 * 1024 * 1024 // Max file size: 5 MB
     },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {

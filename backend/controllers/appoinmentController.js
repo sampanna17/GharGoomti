@@ -1,11 +1,11 @@
 
-import db from '../config/db.js'; // Import the database connection
+import db from '../config/db.js'; 
 
 // Controller for adding an appointment
 export const addAppointment = async (req, res) => {
     const { userID, propertyID, appointmentDate, appointmentTime, notes } = req.body;
 
-    // Validate input
+    // Inputy validation 
     if (!userID || !propertyID || !appointmentDate || !appointmentTime) {
         return res.status(400).json({ message: 'User ID, Property ID, Date, and Time are required.' });
     }
@@ -25,7 +25,7 @@ export const addAppointment = async (req, res) => {
     }
 };
 
-// Controller to get all appointments for a user
+// Controller to get all appointments
 export const getUserAppointments = async (req, res) => {
     const { userID } = req.params;
 
@@ -61,13 +61,11 @@ export const updateAppointmentStatus = async (req, res) => {
     }
 
     try {
-        // Log the incoming request
         console.log('Updating appointment status:', status, 'for appointmentID:', appointmentID);
 
         const query = 'UPDATE appointment SET appointmentStatus = ? WHERE appointmentID = ?';
         const [result] = await db.query(query, [status, appointmentID]);
 
-        // Check the number of affected rows
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Appointment not found.' });
         }
@@ -78,7 +76,6 @@ export const updateAppointmentStatus = async (req, res) => {
         res.status(500).json({ message: 'Error updating appointment status.', error });
     }
 };
-
 
 // Controller to remove an appointment
 export const removeAppointment = async (req, res) => {

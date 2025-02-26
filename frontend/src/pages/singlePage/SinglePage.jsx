@@ -88,6 +88,7 @@ function SinglePage() {
                             <div className="user">
                                 <img src={post.user.avatar} alt="" />
                                 <span>{post.user.username}</span>
+                                <p>Contact : +977- 9864034456</p>
                             </div>
                         </div>
                         <div

@@ -30,7 +30,7 @@ export const registerUser = async (req, res) => {
     // Generate a random 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    // Set expiry for OTP (5 minutes from now)
+    // Set expiry for OTP (5 minutes)
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
       .toISOString()
       .slice(0, 19)
@@ -169,13 +169,14 @@ export const signin = async (req, res) => {
       expiresIn: rememberMe ? "30d" : "1d", 
     });
 
-    // Store refresh token in HttpOnly cookie
+    // Store access token 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
     });
 
+    // Store refresh token 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -238,7 +239,7 @@ export const google = async (req, res) => {
     res.status(200).json({
       message: "Google sign-in successful!",
       user: userDetails,
-      token, // Include the token in the response
+      token, 
     });
   } catch (error) {
     console.error("Error during Google sign-in:", error);
@@ -257,6 +258,7 @@ export const signOut = async (req, res, next) => {
     next(error);
   }
 };
+
 export const forgotPassword = async (req, res) => {
   try {
     const { userEmail } = req.body;
@@ -331,7 +333,6 @@ export const resetPassword = async (req, res) => {
       [userID]
     );
 
-    // Debugging: Log the tokens
     console.log("Database Token:", userToken[0].reset_password_token);
     console.log("Request Token:", reset_password_token);
 
@@ -371,7 +372,7 @@ export const resetPassword = async (req, res) => {
       [hashedPassword, userID]
     );
 
-    // Send success response
+    // success response
     res.status(200).json({
       success: true,
       message: "Your password has been reset successfully!",

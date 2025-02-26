@@ -5,42 +5,61 @@ import ImageUP from "../assets/image-up.png";
 import Logo from "../assets/LOGO.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import OAuth from "../components/OAuth";
 import "../css/Login.css";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); 
-  const [error, setError] = useState(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+
+  const toastOptions = {
+    autoClose: 3000,
+    position: "top-right",
+    limit: 1,
+    newestOnTop: false,
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-  
-    if (!email || !password) {
-      setError("Email and Password are required!");
+    toast.dismiss();
+
+    if (!email && !password) {
+      toast.error("Email and Password are required!", toastOptions);
       return;
     }
-  
+
+    if (!password) {
+      toast.error(" Password is required!", toastOptions);
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      toast.error("Please enter a valid email address.", toastOptions);
+      return;
+    }
+
     try {
       const res = await axios.post(
         "http://localhost:8000/api/auth/signin",
-        { userEmail: email, password, rememberMe }, 
-        { withCredentials: true } 
+        { userEmail: email, password, rememberMe },
+        { withCredentials: true }
       );
 
       const { user } = res.data;
 
       // Store user details in localStorage
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("isLoggedIn", "true"); 
+      localStorage.setItem("isLoggedIn", "true");
 
       navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.response?.data?.error || "Unable to log in. Please try again.");
+      toast.error(err.response?.data?.error ||"Unable to log in. Please try again.", toastOptions);
     }
   };
 
@@ -58,8 +77,7 @@ const Login = () => {
           <div className="login-center">
             <h2>Welcome back to Ghar Gomti!</h2>
             <p>Please enter your details</p>
-            {error && <p className="text-red-500">{error}</p>}
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} noValidate>
               <input
                 type="email"
                 placeholder="Email"
@@ -97,7 +115,7 @@ const Login = () => {
                 </Link>
               </div>
               <div className="login-center-buttons">
-                <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+                <button type="submit">
                   Log In
                 </button>
                 <OAuth />

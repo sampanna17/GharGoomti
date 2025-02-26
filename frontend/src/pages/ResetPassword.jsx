@@ -2,32 +2,57 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { toast } from "react-toastify";
-import { useState } from "react"; // Add useState for loading state
+import { useState } from "react";
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const userId = searchParams.get("id");
     const token = searchParams.get("token");
-    const [isLoading, setIsLoading] = useState(false); // Add loading state
+    const [isLoading, setIsLoading] = useState(false); 
+
+    const toastOptions = {
+        autoClose: 3000,
+        position: "top-right",
+        limit: 1,
+        newestOnTop: false,
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true); // Set loading to true
+        toast.dismiss();
+        setIsLoading(true);
 
         const data = new FormData(e.currentTarget);
         const newPassword = data.get("newpassword");
         const confirmPassword = data.get("confirmpassword");
 
-        // Check if passwords match
-        if (newPassword !== confirmPassword) {
-            toast.error("New Password and Confirm Password do not match!", {
-                autoClose: 5000,
-                position: "top-right",
-            });
-            setIsLoading(false); // Reset loading state
+        if (!newPassword && !confirmPassword) {
+            toast.error("Please Enter the New Password and Confirm Password", toastOptions);
+            setIsLoading(false); 
             return;
         }
+
+        if (!confirmPassword) {
+            toast.error("Please Enter Confirm Password", toastOptions);
+            setIsLoading(false); 
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            toast.error("Password must be at least 8 characters long", toastOptions);
+            setIsLoading(false); 
+            return false;
+        }
+
+        // Check if passwords match
+        if (newPassword !== confirmPassword) {
+            toast.error("New Password and Confirm Password do not match!", toastOptions);
+            setIsLoading(false); 
+            return;
+        }
+
+        
 
         try {
             const url = "http://localhost:8000/api/auth/resetPassword";
@@ -38,18 +63,12 @@ const ResetPassword = () => {
             });
 
             if (res.data.success) {
-                toast.success(res.data.message, {
-                    autoClose: 5000,
-                    position: "top-right",
-                });
+                toast.success(res.data.message, toastOptions);
                 setTimeout(() => {
                     navigate("/login");
                 }, 2000);
             } else {
-                toast.error(res.data.message, {
-                    autoClose: 5000,
-                    position: "top-right",
-                });
+                toast.error(res.data.message, toastOptions);
             }
         } catch (error) {
             console.error("Error resetting password:", error);
@@ -58,7 +77,7 @@ const ResetPassword = () => {
                 position: "top-right",
             });
         } finally {
-            setIsLoading(false); // Reset loading state
+            setIsLoading(false); 
         }
     };
 
@@ -67,15 +86,15 @@ const ResetPassword = () => {
             <div className="w-full max-w-md">
                 <div className="bg-white shadow-lg rounded-lg p-8">
                     <div className="flex justify-center">
-                        <div className="bg-blue-500 rounded-full p-3">
+                        <div className="bg-[#1B4237] rounded-full p-3">
                             <LockClosedIcon className="h-6 w-6 text-white" /> {/* Icon */}
                         </div>
                     </div>
                     <h1 className="text-2xl font-bold text-center mt-4">
                         Reset Password
                     </h1>
-                    <form onSubmit={handleSubmit} className="mt-4">
-                        <div className="mb-4">
+                    <form onSubmit={handleSubmit} noValidate className="mt-4">
+                        <div className="mt-8 mb-4">
                             <label htmlFor="newpassword" className="block text-sm font-medium text-gray-700">
                                 New Password
                             </label>
@@ -85,7 +104,7 @@ const ResetPassword = () => {
                                 name="newpassword"
                                 required
                                 autoFocus
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm "
                             />
                         </div>
                         <div className="mb-4 mt-8">
@@ -97,13 +116,13 @@ const ResetPassword = () => {
                                 id="confirmpassword"
                                 name="confirmpassword"
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm "
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={isLoading} // Disable button when loading
-                            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-300"
+                            className="w-full bg-[#1B4237] text-white py-2 px-4 rounded-sm hover:bg-gray-500 transition duration-300 "
                         >
                             {isLoading ? "Resetting..." : "Submit"}
                         </button>

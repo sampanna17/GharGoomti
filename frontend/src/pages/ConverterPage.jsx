@@ -17,10 +17,8 @@ const AreaConverter = () => {
     const handleChange = (e, key) => {
         const inputValue = e.target.value;
 
-        // Allow empty input for the field being edited
+        // Allow empty input for the field 
         let value = inputValue === "" ? "" : parseFloat(inputValue) || 0;
-
-        // Ensure that when the value is "0", it is set as a valid number
         if (inputValue === "0") {
             value = 0;
         }
@@ -28,7 +26,7 @@ const AreaConverter = () => {
         // Create a new state object but only update the field being changed
         const updatedValues = { ...areaValues, [key]: value };
 
-        // Perform calculations only based on the edited field
+        // Perform calculations 
         if (key === "ropani") {
             updatedValues.aana = value * 16;
             updatedValues.paisa = value * 64;

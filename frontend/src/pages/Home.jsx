@@ -10,11 +10,10 @@ import { HeroSection } from "./HeroSection";
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
-  ); // Initialize directly from localStorage
+  ); 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Debugging: Check the value of isLoggedIn in localStorage when the component mounts
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     console.log("isLoggedIn from localStorage on mount:", loggedIn);
     setIsLoggedIn(loggedIn);
@@ -38,14 +37,14 @@ export default function Home() {
       // Call your backend logout API
       const response = await fetch('http://localhost:8000/api/auth/signout', {
         method: 'POST',
-        credentials: 'include', // Include cookies in the request
+        credentials: 'include', 
       });
 
       if (response.ok) {
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("user");
         setIsLoggedIn(false);
-        navigate("/login"); // Redirect to the landing page after logout
+        navigate("/login"); 
       } else {
         // Handle logout error
         console.error('Logout failed');
@@ -94,9 +93,6 @@ export default function Home() {
         </main>
 
         <HeroSection />
-
-        {/* Featured properties Section */}
-
 
         {/* Property Services Section */}
         <div className="py-12">
@@ -184,9 +180,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-
       </div>
-
       {/* Footer */}
       <GotoTop />
     </>

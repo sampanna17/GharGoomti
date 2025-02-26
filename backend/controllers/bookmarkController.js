@@ -1,4 +1,4 @@
-// Add a property to the user's bookmark
+// Add bookmark
 export const bookmarkProperty = async (req, res) => {
     const { userID, propertyID } = req.body;
 
@@ -21,7 +21,7 @@ export const bookmarkProperty = async (req, res) => {
     }
 };
 
-// Remove a property from the user's bookmark
+// Remove bookmark
 export const removeBookmarks = async (req, res) => {
     const { userID, propertyID } = req.body;
 

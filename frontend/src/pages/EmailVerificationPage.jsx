@@ -10,10 +10,9 @@ const EmailVerificationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Extract userEmail from the state passed via navigate
   const { userEmail } = location.state || { userEmail: "" };
 
-  const { error, isLoading } = useAuthStore(); // Destructure verifyEmail from the store
+  const { error, isLoading } = useAuthStore(); 
 
   const verifyEmail = async ({ email, otp }) => {
     try {
@@ -31,10 +30,10 @@ const EmailVerificationPage = () => {
         throw new Error(data.error || "Failed to verify email");
       }
 
-      return data; // Return the response data on success
+      return data;
     } catch (error) {
       console.error("Error verifying email:", error);
-      throw error; // Re-throw the error to handle it in the calling function
+      throw error;
     }
   };
 
@@ -87,7 +86,7 @@ const EmailVerificationPage = () => {
         toast.error(response.error);
       } else {
         toast.success("Email verified successfully!");
-        navigate("/login"); // Redirect to dashboard or another page
+        navigate("/login");
       }
     } catch (error) {
       console.error("Error verifying email:", error);
@@ -103,13 +102,8 @@ const EmailVerificationPage = () => {
   }, [code]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full max-w-md"
-      >
+    <div className="min-h-screen flex items-center justify-center bg-[#1A2D42]">
+      <div className="bg-[#2E4156] bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
           Verify Your Email
         </h2>
@@ -126,7 +120,7 @@ const EmailVerificationPage = () => {
                 value={digit}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:border-green-500 focus:outline-none"
+                className="w-16 h-14 text-center text-2xl  bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:border-green-500 focus:outline-none"
               />
             ))}
           </div>
@@ -141,7 +135,7 @@ const EmailVerificationPage = () => {
             {isLoading ? "Verifying..." : "Verify Email"}
           </motion.button>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 };

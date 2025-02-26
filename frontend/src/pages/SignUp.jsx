@@ -2,6 +2,7 @@ import { useState } from "react";
 import Logo from "../assets/LOGO.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 import "../css/SignUp.css";
 
 const Signup = () => {
@@ -17,8 +18,7 @@ const Signup = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" });
-  const [successMessage, setSuccessMessage] = useState(""); 
+  const [isChecked, setIsChecked] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +26,10 @@ const Signup = () => {
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleCheckboxChange = (e) => {
+    setIsChecked(e.target.checked);
   };
 
   // Validate form data
@@ -67,8 +71,8 @@ const Signup = () => {
       return "Please enter a valid email address.";
     }
 
-    if (!/^[0-9]{1,3}$/.test(userAge) || userAge < 1 || userAge > 120) {
-      return "Age must be a valid number between 1 and 120.";
+    if (!/^[0-9]{1,3}$/.test(userAge) || userAge < 1 || userAge > 100) {
+      return "Age must be a valid number between 1 and 100.";
     }
 
     if (password.length < 8) {
@@ -79,18 +83,22 @@ const Signup = () => {
       return "Passwords do not match.";
     }
 
+    if (!isChecked) {
+      return "You must agree to the terms and conditions.";
+    }
+
     return null; // Validation passed
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    toast.dismiss();
     const errorMessage = validateForm();
     if (errorMessage) {
-      setMessage({ text: errorMessage, type: "error" });
+      toast.error(errorMessage);
       return;
     }
-  
+
     try {
       const response = await fetch("http://localhost:8000/api/auth/register", {
         method: "POST",
@@ -107,29 +115,26 @@ const Signup = () => {
           role: "Buyer", // Default role
         }),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
-        setMessage({
-          text: "Signup successful! Redirecting to email verification...",
-          type: "success",
-        });
+        toast.success("Signup successful! Redirecting...");
         // Pass userEmail as state when navigating
         setTimeout(() => navigate("/verify-email", { state: { userEmail: formData.userEmail } }), 1000);
       } else {
-        setMessage({ text: data.message || "Signup failed.", type: "error" });
+        toast.error(data.message || "Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
-      setMessage({
-        text: "An error occurred. Please try again.",
-        type: "error",
-      });
+      toast.error("An error occurred. Please try again.");
     }
   };
 
   return (
     <div className="signup-main">
+      <ToastContainer position="bottom-center" autoClose={3000} limit={1}
+        newestOnTop={false} 
+        closeOnClick />
       <div className="signup-left">
         <div className="signup-logo">
           <img src={Logo} alt="logo" className="signup-logo-image" />
@@ -140,7 +145,7 @@ const Signup = () => {
           <div className="signup-center">
             <h2>Create your Ghar Goomti account!</h2>
             <p>Please enter your details to sign up</p>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="signup-name-fields">
                 <input
                   type="text"
@@ -160,23 +165,23 @@ const Signup = () => {
                 />
               </div>
               <div className="signup-name-fields">
-              <input
-                    type="tel"
-                    name="userContact"
-                    placeholder="Phone Number"
-                    value={formData.userContact}
-                    onChange={(e) => {
-                      const inputValue = e.target.value.replace(/[^0-9]/g, ""); // Allow only numeric characters
-                      setFormData({ ...formData, userContact: inputValue });
-                    }}
-                    required
-                    pattern="[0-9]{10}" // Ensure only 10 digits
-                    title="Phone number"
-                    className="flex-1 outline-none text-gray-700 placeholder-gray-400"
-                  />
-                
                 <input
-                  type="text" // Use text instead of number
+                  type="tel"
+                  name="userContact"
+                  placeholder="Phone Number"
+                  value={formData.userContact}
+                  onChange={(e) => {
+                    const inputValue = e.target.value.replace(/[^0-9]/g, "");
+                    setFormData({ ...formData, userContact: inputValue });
+                  }}
+                  required
+                  pattern="[0-9]{10}"
+                  title="Phone number"
+                  className="flex-1 outline-none text-gray-700 placeholder-gray-400"
+                />
+
+                <input
+                  type="text"
                   name="userAge"
                   placeholder="Age"
                   value={formData.userAge}
@@ -185,7 +190,7 @@ const Signup = () => {
                     setFormData({ ...formData, userAge: inputValue });
                   }}
                   required
-                  pattern="[0-9]*" // Allow only numeric input
+                  pattern="[0-9]*"
                   title="Please enter a valid age"
                 />
               </div>
@@ -236,7 +241,7 @@ const Signup = () => {
 
               <div className="signup-center-options">
                 <div className="signup-remember-div">
-                  <input type="checkbox" id="terms-checkbox" required />
+                  <input type="checkbox" id="terms-checkbox" checked={isChecked} onChange={handleCheckboxChange} />
                   <label htmlFor="terms-checkbox">
                     I agree to the terms and conditions
                   </label>
@@ -253,15 +258,6 @@ const Signup = () => {
           </p>
         </div>
       </div>
-      {message.text && (
-        <div
-          className={`signup-message ${
-            message.type === "success" ? "success" : "error"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
     </div>
   );
 };
