@@ -1,23 +1,27 @@
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const logoUrl = process.env.LOGO_URL;
 
 const sendResetEmail = async ({ email, subject, message }) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'piyasampanna@gmail.com', // Replace with your Gmail email
-      pass: 'ugdalllppzqdwcjd', // Replace with your Gmail app password
+      user: 'piyasampanna@gmail.com', 
+      pass: 'ugdalllppzqdwcjd', 
     },
   });
 
   const mailOptions = {
-    from: 'piyasampanna@gmail.com', // Replace with your Gmail email
-    to: email, // Use the `email` property from the `mailOption` object
+    from: 'piyasampanna@gmail.com', 
+    to: email, 
     subject,
-    html: message, // Use `html` for rich content
+    html: message, 
   };
 
   try {
-    await transporter.sendMail(mailOptions); // Corrected method name
+    await transporter.sendMail(mailOptions); 
     console.log('Email sent successfully!');
     return true;
   } catch (error) {
@@ -30,16 +34,24 @@ const mailTemplate = (content, buttonUrl, buttonText) => {
   return `
     <!DOCTYPE html>
     <html>
-      <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; color: #333; text-align: center;">
+      <body style="margin: 0; padding: 0; background-color: #ffffff; font-family: Arial, sans-serif; color: #333; text-align: center;">
         <div style="
           max-width: 600px;
           margin: 30px auto;
-          background-color: #ffffff;
+          background-color: #f4f4f4;
           padding: 25px 20px;
           border-radius: 10px;
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
           text-align: left;
         ">
+          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <img src="${logoUrl}" alt="Ghar Goomti Logo" style="height: 50px; margin-right: 10px;">
+            <span style="font-size: 22px; font-weight: bold; color: #444394;">Ghar Gomti</span>
+          </div
+          
+          <!-- Horizontal Line -->
+          <hr style="border: none; height: 1px; background-color: #ddd; margin: 20px 0;">
+
           <!-- Content Section -->
           <p style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 20px;">
             ${content}
@@ -67,9 +79,10 @@ const mailTemplate = (content, buttonUrl, buttonText) => {
           </div>
 
           <!-- Alternate Link Section -->
-          <p style="font-size: 14px; line-height: 1.5; color: #777; text-align: center; margin: 0 0 10px;">
-            If the button above doesn’t work, please copy and paste the following URL into your browser:
+          <p style="font-size: 14px; line-height: 1.5; color: #777; text-align: center; margin: 20px auto; width: 80%;">
+              If the button above doesn’t work, please copy and paste the following URL into your browser:
           </p>
+
           <a href="${buttonUrl}" target="_blank" style="
             font-size: 14px;
             color: #444394;

@@ -22,6 +22,8 @@ import one from "../../assets/demo/1.jpg";
 import two from "../../assets/demo/2.jpg";
 import three from "../../assets/demo/3.jpg";
 import four from "../../assets/demo/4.png";
+import five from "../../assets/demo/5.jpg";
+import six from "../../assets/demo/6.jpg";
 
 
 function SinglePage() {
@@ -29,7 +31,7 @@ function SinglePage() {
         title: "Luxury Apartment in the City Center",
         address: "123 Main St, Kathmandu, Nepal",
         price: 120000,
-        images: [one, two, three, four],
+        images: [one, two, three, four,five],
         user: {
             avatar: "user-avatar.jpg",
             username: "Sampanna"
@@ -51,14 +53,14 @@ function SinglePage() {
     };
 
     const [saved, setSaved] = useState(false);
-    const [visitDate, setVisitDate] = useState(""); // State for selected date
+    const [visitDate, setVisitDate] = useState(""); 
 
     const handleSave = () => {
         setSaved((prev) => !prev);
     };
 
     const handleDateChange = (event) => {
-        setVisitDate(event.target.value); // Update selected date
+        setVisitDate(event.target.value); 
     };
 
     const handleBookVisit = () => {
@@ -71,7 +73,7 @@ function SinglePage() {
     };
 
     return (
-        <div className="singlePage mt-28 mb-5 mx-auto px-4">
+        <div className="singlePage mt-32 mb-5 mx-auto px-4">
             <div className="details">
                 <div className="wrapper">
                     <Slider images={post.images} />

@@ -1,7 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import LeftArrow from '../assets/left-arrow.png';
+import RightArrow from '../assets/right-arrow.png';
+import Cross from '../assets/close.png';
 
 function Slider({ images }) {
   const [imageIndex, setImageIndex] = useState(null);
+
+  useEffect(() => {
+    if (imageIndex !== null) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [imageIndex]);
 
   const changeSlide = (direction) => {
     setImageIndex((prevIndex) => {
@@ -13,55 +28,91 @@ function Slider({ images }) {
     });
   };
 
+
+  const isFiveImages = images.length === 5;
+  const isSixImages = images.length === 6;
+
   return (
-    <div className="w-full h-[350px] flex gap-5 sm:h-[280px]">
+    <div className="w-full h-[450px] flex gap-5 sm:h-[380px]">
       {imageIndex !== null && (
-        <div className="fixed inset-0 bg-black flex justify-between items-center z-50">
-          <button
-            className="flex-1 flex items-center justify-center"
-            onClick={() => changeSlide("left")}
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md flex items-center justify-center z-50">
+          <div
+            className="relative p-4 rounded-lg flex flex-col items-center transform transition-transform duration-300 scale-y-100"
+            style={{ transform: imageIndex === null ? "scaleY(0)" : "scaleY(1)" }}
           >
-            <img src="/arrow.png" alt="Left" className="w-12 md:w-8 sm:w-5" />
-          </button>
-          <div className="flex-10 flex justify-center items-center">
-            <img src={images[imageIndex]} alt="" className="w-full h-full object-cover" />
+            <button
+              className="absolute -top-4 right-16 text-gray-600 text-xl font-bold"
+              onClick={() => setImageIndex(null)}
+            >
+              <img src={Cross} alt="Close" className="w-5 h-autofilter invert" />
+            </button>
+            <div className="relative flex items-center">
+              <button
+                className=" left-2 p-2 filter invert"
+                onClick={() => changeSlide("left")}
+              >
+                <img src={LeftArrow} alt="Left" className="w-9 h-10 opacity-80 hover:opacity-100" />
+              </button>
+              <img
+                src={images[imageIndex]}
+                alt="Preview"
+                className="w-[600px] h-[500px] object-cover rounded-lg"
+              />
+              <button
+                className="right-2 p-2 filter invert"
+                onClick={() => changeSlide("right")}
+              >
+                <img src={RightArrow} alt="Right" className="w-8 opacity-80 hover:opacity-100" />
+              </button>
+            </div>
           </div>
-          <button
-            className="flex-1 flex items-center justify-center"
-            onClick={() => changeSlide("right")}
-          >
-            <img
-              src="/arrow.png"
-              alt="Right"
-              className="w-12 md:w-8 sm:w-5 rotate-180"
-            />
-          </button>
-          <button
-            className="absolute top-5 right-5 text-white text-3xl font-bold cursor-pointer"
-            onClick={() => setImageIndex(null)}
-          >
-            X
-          </button>
         </div>
       )}
-      <div className="flex-3 sm:flex-2 cursor-pointer">
-        <img
-          src={images[0]}
-          alt=""
-          className="w-full h-full object-cover rounded-lg"
-          onClick={() => setImageIndex(0)}
-        />
-      </div>
-      <div className="flex-1 flex flex-col justify-between gap-5 sm:gap-3">
-        {images.slice(1).map((image, index) => (
+      {/* Conditionally render based on the number of images */}
+      <div className={`flex ${isSixImages ? 'flex-col' : (isFiveImages ? 'flex-col' : 'flex-row')} gap-5 sm:h-[380px]`}>
+        {/* First image container */}
+        <div className={`${images.length === 4 ? 'flex-3 sm:flex-2 w-[550px]' : (isFiveImages ? 'grid grid-cols-2 gap-4' : (isSixImages ? 'grid grid-cols-3 gap-2 ' : 'flex-3 sm:flex-2'))} cursor-pointer`}>
           <img
-            src={image}
+            src={images[0]}
             alt=""
-            key={index}
-            className="h-[100px] sm:h-[80px] object-cover rounded-lg cursor-pointer"
-            onClick={() => setImageIndex(index + 1)}
+            className="w-full h-full object-cover rounded-lg"
+            onClick={() => setImageIndex(0)}
           />
-        ))}
+
+          {isFiveImages && (
+            <img
+              src={images[1]}
+              alt=""
+              className="w-full h-full object-cover rounded-lg"
+              onClick={() => setImageIndex(1)}
+            />
+          )}
+   
+          {isSixImages  && (
+            <img
+              src={images[2]}
+              alt=""
+              className="w-full h-full object-cover rounded-lg"
+              onClick={() => setImageIndex(2)}
+            />
+          )}
+
+        </div>
+
+        {/* Second image container */}
+        <div className={`${images.length === 4 ? 'flex-1 flex flex-col justify-between gap-2  sm:gap-1' : (isFiveImages ? 'grid grid-cols-3 gap-4 w-full' : 'flex-1 flex-col justify-between gap-4 sm:gap-2')}`}>
+
+          {images.slice(isFiveImages ? 2 : 1).map((image, index) => (
+            <img
+              src={image}
+              alt=""
+              key={index}
+              className={`h-[200px] sm:h-[120px] ${images.length === 4 ? 'w-[220px]' : 'w-full'} object-cover rounded-lg cursor-pointer`}
+
+              onClick={() => setImageIndex(index + (isFiveImages ? 2 : 1))}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

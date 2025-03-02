@@ -78,7 +78,7 @@ export default function AddProperty() {
                         onChange={handleChange}
                         className={`p-2 border rounded border-gray-300 ${inputs.type === "" ? "text-gray-500" : "text-black"}`}
                     >
-                        <option value="" disabled>Select Type</option>
+                        <option value="" disabled>Select Property Type</option>
                         <option value="apartment" className="text-black">Apartment</option>
                         <option value="building" className="text-black"> Building</option>
                         <option value="flat" className="text-black">Flat</option>
@@ -91,7 +91,7 @@ export default function AddProperty() {
                         className={`p-2 border rounded border-gray-300 ${inputs.property === "" ? "text-gray-500" : "text-black"}`}
                     >
                         <option value="" disabled>
-                            Select Property Type
+                            Select Property For
                         </option>
                         <option value="rent" className="text-black">Rent</option>
                         <option value="sale" className="text-black">Sale</option>

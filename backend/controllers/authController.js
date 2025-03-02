@@ -125,7 +125,7 @@ export const verifyEmail = async (req, res) => {
     // Return success response with user data
     res.status(200).json({ 
       message: "Email verified successfully!", 
-      user: { email } // Include user data if needed
+      user: { email } 
     });
   } catch (error) {
     console.error("Error verifying OTP:", error);
@@ -162,7 +162,7 @@ export const signin = async (req, res) => {
 
     // Generate JWT tokens
     const accessToken = jwt.sign({ id: validUser.id }, process.env.JWT_SECRET, {
-      expiresIn: "15m", // Access Token (Short-lived)
+      expiresIn: "15m", // Access Token 
     });
 
     const refreshToken = jwt.sign({ id: validUser.id }, process.env.REFRESH_TOKEN_SECRET, {
@@ -292,7 +292,7 @@ export const forgotPassword = async (req, res) => {
       [resetToken, expiresAt, user[0].userID]
     );
 
-    // Prepare the email content
+    // Email content
     const mailOption = {
       email: userEmail,
       subject: "Forgot Password Link",

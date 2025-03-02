@@ -1,31 +1,35 @@
 
-import db from '../config/db.js'; 
+import db from '../config/db.js';
 import fs from 'fs';
-import upload from '../config/multer.js'; 
+import upload from '../config/multer.js';
 
 // Add a new property
 export const addProperty = async (req, res) => {
-    const { userID, propertyTitle, propertyPrice, propertyType, propertyLocation, propertySize } = req.body;
+    const { userID, propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType, propertyFor, propertySize, petPolicy, latitude, longitude } = req.body;
 
     // Check if all required fields are provided
-    if (!userID || !propertyTitle || !propertyPrice || !propertyType || !propertyLocation || !propertySize) {
+    if (!userID || !propertyTitle || !propertyPrice || !propertyAddress || !propertyCity || !bedrooms || !bathrooms || !kitchens || !halls || !propertyType || !propertyFor || !propertySize || !petPolicy || !latitude || !longitude) {
         return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
         // Insert property into the database
         const query = `
-            INSERT INTO property (userID, propertyTitle, propertyPrice, propertyType, propertyLocation, propertySize, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO property (userID, propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType, propertyFor, propertySize, petPolicy, latitude, longitude, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW());
+
         `;
-        const [result] = await db.query(query, [userID, propertyTitle, propertyPrice, propertyType, propertyLocation, propertySize]);
+        const [result] = await db.query(query, [
+            userID, propertyTitle, propertyPrice, propertyAddress, propertyCity, 
+            bedrooms, bathrooms, kitchens, halls, propertyType, 
+            propertyFor, propertySize, petPolicy, latitude, longitude
+        ]);
 
         res.status(201).json({ message: 'Property added successfully.', propertyID: result.insertId });
     } catch (error) {
         res.status(500).json({ message: 'Error adding property.', error });
     }
 };
-
 
 // Get all properties
 export const getProperties = async (req, res) => {
@@ -89,7 +93,7 @@ export const addPropertyImage = async (req, res) => {
 
 // Get all images for a property
 export const getPropertyImages = async (req, res) => {
-    const { id } = req.params; 
+    const { id } = req.params;
 
     try {
         const [images] = await db.query('SELECT * FROM property_image WHERE propertyID = ?', [id]);

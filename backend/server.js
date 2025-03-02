@@ -37,4 +37,7 @@ app.use('/api/auth', authroute);
 const PORT = 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
+// Serve static files from the 'public' folder
+app.use("/public", express.static("public"));
+
 
