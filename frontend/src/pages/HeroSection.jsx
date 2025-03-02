@@ -4,18 +4,20 @@ import { useInView } from "react-intersection-observer";
 import Frame from "../assets/Frame.png";
 import Hero from "../assets/hero.png";
 import SideHero from "../assets/hero1.png";
+import ImageLoop from "../components/ImgaeLoop";
 
 export const HeroSection = () => {
     const controls = useAnimation();
-    const { ref, inView } = useInView({ 
-        threshold: 0.4, 
+    const { ref, inView } = useInView({
+        threshold: 0.4,
+        triggerOnce: false,  
     });
 
     useEffect(() => {
         if (inView) {
             controls.start({ opacity: 1, y: 0 });
         } else {
-            controls.start({ opacity: 0, y: 50 });
+            controls.start({ opacity: 0, y: 60 });
         }
     }, [controls, inView]);
 
@@ -43,7 +45,7 @@ export const HeroSection = () => {
                         We have more apartments, places & plots.
                     </motion.p>
                     <motion.h1 
-                        initial={{ opacity: 0,scale: 0.8 }}
+                        initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
                         className="text-[#1B4B40] text-5xl font-medium mt-4 mb-8"
@@ -59,12 +61,14 @@ export const HeroSection = () => {
                     </p>
                 </div>
             </div>
+            <ImageLoop/>
 
             <motion.div
                 ref={ref}
                 animate={controls}
-                initial={{ opacity: 0, y: 50 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                initial={controls}
+                
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="relative flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 px-6 lg:px-20 py-16 overflow-x-hidden w-full"
             >
                 {/* Left Image Section */}
@@ -75,7 +79,7 @@ export const HeroSection = () => {
                         alt="Side Hero"
                     />
                     <p className="-mt-16 text-gray-600 text-lg sm:text-xl mr-20 font-['Playfair_Display']">
-                        Explore the best real estate deals with ease and confidence.    
+                        Explore the best real estate deals with ease and confidence.
                     </p>
                 </div>
 
