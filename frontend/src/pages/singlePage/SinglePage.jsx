@@ -31,7 +31,7 @@ function SinglePage() {
         title: "Luxury Apartment in the City Center",
         address: "123 Main St, Kathmandu, Nepal",
         price: 120000,
-        images: [one, two, three, four,five],
+        images: [one, two, three, four,five,six],
         user: {
             avatar: "user-avatar.jpg",
             username: "Sampanna"

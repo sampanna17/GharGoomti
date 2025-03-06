@@ -11,12 +11,12 @@ export default {
             transform: 'translateX(0)',
           },
           '100%': {
-            transform: 'translateX(-100%)',
+            transform: 'translateX(-25%)',
           },
         },
       },
       animation: {
-        'scroll': 'scroll 100s linear infinite',
+        'scroll': 'scroll 20s linear infinite',
       },
     },
   },

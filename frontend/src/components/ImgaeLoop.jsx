@@ -21,15 +21,17 @@ const images = [
 ];
 
 const ImageLoop = () => {
-  const repeatedImages = Array.from({ length: 10 }, () => images).flat(); // Creates 10 copies
   return (
-    <div className="overflow-hidden relative bg-white py-6">
-      <div className="flex w-max animate-scroll gap-5 whitespace-nowrap">
-        {repeatedImages.map((image, index) => (
-          <div key={index} className="flex-shrink-0">
-            <img src={image.src} alt={image.alt} className="h-12 mx-10" loading="lazy" />
-          </div>
-        ))}
+    <div className="overflow-hidden relative bg-white py-6 w-full">
+      <div className="flex w-full
+       gap-5 whitespace-nowrap animate-scroll">
+        {Array.from({ length: 4 }).flatMap(() =>
+          images.map((image, index) => (
+            <div key={index} className="flex-shrink-0">
+              <img src={image.src} alt={image.alt} className="h-12 mx-10 pointer-events-none" loading="lazy" />
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

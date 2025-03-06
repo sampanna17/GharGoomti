@@ -9,7 +9,7 @@ import ImageLoop from "../components/ImgaeLoop";
 export const HeroSection = () => {
     const controls = useAnimation();
     const { ref, inView } = useInView({
-        threshold: 0.4,
+        threshold: 0.2,
         triggerOnce: false,  
     });
 
@@ -31,7 +31,7 @@ export const HeroSection = () => {
                     <motion.button 
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
                         className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 text-sm hover:bg-gray-50 transition-colors"
                     >
                         LET US GUIDE YOUR HOME
@@ -39,7 +39,7 @@ export const HeroSection = () => {
                     <motion.p 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                        transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
                         className="mt-6 text-[#1B4B40] text-lg font-medium"
                     >
                         We have more apartments, places & plots.
@@ -67,9 +67,8 @@ export const HeroSection = () => {
                 ref={ref}
                 animate={controls}
                 initial={controls}
-                
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="relative flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 px-6 lg:px-20 py-16 overflow-x-hidden w-full"
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="relative flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 px-2 lg:px-20 py-8 overflow-x-hidden w-full"
             >
                 {/* Left Image Section */}
                 <div className="flex-1 flex flex-col items-center">
