@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from "./context/AuthContext";
+// import { AuthProvider } from "./context/AuthContext";
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import PrivateRoute from './components/PrivateRoute';
@@ -26,7 +26,6 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-
         {/* Auth Routes */}
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/verify-email" element={<EmailVerificationPage />} />
@@ -45,7 +44,6 @@ export default function App() {
           <Route path="/properties" element={<ListProperties />} />
           <Route path="/add-property" element={<AddProperty />} />
           <Route path="/single-page" element={<SinglePage />} />
-
         </Route>
 
         {/* Admin Routes */}

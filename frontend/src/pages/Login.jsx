@@ -42,7 +42,7 @@ const Login = () => {
       toast.error("Please enter a valid email address.", toastOptions);
       return;
     }
-
+    
     try {
       const res = await axios.post(
         "http://localhost:8000/api/auth/signin",
