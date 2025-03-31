@@ -30,67 +30,11 @@ export default function Home() {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
-
-  // Function to handle logout
-  const handleLogout = async () => {
-    try {
-      // Call your backend logout API
-      const response = await fetch('http://localhost:8000/api/auth/signout', {
-        method: 'POST',
-        credentials: 'include', 
-      });
-
-      if (response.ok) {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("user");
-        setIsLoggedIn(false);
-        navigate("/login"); 
-      } else {
-        // Handle logout error
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
-
   console.log("isLoggedIn state:", isLoggedIn);
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-center justify-center mt-28">
-        
-        <header className="w-full py-4 shadow-md">
-          <div className="max-w-7xl mx-auto text-white flex justify-between items-center">
-            <h1 className="text-black text-3xl font-bold">Welcome to Ghar Goomti</h1>
-            <nav>
-              {isLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="text-black px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600 transition duration-200"
-                >
-                  Logout
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate("/login")}
-                  className="text-black px-4 py-2 bg-green-500 rounded-lg hover:bg-green-600 transition duration-200"
-                >
-                  Sign In
-                </button>
-              )}
-            </nav>
-          </div>
-        </header>
-
-        <main className="flex-grow flex items-center justify-center mt-10">
-          <div className="text-center">
-            {/* Displaying login status */}
-            <h2 className="text-2xl font-semibold">
-              {isLoggedIn ? "You are logged in!" : "You are not logged in."}
-            </h2>
-          </div>
-        </main>
+      <div className="min-h-screen flex flex-col items-center justify-center mt-20">
 
         <HeroSection />
 

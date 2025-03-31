@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CloudUpload, X, ChevronLeft, ChevronRight } from "lucide-react";
 
-const ImageUploader = () => {
+const ImageUploader = ({onImagesUploaded}) => {
   const [images, setImages] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const maxImages = 6;
@@ -13,10 +13,12 @@ const ImageUploader = () => {
 
     setImages((prevImages) => {
       const newImages = [...prevImages, ...files].slice(0, maxImages);
+      onImagesUploaded(newImages); // Pass images back to the parent
       return newImages;
     });
 
     setCurrentIndex(0);
+    
   };
 
   const removeImage = (index) => {
@@ -26,6 +28,8 @@ const ImageUploader = () => {
     if (currentIndex >= updatedImages.length) {
       setCurrentIndex(Math.max(0, updatedImages.length - imagesPerPage));
     }
+
+    onImagesUploaded(updatedImages);
   };
 
   const nextSlide = () => {
@@ -41,6 +45,7 @@ const ImageUploader = () => {
   const canShowNextArrow = currentIndex + imagesPerPage < images.length;
   const canShowPrevArrow = currentIndex > 0;
 
+  
   return (
     <div className="col-span-2 h-56">
       <label className="block mb-2 font-medium">Upload Images</label>

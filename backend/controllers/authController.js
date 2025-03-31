@@ -272,7 +272,17 @@ export const forgotPassword = async (req, res) => {
     if (!user || user.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "You are not registered!",
+        message: "You are not registered! Please Signp First.",
+      });
+    }
+
+    const currentTime = new Date();
+    const resetTokenExpiry = new Date(user[0].reset_token_expiry);
+
+    if (resetTokenExpiry > currentTime) {
+      return res.status(400).json({
+        success: false,
+        message: "A password reset link has already been sent. Please check your email.",
       });
     }
 

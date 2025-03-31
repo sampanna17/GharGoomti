@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-// import { AuthProvider } from "./context/AuthContext";
+import { AuthContext } from "./context/AuthContext";
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import PrivateRoute from './components/PrivateRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import EmailVerificationPage from './pages/EmailVerificationPage';
 import ForgotPassword from './pages/ForgetPassword';
@@ -16,10 +17,11 @@ import AdminProfile from './pages/Admin/adminprofile';
 import Layout from "./components/Layout";
 import BookmarkPage from './pages/BookmarkPage';
 import Chats from './pages/ChatPgae';
-import ListProperties from './pages/ListProperties';
 import AddProperty from './pages/Addproperty';
 import ScrollToTop from './components/ScrollToTop';
 import SinglePage from './pages/singlePage/SinglePage';
+import ListPage from './pages/ListProperty/ListProperty';
+import UserProfile from './pages/UserProfile';
 
 export default function App() {
   return (
@@ -41,9 +43,14 @@ export default function App() {
           <Route path="/emi-calculator" element={<HomeLoanEMICalculator />} />
           <Route path="/bookmarks" element={<BookmarkPage />} />
           <Route path="/chats" element={<Chats />} />
-          <Route path="/properties" element={<ListProperties />} />
+          <Route path="/properties" element={<ListPage />} />
           <Route path="/add-property" element={<AddProperty />} />
+          
+
+          <Route path="/:id" element={<SinglePage />} />
           <Route path="/single-page" element={<SinglePage />} />
+          <Route path="/profile" element={<UserProfile />} />
+
         </Route>
 
         {/* Admin Routes */}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import Cookies from 'js-cookie';
 import Image from "../assets/image.png";
 import ImageUP from "../assets/image-up.png";
 import Logo from "../assets/LOGO.png";
@@ -42,7 +43,7 @@ const Login = () => {
       toast.error("Please enter a valid email address.", toastOptions);
       return;
     }
-    
+
     try {
       const res = await axios.post(
         "http://localhost:8000/api/auth/signin",
@@ -50,7 +51,13 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      const { user } = res.data;
+      const { user, token } = res.data;
+
+      Cookies.set('auth_token', token, { expires: 1, secure: true, sameSite: 'Strict' });
+      Cookies.set("user_data", JSON.stringify(user), { expires: 1, secure: true, sameSite: "Strict" });
+      const userDataString = Cookies.get('user_data');
+      const userData = JSON.parse(userDataString);
+      console.log(JSON.stringify(userData, null, 2)); 
 
       // Store user details in localStorage
       localStorage.setItem("user", JSON.stringify(user));
@@ -59,7 +66,7 @@ const Login = () => {
       navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
-      toast.error(err.response?.data?.error ||"Unable to log in. Please try again.", toastOptions);
+      toast.error(err.response?.data?.error || "Unable to log in. Please try again.", toastOptions);
     }
   };
 

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import session from 'express-session'; 
 import authroute from './routes/authRoute.js';
+import userRoute from './routes/userRoute.js'; 
 import db from './config/db.js'
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use(
 app.use(bodyParser.json());
 
 app.use('/api/auth', authroute);
+app.use('/api/user', userRoute);
 
 const PORT = 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

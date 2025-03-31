@@ -1,8 +1,12 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import { LockClosedIcon } from "@heroicons/react/24/solid";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
+
+
+    const navigate = useNavigate();
 
     const toastOptions = {
         autoClose: 3000,
@@ -18,7 +22,7 @@ const ForgotPassword = () => {
         const userEmail = data.get("email");
 
         if (!userEmail) {
-            toast.error("Email address is required.",toastOptions);
+            toast.error("Email address is required.", toastOptions);
             return;
         }
 
@@ -35,12 +39,49 @@ const ForgotPassword = () => {
             if (!res.data.success) {
                 toast.error(res.data.message, toastOptions);
             } else {
-                toast.success(res.data.message, toastOptions);
+                // toast.success(res.data.message, toastOptions);
+                toast.success(
+                    <>
+                      <div className="mr-2">A password reset link has been sent to your email.</div>
+                      <div className="mr-5">
+                        <a 
+                          href="https://mail.google.com/mail/u/0/#inbox" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className=" w-auto hover:underline"
+                        >
+                          <span className="w-auto">Click Here</span>
+                        </a>
+                      </div>
+                    </>,
+                    toastOptions
+                  );
+                                  
             }
-        } catch{
-            toast.error("An error occurred. Please try again.", toastOptions);
+        } catch (error) {
+            if (error.response) {
+                if (error.response.data.message === "A password reset link has already been sent. Please check your email.") {
+                    toast.info("A password reset link has already been sent. Please check your email.", toastOptions);
+                } else {
+                    toast.error(error.response.data.message || "An error occurred. Please try again.", toastOptions);
+                }
+            } else if (error.request) {
+                toast.error("Network error. Please try again.", toastOptions);
+            } else {
+                toast.error("An error occurred", toastOptions);
+            }
         }
     };
+
+    const handleBackToLogin = () => {
+        navigate("/login");
+    };
+
+    const handleBackToSignup = () => {
+        navigate("/signup");
+    };
+    
+
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -74,6 +115,22 @@ const ForgotPassword = () => {
                             Reset Password
                         </button>
                     </form>
+                </div>
+                <div className="flex justify-between">
+                    <button
+                        type="button"
+                        onClick={handleBackToLogin} // Call the function when clicked
+                        className="bg-[#1B4237] mt-4 w-40 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition duration-300"
+                    >
+                        Back to Login
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleBackToSignup} // Call the function when clicked
+                        className="bg-[#1B4237] mt-4 w-40 text-white py-2 px-4 rounded-md hover:bg-gray-500 transition duration-300"
+                    >
+                        Back to Signup
+                    </button>
                 </div>
             </div>
         </div>

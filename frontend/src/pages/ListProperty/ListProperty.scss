@@ -1,0 +1,54 @@
+@use "../../responsive" as *;
+
+.listPage {
+    display: flex;
+    height: 100vh;
+    padding: 40px;
+    overflow: hidden;
+}
+
+.listContainer {
+    flex: 2;
+    max-height: 90%;
+    height: 100%; 
+    overflow-y: auto; 
+    padding-right: 20px;
+    margin-top: 80px; 
+
+    &::-webkit-scrollbar {
+        width: 8px; 
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #888; 
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #555; 
+    }
+
+    .wrapper {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        padding-bottom: 50px;
+    }
+}
+
+.mapContainer {
+    flex: 2;
+    height: 400px;
+    padding: 10px;
+    padding-left: 50px;
+
+    @include md {
+        display: none;
+    }
+}

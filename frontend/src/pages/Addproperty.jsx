@@ -1,4 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from '../context/AuthContext';
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
 import FloatingLabelInput from "../components/FloatingLabel";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -48,6 +51,11 @@ export default function AddProperty() {
         petPolicy: "",
         size: "",
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleImagesUploaded = (newImages) => {
+        setInputs((prev) => ({ ...prev, images: newImages }));
+    };
 
     const handleChange = (e) => {
         let { name, value } = e.target;
@@ -55,13 +63,243 @@ export default function AddProperty() {
             value = value.replace(/[^0-9.-]/g, "");
             if (value) value = parseFloat(value).toFixed(6);
         }
+
+        if (name === "price") {
+            value = value.replace(/[^0-9.]/g, "");
+        }
+
         setInputs((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Validate form data
+    const validateForm = () => {
+        const {
+            title,
+            price,
+            address,
+            city,
+            latitude,
+            longitude,
+            bedroom,
+            bathroom,
+            kitchen,
+            hall,
+            type,
+            property,
+            images,
+            desc,
+            petPolicy,
+            size,
+        } = inputs;
+
+        // Check if all fields are filled
+        if (
+            !title ||
+            !price ||
+            !address ||
+            !city ||
+            !latitude ||
+            !longitude ||
+            !bedroom ||
+            !bathroom ||
+            !kitchen ||
+            !hall ||
+            !type ||
+            !property ||
+
+            !desc ||
+            !petPolicy ||
+            !size
+        ) {
+            return "All fields are required.";
+        }
+
+        // Validate price
+        const parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice) || parseFloat <= 0) {
+            return "Price must be a valid positive number.";
+        }
+
+        // Validate latitude and longitude
+        if (
+            isNaN(latitude) ||
+            latitude < -90 ||
+            latitude > 90 ||
+            isNaN(longitude) ||
+            longitude < -180 ||
+            longitude > 180
+        ) {
+            return "Please enter valid latitude and longitude.";
+        }
+
+        // Validate number of rooms
+        if (
+            isNaN(bedroom) ||
+            bedroom < 0 || bedroom > 25
+
+        ) {
+            return "Please enter valid numbers for the bedroom.";
+        }
+
+        if (
+            isNaN(bathroom) ||
+            bathroom < 0 || bathroom > 20
+        ) {
+            return "Please enter valid numbers for bathrooms.";
+        }
+
+        if (
+
+            isNaN(kitchen) ||
+            kitchen < 0 || kitchen > 5
+        ) {
+            return "Please enter valid numbers for Kitchen.";
+        }
+
+        if (
+            isNaN(hall) ||
+            hall < 0 ||
+            hall > 10
+        ) {
+            return "Please enter valid numbers for Hall.";
+        }
+
+        // Validate property type
+        if (!["apartment", "house", "land"].includes(type)) {
+            return "Please select a valid property type.";
+        }
+
+        // Validate property for sale or rent
+        if (!["sale", "rent"].includes(property)) {
+            return "Please select a valid property for option.";
+        }
+
+        // Validate size
+        if (isNaN(size) || parseFloat(size) <= 0) {
+            return "Size must be a valid positive number.";
+        }
+
+        // Validate pet policy
+        if (!["available", "unavailable"].includes(petPolicy)) {
+            return "Please select a valid pet policy.";
+        }
+
+        // Validate image upload
+        if (images.length === 0 || images.length < 3) {
+            return "Please upload at least 3 image.";
+        }
+
+        // Validate description length
+        if (desc.length < 10) {
+            return "Description must be at least 10 characters long.";
+        }
+
+        return null; // Validation passed
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        toast.dismiss();
+        const errorMessage = validateForm();
+        if (errorMessage) {
+            toast.error(errorMessage);
+            return;
+        }
+
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+
+        try {
+            // Send property details
+            const propertyData = {
+                userID: 1,
+                propertyTitle: inputs.title,
+                propertyPrice: inputs.price,
+                propertyAddress: inputs.address,
+                propertyCity: inputs.city,
+                bedrooms: inputs.bedroom,
+                bathrooms: inputs.bathroom,
+                kitchens: inputs.kitchen,
+                halls: inputs.hall,
+                propertyType: inputs.type,
+                propertyFor: inputs.property,
+                propertySize: inputs.size,
+                petPolicy: inputs.petPolicy,
+                latitude: inputs.latitude,
+                longitude: inputs.longitude,
+            };
+
+            const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
+
+            if (propertyResponse.status === 201) {
+                const propertyID = propertyResponse.data.propertyID;
+
+                if (inputs.images.length > 0) {
+                    for (const image of inputs.images) {
+                        const formData = new FormData();
+                        formData.append("image", image);
+
+                        await axios.post(`http://localhost:8000/api/property/${propertyID}/images`, formData, {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
+                        });
+                    }
+                }
+                toast.success("Property added successfully!");
+                setInputs({
+                    title: "",
+                    price: "",
+                    address: "",
+                    city: "",
+                    latitude: "",
+                    longitude: "",
+                    bedroom: "",
+                    bathroom: "",
+                    kitchen: "",
+                    hall: "",
+                    type: "",
+                    property: "",
+                    images: [],
+                    desc: "",
+                    petPolicy: "",
+                    size: "",
+                });
+            } else {
+                toast.error("Failed to add property.");
+            }
+        } catch (error) {
+            console.error("Error adding property:", error);
+            toast.error("An error occurred while adding the property.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const { user } = useContext(AuthContext);
+
+    if (!user || user.userRole !== 'seller') {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen text-center">
+                <p className="text-red-600 text-lg font-semibold">
+                    You are not a seller. Request the admin to become a seller.
+                </p>
+                <button
+                    onClick={() => window.location.href = "/home"}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                    Go Back to Home
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg border border-gray-300 mt-32 mb-6 flex">
+            <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick />
             {/* Left Side: Form Fields */}
             <div className="flex-[60%] pr-4 border-r border-gray-300">
+
                 <div className="grid grid-cols-2 gap-4">
                     <FloatingLabelInput name="title" label="Title" value={inputs.title} onChange={handleChange} required />
                     <FloatingLabelInput name="price" label="Price" value={formatNumber(inputs.price)} onChange={handleChange} required />
@@ -80,8 +318,8 @@ export default function AddProperty() {
                     >
                         <option value="" disabled>Select Property Type</option>
                         <option value="apartment" className="text-black">Apartment</option>
-                        <option value="building" className="text-black"> Building</option>
-                        <option value="flat" className="text-black">Flat</option>
+                        <option value="house" className="text-black"> House</option>
+                        <option value="land" className="text-black">Land</option>
                     </select>
 
                     <select
@@ -96,7 +334,7 @@ export default function AddProperty() {
                         <option value="rent" className="text-black">Rent</option>
                         <option value="sale" className="text-black">Sale</option>
                     </select>
-                    
+
                     <FloatingLabelInput name="size" type="number" label="Size (sq ft)" value={inputs.size} onChange={handleChange} required />
 
                     <select
@@ -121,13 +359,22 @@ export default function AddProperty() {
 
                     <textarea name="desc" placeholder="Description" value={inputs.desc} onChange={handleChange} className="col-span-2 h-20 p-2 border rounded border-gray-300"></textarea>
 
-                    <button className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300">Submit</button>
+                    {/* <button className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300">Submit</button> */}
+                    <button
+                        onClick={handleSubmit}
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300"
+                    >
+                        {isSubmitting ? "Submitting..." : "Submit"}
+                    </button>
                 </div>
+
             </div>
 
             {/* Right Side: Image Uploader & Map */}
             <div className="flex-[40%] pl-4">
-                <ImageUploader />
+                <ImageUploader onImagesUploaded={handleImagesUploaded} />
 
                 {/* Map Section */}
                 <div className="mt-4">

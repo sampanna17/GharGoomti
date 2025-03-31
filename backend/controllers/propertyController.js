@@ -1,6 +1,7 @@
 
 import db from '../config/db.js';
 import fs from 'fs';
+import cloudinary from '../config/cloudinary.js';
 import upload from '../config/multer.js';
 
 // Add a new property
@@ -68,20 +69,22 @@ export const deleteProperty = async (req, res) => {
     }
 };
 
-// Add an image to a property
+// Add image to property (Cloudinary)
 export const addPropertyImage = async (req, res) => {
     const { id } = req.params; // propertyID
 
-    // Check if file is uploaded
     if (!req.file) {
         return res.status(400).json({ message: 'Image file is required.' });
     }
 
-    // Construct the image URL from the uploaded file's path
-    const imageURL = `/uploads/images/${req.file.filename}`;
-
     try {
-        // Insert image into the database
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "property_images",
+        });
+
+        const imageURL = result.secure_url;
+
+        // Save image URL to database
         const query = 'INSERT INTO property_image (propertyID, imageURL) VALUES (?, ?)';
         await db.query(query, [id, imageURL]);
 
@@ -103,8 +106,8 @@ export const getPropertyImages = async (req, res) => {
     }
 };
 
-// Delete a property image from the server and the database
-export const deletePropertyImages = async (req, res) => {
+// Delete property image from Cloudinary and database
+export const deletePropertyImage = async (req, res) => {
     const { imageID } = req.body;
 
     try {
@@ -114,10 +117,13 @@ export const deletePropertyImages = async (req, res) => {
             return res.status(404).json({ message: 'Image not found.' });
         }
 
-        // Delete the image file from the server
-        const imagePath = `uploads/images/${result[0].imageURL.split('/').pop()}`;
-        fs.unlinkSync(imagePath);
+        const imageURL = result[0].imageURL;
+        const publicId = imageURL.split('/').pop().split('.')[0]; 
 
+        // Delete from Cloudinary
+        await cloudinary.uploader.destroy(`property_images/${publicId}`);
+
+        // Delete from Database
         await db.query('DELETE FROM property_image WHERE imageID = ?', [imageID]);
 
         res.status(200).json({ message: 'Image deleted successfully.' });

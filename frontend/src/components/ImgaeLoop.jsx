@@ -22,13 +22,17 @@ const images = [
 
 const ImageLoop = () => {
   return (
-    <div className="overflow-hidden relative bg-white py-6 w-full">
-      <div className="flex w-full
-       gap-5 whitespace-nowrap animate-scroll">
-        {Array.from({ length: 4 }).flatMap(() =>
+    <div className="overflow-hidden relative bg-white mt-4 py-6 w-full">
+      <div className="flex w-full gap-5 whitespace-nowrap animate-scroll">
+        {Array.from({ length: 4 }).flatMap((_, i) =>
           images.map((image, index) => (
-            <div key={index} className="flex-shrink-0">
-              <img src={image.src} alt={image.alt} className="h-12 mx-10 pointer-events-none" loading="lazy" />
+            <div key={`${image.alt}-${i}-${index}`} className="flex-shrink-0">
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="h-12 mx-10 pointer-events-none"
+                loading="lazy"
+              />
             </div>
           ))
         )}

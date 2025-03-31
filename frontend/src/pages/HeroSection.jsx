@@ -40,7 +40,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
-                        className="mt-6 text-[#1B4B40] text-lg font-medium"
+                        className="mt-8 text-[#1B4B40] text-lg font-medium"
                     >
                         We have more apartments, places & plots.
                     </motion.p>
@@ -48,7 +48,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
-                        className="text-[#1B4B40] text-5xl font-medium mt-4 mb-8"
+                        className="text-[#1B4B40] text-5xl font-medium mt-4 mb-14"
                     >
                         Find Your Perfect Home
                     </motion.h1>
