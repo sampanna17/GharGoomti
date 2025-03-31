@@ -51,6 +51,8 @@ export default function AddProperty() {
         petPolicy: "",
         size: "",
     });
+    const { user } = useContext(AuthContext);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleImagesUploaded = (newImages) => {
@@ -106,7 +108,6 @@ export default function AddProperty() {
             !hall ||
             !type ||
             !property ||
-
             !desc ||
             !petPolicy ||
             !size
@@ -116,7 +117,7 @@ export default function AddProperty() {
 
         // Validate price
         const parsedPrice = parseFloat(price);
-        if (isNaN(parsedPrice) || parseFloat <= 0) {
+        if (isNaN(parsedPrice) || parsedPrice <= 0) {
             return "Price must be a valid positive number.";
         }
 
@@ -133,45 +134,30 @@ export default function AddProperty() {
         }
 
         // Validate number of rooms
-        if (
-            isNaN(bedroom) ||
-            bedroom < 0 || bedroom > 25
-
-        ) {
+        if (isNaN(bedroom) || bedroom < 0 || bedroom > 25) {
             return "Please enter valid numbers for the bedroom.";
         }
 
-        if (
-            isNaN(bathroom) ||
-            bathroom < 0 || bathroom > 20
-        ) {
+        if (isNaN(bathroom) || bathroom < 0 || bathroom > 20) {
             return "Please enter valid numbers for bathrooms.";
         }
 
-        if (
-
-            isNaN(kitchen) ||
-            kitchen < 0 || kitchen > 5
-        ) {
+        if (isNaN(kitchen) || kitchen < 0 || kitchen > 5) {
             return "Please enter valid numbers for Kitchen.";
         }
 
-        if (
-            isNaN(hall) ||
-            hall < 0 ||
-            hall > 10
-        ) {
+        if (isNaN(hall) || hall < 0 || hall > 10) {
             return "Please enter valid numbers for Hall.";
         }
 
         // Validate property type
-        if (!["apartment", "house", "land"].includes(type)) {
-            return "Please select a valid property type.";
+        if (!["Apartment", "Building", "Fiat"].includes(type)) {
+            return "Please select a valid property type (Apartment, Building, Fiat).";
         }
 
         // Validate property for sale or rent
-        if (!["sale", "rent"].includes(property)) {
-            return "Please select a valid property for option.";
+        if (!["Rent", "Sale"].includes(property)) {
+            return "Please select either Rent or Sale.";
         }
 
         // Validate size
@@ -180,13 +166,13 @@ export default function AddProperty() {
         }
 
         // Validate pet policy
-        if (!["available", "unavailable"].includes(petPolicy)) {
+        if (!["Available", "Not Available"].includes(petPolicy)) {
             return "Please select a valid pet policy.";
         }
 
         // Validate image upload
         if (images.length === 0 || images.length < 3) {
-            return "Please upload at least 3 image.";
+            return "Please upload at least 3 images.";
         }
 
         // Validate description length
@@ -210,23 +196,24 @@ export default function AddProperty() {
         setIsSubmitting(true);
 
         try {
-            // Send property details
+            // Transform data to match backend expectations
             const propertyData = {
-                userID: 1,
+                userID: user.userID,
                 propertyTitle: inputs.title,
                 propertyPrice: inputs.price,
                 propertyAddress: inputs.address,
                 propertyCity: inputs.city,
-                bedrooms: inputs.bedroom,
-                bathrooms: inputs.bathroom,
-                kitchens: inputs.kitchen,
-                halls: inputs.hall,
+                bedrooms: parseInt(inputs.bedroom),
+                bathrooms: parseInt(inputs.bathroom),
+                kitchens: parseInt(inputs.kitchen),
+                halls: parseInt(inputs.hall),
                 propertyType: inputs.type,
                 propertyFor: inputs.property,
-                propertySize: inputs.size,
+                propertySize: parseInt(inputs.size),
                 petPolicy: inputs.petPolicy,
                 latitude: inputs.latitude,
                 longitude: inputs.longitude,
+                propertyDescription: inputs.desc
             };
 
             const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
@@ -270,15 +257,14 @@ export default function AddProperty() {
             }
         } catch (error) {
             console.error("Error adding property:", error);
-            toast.error("An error occurred while adding the property.");
+            const errorMessage = error.response?.data?.error || "An error occurred while adding the property.";
+            toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const { user } = useContext(AuthContext);
-
-    if (!user || user.userRole !== 'seller') {
+    if (!user || user.role !== 'seller') {
         return (
             <div className="flex flex-col items-center justify-center h-screen text-center">
                 <p className="text-red-600 text-lg font-semibold">
@@ -299,7 +285,6 @@ export default function AddProperty() {
             <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick />
             {/* Left Side: Form Fields */}
             <div className="flex-[60%] pr-4 border-r border-gray-300">
-
                 <div className="grid grid-cols-2 gap-4">
                     <FloatingLabelInput name="title" label="Title" value={inputs.title} onChange={handleChange} required />
                     <FloatingLabelInput name="price" label="Price" value={formatNumber(inputs.price)} onChange={handleChange} required />
@@ -317,9 +302,9 @@ export default function AddProperty() {
                         className={`p-2 border rounded border-gray-300 ${inputs.type === "" ? "text-gray-500" : "text-black"}`}
                     >
                         <option value="" disabled>Select Property Type</option>
-                        <option value="apartment" className="text-black">Apartment</option>
-                        <option value="house" className="text-black"> House</option>
-                        <option value="land" className="text-black">Land</option>
+                        <option value="Apartment" className="text-black">Apartment</option>
+                        <option value="Building" className="text-black">Building</option>
+                        <option value="Fiat" className="text-black">Fiat</option>
                     </select>
 
                     <select
@@ -328,11 +313,9 @@ export default function AddProperty() {
                         onChange={handleChange}
                         className={`p-2 border rounded border-gray-300 ${inputs.property === "" ? "text-gray-500" : "text-black"}`}
                     >
-                        <option value="" disabled>
-                            Select Property For
-                        </option>
-                        <option value="rent" className="text-black">Rent</option>
-                        <option value="sale" className="text-black">Sale</option>
+                        <option value="" disabled>Select Property For</option>
+                        <option value="Rent" className="text-black">Rent</option>
+                        <option value="Sale" className="text-black">Sale</option>
                     </select>
 
                     <FloatingLabelInput name="size" type="number" label="Size (sq ft)" value={inputs.size} onChange={handleChange} required />
@@ -343,15 +326,9 @@ export default function AddProperty() {
                         onChange={handleChange}
                         className={`p-2 border rounded border-gray-300 ${inputs.petPolicy === "" ? "text-gray-500" : "text-black"}`}
                     >
-                        <option value="" disabled>
-                            Pet Policy
-                        </option>
-                        <option value="available" className="text-black">
-                            Available
-                        </option>
-                        <option value="unavailable" className="text-black">
-                            Not Available
-                        </option>
+                        <option value="" disabled>Pet Policy</option>
+                        <option value="Available" className="text-black">Available</option>
+                        <option value="Not Available" className="text-black">Not Available</option>
                     </select>
 
                     <FloatingLabelInput name="latitude" label="Latitude" value={inputs.latitude} onChange={handleChange} required />
@@ -359,7 +336,6 @@ export default function AddProperty() {
 
                     <textarea name="desc" placeholder="Description" value={inputs.desc} onChange={handleChange} className="col-span-2 h-20 p-2 border rounded border-gray-300"></textarea>
 
-                    {/* <button className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300">Submit</button> */}
                     <button
                         onClick={handleSubmit}
                         type="submit"
@@ -369,7 +345,6 @@ export default function AddProperty() {
                         {isSubmitting ? "Submitting..." : "Submit"}
                     </button>
                 </div>
-
             </div>
 
             {/* Right Side: Image Uploader & Map */}

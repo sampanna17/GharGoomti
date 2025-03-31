@@ -6,29 +6,110 @@ import upload from '../config/multer.js';
 
 // Add a new property
 export const addProperty = async (req, res) => {
-    const { userID, propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType, propertyFor, propertySize, petPolicy, latitude, longitude } = req.body;
-
-    // Check if all required fields are provided
-    if (!userID || !propertyTitle || !propertyPrice || !propertyAddress || !propertyCity || !bedrooms || !bathrooms || !kitchens || !halls || !propertyType || !propertyFor || !propertySize || !petPolicy || !latitude || !longitude) {
-        return res.status(400).json({ message: 'All fields are required.' });
-    }
-
     try {
-        // Insert property into the database
-        const query = `
-            INSERT INTO property (userID, propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType, propertyFor, propertySize, petPolicy, latitude, longitude, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW());
+        const {
+            userID,
+            propertyTitle,
+            propertyPrice,
+            propertyAddress,
+            propertyCity,
+            bedrooms,
+            bathrooms,
+            kitchens,
+            halls,
+            propertyType,
+            propertyFor,
+            propertySize,
+            petPolicy,
+            latitude,
+            longitude
+        } = req.body;
 
+        // Validate required fields
+        if (!userID || !propertyTitle || !propertyPrice || !propertyAddress || !propertyCity) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Validate enum values
+        const validPropertyTypes = ['Apartment', 'Building', 'Fiat'];
+        const validPropertyFor = ['Rent', 'Sale'];
+        const validPetPolicies = ['Available', 'Not Available'];
+
+        if (!validPropertyTypes.includes(propertyType)) {
+            return res.status(400).json({ error: 'Invalid property type' });
+        }
+
+        if (!validPropertyFor.includes(propertyFor)) {
+            return res.status(400).json({ error: 'Invalid property for value' });
+        }
+
+        if (!validPetPolicies.includes(petPolicy)) {
+            return res.status(400).json({ error: 'Invalid pet policy' });
+        }
+
+        // Convert numeric fields to integers
+        const numericFields = {
+            bedrooms: parseInt(bedrooms),
+            bathrooms: parseInt(bathrooms),
+            kitchens: parseInt(kitchens),
+            halls: parseInt(halls),
+            propertySize: parseInt(propertySize)
+        };
+
+        // Check if numeric fields are valid
+        for (const [field, value] of Object.entries(numericFields)) {
+            if (isNaN(value)) {
+                return res.status(400).json({ error: `${field} must be a valid number` });
+            }
+        }
+
+        // Create the property in the database
+        const query = `
+            INSERT INTO property (
+                userID,
+                propertyTitle,
+                propertyPrice,
+                propertyAddress,
+                propertyCity,
+                bedrooms,
+                bathrooms,
+                kitchens,
+                halls,
+                propertyType,
+                propertyFor,
+                propertySize,
+                petPolicy,
+                latitude,
+                longitude
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result] = await db.query(query, [
-            userID, propertyTitle, propertyPrice, propertyAddress, propertyCity, 
-            bedrooms, bathrooms, kitchens, halls, propertyType, 
-            propertyFor, propertySize, petPolicy, latitude, longitude
+
+        const [result] = await db.execute(query, [
+            userID,
+            propertyTitle,
+            propertyPrice,
+            propertyAddress,
+            propertyCity,
+            numericFields.bedrooms,
+            numericFields.bathrooms,
+            numericFields.kitchens,
+            numericFields.halls,
+            propertyType,
+            propertyFor,
+            numericFields.propertySize,
+            petPolicy,
+            latitude,
+            longitude
         ]);
 
-        res.status(201).json({ message: 'Property added successfully.', propertyID: result.insertId });
+        res.status(201).json({
+            message: 'Property added successfully',
+            propertyID: result.insertId
+        });
+
     } catch (error) {
-        res.status(500).json({ message: 'Error adding property.', error });
+        console.error('Error adding property:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -72,27 +153,85 @@ export const deleteProperty = async (req, res) => {
 // Add image to property (Cloudinary)
 export const addPropertyImage = async (req, res) => {
     const { id } = req.params; // propertyID
-
-    if (!req.file) {
-        return res.status(400).json({ message: 'Image file is required.' });
-    }
-
+    
     try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: "property_images",
+        // 1. Validate property exists
+        const [property] = await db.query('SELECT propertyID FROM property WHERE propertyID = ?', [id]);
+        if (!property) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Property not found' 
+            });
+        }
+
+        // 2. Check current image count
+        const [imageCount] = await db.query(
+            'SELECT COUNT(*) AS count FROM property_image WHERE propertyID = ?', 
+            [id]
+        );
+        
+        if (imageCount[0].count >= 6) {
+            return res.status(400).json({
+                success: false,
+                message: 'Maximum of 6 images allowed per property'
+            });
+        }
+
+        // 3. Validate file was uploaded
+        if (!req.files || !req.files.image) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No file was uploaded' 
+            });
+        }
+
+        const { image } = req.files;
+
+        // 4. Upload to Cloudinary (accepts all file types)
+        const result = await cloudinary.uploader.upload(image.path, {
+            folder: "property_files",
+            resource_type: "auto" // Automatically detects file type
         });
 
-        const imageURL = result.secure_url;
-
-        // Save image URL to database
+        // 5. Save to database
         const query = 'INSERT INTO property_image (propertyID, imageURL) VALUES (?, ?)';
-        await db.query(query, [id, imageURL]);
+        const [dbResult] = await db.query(query, [id, result.secure_url]);
 
-        res.status(201).json({ message: 'Image added to property.', imageURL });
+        // 6. Success response
+        res.status(201).json({ 
+            success: true,
+            message: 'File uploaded successfully',
+            data: {
+                fileID: dbResult.insertId,
+                fileURL: result.secure_url,
+                fileType: result.resource_type, // 'image', 'video', 'raw', etc.
+                currentImageCount: imageCount[0].count + 1,
+                maxImagesAllowed: 6
+            }
+        });
+
     } catch (error) {
-        res.status(500).json({ message: 'Error adding image to property.', error });
+        console.error('File upload error:', error);
+        
+        // Cloudinary-specific errors
+        if (error.http_code) {
+            return res.status(error.http_code).json({
+                success: false,
+                message: 'File upload failed',
+                error: error.message
+            });
+        }
+
+        // Generic server error
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
+
+
 
 // Get all images for a property
 export const getPropertyImages = async (req, res) => {

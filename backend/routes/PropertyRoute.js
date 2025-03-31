@@ -2,7 +2,7 @@ import express from 'express';
 import upload from '../config/multer.js';
 import { addProperty, addPropertyImage, deleteProperty, deletePropertyImage, getProperties, getPropertyById, getPropertyImages } from '../controllers/propertyController.js';
 import { bookmarkProperty, getBookmarks, removeBookmarks } from '../controllers/bookmarkController.js';
-
+import formidable from 'express-formidable';
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ router.get('/property/:id', getPropertyById);
 router.delete('/property/:id', deleteProperty); 
 
 // Property image routes
-router.post('/property/:id/images', upload.single('image'), addPropertyImage);
+router.post('/property/:id/images', formidable(), addPropertyImage);
 router.get('/property/:id/images', getPropertyImages); 
 router.delete('/property/image', deletePropertyImage);
 
