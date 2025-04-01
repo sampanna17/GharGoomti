@@ -47,9 +47,9 @@ export default function AddProperty() {
         type: "",
         property: "",
         images: [],
-        desc: "",
         petPolicy: "",
         size: "",
+        description: "",
     });
     const { user } = useContext(AuthContext);
 
@@ -89,9 +89,9 @@ export default function AddProperty() {
             type,
             property,
             images,
-            desc,
             petPolicy,
             size,
+            description,
         } = inputs;
 
         // Check if all fields are filled
@@ -108,7 +108,7 @@ export default function AddProperty() {
             !hall ||
             !type ||
             !property ||
-            !desc ||
+            !description ||
             !petPolicy ||
             !size
         ) {
@@ -151,8 +151,8 @@ export default function AddProperty() {
         }
 
         // Validate property type
-        if (!["Apartment", "Building", "Fiat"].includes(type)) {
-            return "Please select a valid property type (Apartment, Building, Fiat).";
+        if (!["Apartment", "Building", "Flat"].includes(type)) {
+            return "Please select a valid property type (Apartment, Building, Flat).";
         }
 
         // Validate property for sale or rent
@@ -176,7 +176,7 @@ export default function AddProperty() {
         }
 
         // Validate description length
-        if (desc.length < 10) {
+        if (description.length < 10) {
             return "Description must be at least 10 characters long.";
         }
 
@@ -213,7 +213,7 @@ export default function AddProperty() {
                 petPolicy: inputs.petPolicy,
                 latitude: inputs.latitude,
                 longitude: inputs.longitude,
-                propertyDescription: inputs.desc
+                description: inputs.description
             };
 
             const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
@@ -248,7 +248,7 @@ export default function AddProperty() {
                     type: "",
                     property: "",
                     images: [],
-                    desc: "",
+                    description: "",
                     petPolicy: "",
                     size: "",
                 });
@@ -304,7 +304,7 @@ export default function AddProperty() {
                         <option value="" disabled>Select Property Type</option>
                         <option value="Apartment" className="text-black">Apartment</option>
                         <option value="Building" className="text-black">Building</option>
-                        <option value="Fiat" className="text-black">Fiat</option>
+                        <option value="Flat" className="text-black">Flat</option>
                     </select>
 
                     <select
@@ -334,7 +334,7 @@ export default function AddProperty() {
                     <FloatingLabelInput name="latitude" label="Latitude" value={inputs.latitude} onChange={handleChange} required />
                     <FloatingLabelInput name="longitude" label="Longitude" value={inputs.longitude} onChange={handleChange} required />
 
-                    <textarea name="desc" placeholder="Description" value={inputs.desc} onChange={handleChange} className="col-span-2 h-20 p-2 border rounded border-gray-300"></textarea>
+                    <textarea name="description" placeholder="Description" value={inputs.description} onChange={handleChange} className="col-span-2 h-20 p-2 border rounded border-gray-300"></textarea>
 
                     <button
                         onClick={handleSubmit}

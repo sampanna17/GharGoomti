@@ -22,7 +22,8 @@ export const addProperty = async (req, res) => {
             propertySize,
             petPolicy,
             latitude,
-            longitude
+            longitude,
+            description
         } = req.body;
 
         // Validate required fields
@@ -80,8 +81,9 @@ export const addProperty = async (req, res) => {
                 propertySize,
                 petPolicy,
                 latitude,
-                longitude
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                longitude,
+                description
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
         `;
 
         const [result] = await db.execute(query, [
@@ -99,7 +101,8 @@ export const addProperty = async (req, res) => {
             numericFields.propertySize,
             petPolicy,
             latitude,
-            longitude
+            longitude,
+            description
         ]);
 
         res.status(201).json({
@@ -116,7 +119,7 @@ export const addProperty = async (req, res) => {
 // Get all properties
 export const getProperties = async (req, res) => {
     try {
-        const [properties] = await db.query('SELECT * FROM property');
+        const [properties] = await db.query('SELECT * FROM property JOIN property_image ON property.propertyID = property_image.propertyID');
         res.status(200).json(properties);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching properties.', error });
