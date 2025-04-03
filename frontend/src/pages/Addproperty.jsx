@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from '../context/AuthContext';
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -6,6 +7,7 @@ import FloatingLabelInput from "../components/FloatingLabel";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import ImageUploader from "../components/ImageUploader";
+import Cookies from 'js-cookie';
 
 const formatNumber = (value) => {
     if (!value) return "";
@@ -52,6 +54,55 @@ export default function AddProperty() {
         description: "",
     });
     const { user } = useContext(AuthContext);
+
+    const navigate = useNavigate();
+    const [authStatus, setAuthStatus] = useState({
+        isLoggedIn: false,
+        isSeller: false,
+        isLoading: true
+    });
+
+    useEffect(() => {
+        const checkAuth = () => {
+            const userData = Cookies.get('user_data');
+
+            if (!userData) {
+                // User not logged in
+                setAuthStatus({
+                    isLoggedIn: false,
+                    isSeller: false,
+                    isLoading: false
+                });
+                return;
+            }
+
+            try {
+                const parsedUser = JSON.parse(userData);
+                const sellerStatus = parsedUser?.role === 'seller';
+
+                setAuthStatus({
+                    isLoggedIn: true,
+                    isSeller: sellerStatus,
+                    isLoading: false
+                });
+
+                if (!sellerStatus) {
+                    toast.error("You need seller privileges to access this page");
+                }
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                setAuthStatus({
+                    isLoggedIn: false,
+                    isSeller: false,
+                    isLoading: false
+                });
+                toast.error("Invalid session data");
+            }
+        };
+
+        checkAuth();
+    }, []);
+
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -196,7 +247,6 @@ export default function AddProperty() {
         setIsSubmitting(true);
 
         try {
-            // Transform data to match backend expectations
             const propertyData = {
                 userID: user.userID,
                 propertyTitle: inputs.title,
@@ -264,7 +314,23 @@ export default function AddProperty() {
         }
     };
 
-    if (!user || user.role !== 'seller') {
+    if (!authStatus.isLoggedIn) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen text-center">
+                <p className="text-red-600 text-lg font-semibold mb-4">
+                    You need to login to access this page
+                </p>
+                <button
+                    onClick={() => navigate('/login')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                    Login Now
+                </button>
+            </div>
+        );
+    }
+
+    if (!authStatus.isSeller) {
         return (
             <div className="flex flex-col items-center justify-center h-screen text-center">
                 <p className="text-red-600 text-lg font-semibold">

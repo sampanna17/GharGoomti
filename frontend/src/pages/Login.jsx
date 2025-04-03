@@ -51,9 +51,8 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      const { user, token } = res.data;
+      const { user } = res.data;
 
-      Cookies.set('auth_token', token, { expires: 1, secure: true, sameSite: 'Strict' });
       Cookies.set("user_data", JSON.stringify(user), { expires: 1, secure: true, sameSite: "Strict" });
       const userDataString = Cookies.get('user_data');
       const userData = JSON.parse(userDataString);

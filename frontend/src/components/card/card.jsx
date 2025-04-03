@@ -13,9 +13,9 @@ function Card({ item }) {
   return (
     <div className="card">
       <Link to={`/${item?.propertyID}`} className="imageContainer">
-        <img 
-          src={item?.images?.[0]?.imageURL || "placeholder-image.jpg"} 
-          alt={item?.propertyTitle} 
+        <img
+          src={item?.images?.[0]?.imageURL || "placeholder-image.jpg"}
+          alt={item?.propertyTitle}
         />
       </Link>
       <div className="textContainer">
@@ -26,7 +26,10 @@ function Card({ item }) {
           <img src={Pin} alt="" />
           <span>{item?.propertyAddress}, {item?.propertyCity}</span>
         </p>
-        <p className="price">$ {item?.propertyPrice}</p>
+        <p className="price">
+          $ {item?.propertyPrice}
+          {item?.propertyFor === 'Rent' && ' /month'}
+        </p>
         <div className="bottom">
           <div className="features">
             <div className="feature">

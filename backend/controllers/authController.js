@@ -251,6 +251,8 @@ export const signOut = async (req, res, next) => {
   try {
     req.session.destroy((err) => {
       if (err) return res.status(500).json({ message: "Logout failed" });
+      res.clearCookie('user_data');
+      res.clearCookie('auth_token');
       res.clearCookie("connect.sid"); // Remove session cookie
       res.json({ message: "Logged out successfully" });
   });

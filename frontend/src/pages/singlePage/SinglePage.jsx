@@ -33,7 +33,20 @@ function SinglePage() {
 
     const [property, setProperty] = useState(null)
     const [pImage, setPImage] = useState(null)
+    const [user, setUser] = useState(null);
+
     useEffect(() => {
+
+
+        const getUserDetails = async () => {
+            try {
+                const res = await axios.get(`http://localhost:8000/api/property/${id}/user`);
+                setUser(res.data);
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            }
+        };
+
         const getsingleproperty = async () => {
             const res = await axios.get(`http://localhost:8000/api/property/${id}`)
             setProperty(res.data);
@@ -47,8 +60,9 @@ function SinglePage() {
 
         getsingleproperty();
         getallimages();
+        getUserDetails();
 
-    }, [])
+    }, [id])
 
     const [saved, setSaved] = useState(false);
     const [visitDate, setVisitDate] = useState("");
@@ -85,12 +99,23 @@ function SinglePage() {
                                     <img src={Pin} alt="Pin" />
                                     <span>{property?.propertyAddress}</span>
                                 </div>
-                                <div className="price">NPR. <NumberFormat value={property?.propertyPrice} /> </div>
+                                <div className="price">
+                                    NPR. <NumberFormat value={property?.propertyPrice} />
+                                    {property?.propertyFor === 'Rent' && ' /month'}
+                                </div>
                             </div>
                             <div className="user">
-                                <img src={post.user.avatar} alt="" />
-                                <span>{post.user.username}</span>
-                                <p>Contact : +977- 9864034456</p>
+                                {user ? (
+                                    <>
+                                        <div className="avatar-placeholder">
+                                            {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                                        </div>
+                                        <span>Seller: {user.fullName}</span>
+                                        <p>Contact: {user.contact}</p>
+                                    </>
+                                ) : (
+                                    <p>Loading user information...</p>
+                                )}
                             </div>
                         </div>
                         <div

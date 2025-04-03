@@ -155,10 +155,10 @@ export const deleteProperty = async (req, res) => {
 
 // Add image to property (Cloudinary)
 export const addPropertyImage = async (req, res) => {
-    const { id } = req.params; // propertyID
+    const { id } = req.params; 
     
     try {
-        // 1. Validate property exists
+
         const [property] = await db.query('SELECT propertyID FROM property WHERE propertyID = ?', [id]);
         if (!property) {
             return res.status(404).json({ 
@@ -167,7 +167,6 @@ export const addPropertyImage = async (req, res) => {
             });
         }
 
-        // 2. Check current image count
         const [imageCount] = await db.query(
             'SELECT COUNT(*) AS count FROM property_image WHERE propertyID = ?', 
             [id]
@@ -271,5 +270,39 @@ export const deletePropertyImage = async (req, res) => {
         res.status(200).json({ message: 'Image deleted successfully.' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting image.', error });
+    }
+};
+
+export const getPropertyUser = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = `
+            SELECT 
+                u.userID,
+                u.userFirstName,
+                u.userLastName,
+                u.userContact
+            FROM property p
+            JOIN users u ON p.userID = u.userID
+            WHERE p.propertyID = ?
+        `;
+
+        const [user] = await db.query(query, [id]);
+        
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'User not found for this property.' });
+        }
+
+        res.status(200).json({
+            firstName: user[0].userFirstName,
+            lastName: user[0].userLastName,
+            contact: user[0].userContact,
+            fullName: `${user[0].userFirstName} ${user[0].userLastName}`
+        });
+
+    } catch (error) {
+        console.error('Error fetching property user:', error);
+        res.status(500).json({ message: 'Error fetching property user.', error });
     }
 };

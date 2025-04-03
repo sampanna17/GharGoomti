@@ -2,22 +2,22 @@ import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
-const ProtectedRoute = ({ element: Element, allowedRoles }) => {
-  const { user, loading } = useContext(AuthContext);
+ const ProtectedRoute = ({ children, requiredRole }) => {
+  const { user, loading, hasRole } = useContext(AuthContext);
 
   if (loading) {
-    return <div>Loading...</div>;
+      return <div>Loading...</div>;
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+      return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(user.role)) {
-    return <div>You are not a seller. Request admin to be a seller.</div>;  
+  if (requiredRole && !hasRole(requiredRole)) {
+      return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Element />;
+  return children;
 };
 
-export default ProtectedRoute;
+export default ProtectedRoute; 
