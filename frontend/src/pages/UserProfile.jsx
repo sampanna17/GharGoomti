@@ -24,7 +24,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const userId = JSON.parse(localStorage.getItem("user"))?.id; // Get user ID from local storage
+        const userId = JSON.parse(localStorage.getItem("user"))?.id; 
         if (!userId) return;
         
         const response = await axios.get(`http://localhost:8000/api/auth/users/${userId}`);
@@ -44,7 +44,6 @@ const UserProfile = () => {
 
   const handleLogout = async () => {
     try {
-      // Call your backend logout API
       const response = await fetch('http://localhost:8000/api/auth/signout', {
         method: 'POST',
         credentials: 'include',
@@ -99,7 +98,6 @@ const UserProfile = () => {
 
     window.addEventListener("storage", handleStorageChange);
 
-    // Cleanup on component unmount
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
@@ -108,11 +106,10 @@ const UserProfile = () => {
   console.log("isLoggedIn state:", isLoggedIn);
 
   const [appointments, setAppointments] = useState([
-    { id: 1, date: "2025-04-10", property: "3BHK Apartment, Kathmandu" },
+    {},
   ]);
   const [listings, setListings] = useState([
-    { id: 1, title: "Luxury Villa in Pokhara" },
-    { id: 2, title: "Modern Apartment in Lalitpur" },
+    {  },
   ]);
 
   const deleteAppointment = (id) => {

@@ -4,7 +4,6 @@ import NumberFormat from "../../components/FormatNumber";
 import Map from "../../components/Map";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import DOMPurify from "dompurify";
 import Pin from "../../assets/SinglePage/pin.png";
 import Pet from "../../assets/SinglePage/animal.png";
 import Area from "../../assets/SinglePage/wide.png";
@@ -19,51 +18,28 @@ import Bookmark from "../../assets/SinglePage/bookmark.png";
 import Calendar from "../../assets/SinglePage/calendar.png";
 import PropertyFor from "../../assets/SinglePage/property-for.png";
 import PropertyType from "../../assets/SinglePage/property-type.png";
-import one from "../../assets/demo/1.jpg";
-import two from "../../assets/demo/2.jpg";
-import three from "../../assets/demo/3.jpg";
-import four from "../../assets/demo/4.png";
-import five from "../../assets/demo/5.jpg";
-import six from "../../assets/demo/6.jpg";
 import axios from 'axios';
 
 function SinglePage() {
     const post = {
-        title: "Luxury Apartment in the City Center",
-        address: "123 Main St, Kathmandu, Nepal",
-        price: 120000,
-        images: [one, two, three, four,five,six],
         user: {
             avatar: "user-avatar.jpg",
             username: "Sampanna"
         },
-        postDetail: {
-            desc: "<p>This is a beautiful apartment with modern amenities Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis ullam totam labore unde minima voluptatibus illo, quia quidem iusto vel! Expedita odit ducimus doloremque sit hic ut doloribus ipsum! Id?</p>",
-            longitude: 123,
-            latitude: 123,
-            pet: "allowed",
-            income: "Minimum $5000/month",
-            size: 1200,
-            school: 500,
-            bus: 200,
-            restaurant: 300
-        },
-        bedroom: 3,
-        bathroom: 2,
         isSaved: false
     };
 
-    const {id} = useParams();
+    const { id } = useParams();
 
     const [property, setProperty] = useState(null)
     const [pImage, setPImage] = useState(null)
     useEffect(() => {
-        const getsingleproperty = async() =>{
+        const getsingleproperty = async () => {
             const res = await axios.get(`http://localhost:8000/api/property/${id}`)
             setProperty(res.data);
         }
 
-        const getallimages = async() =>{
+        const getallimages = async () => {
             const res = await axios.get(`http://localhost:8000/api/property/${id}/images`)
             console.log(res.data);
             setPImage(res.data);
@@ -72,23 +48,23 @@ function SinglePage() {
         getsingleproperty();
         getallimages();
 
-    },[])
+    }, [])
 
     const [saved, setSaved] = useState(false);
-    const [visitDate, setVisitDate] = useState(""); 
+    const [visitDate, setVisitDate] = useState("");
 
     const handleSave = () => {
         setSaved((prev) => !prev);
     };
 
     const handleDateChange = (event) => {
-        setVisitDate(event.target.value); 
+        setVisitDate(event.target.value);
     };
 
     const handleBookVisit = () => {
         if (visitDate) {
             alert(`Visit booked for: ${visitDate}`);
-            setVisitDate(""); 
+            setVisitDate("");
         } else {
             alert("Please select a visit date.");
         }
@@ -100,8 +76,8 @@ function SinglePage() {
         <div className="singlePage mt-32 mb-5 mx-auto px-4">
             <div className="details">
                 <div className="wrapper">
-                        <Slider images={pImage} />
-                        <div className="info">
+                    <Slider images={pImage} />
+                    <div className="info">
                         <div className="top">
                             <div className="post">
                                 <h1>{property?.propertyTitle}</h1>
@@ -119,7 +95,7 @@ function SinglePage() {
                         </div>
                         <div
                             className="bottom"
-                            
+
                         >{property?.description}</div>
                     </div>
                 </div>
@@ -197,8 +173,10 @@ function SinglePage() {
                         </div>
                     </div>
                     <p className="title">Location</p>
-                    <div className="mapContainer">
-                        <Map items={[post]} />
+                    <div className="">
+                        <div className="mapContainer p-0">
+                            {property && <Map items={[property]} />}
+                        </div>
                     </div>
                     <div className="buttons">
                         <button>

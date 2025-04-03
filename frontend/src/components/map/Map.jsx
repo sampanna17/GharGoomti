@@ -18,7 +18,8 @@ function Map({ items }) {
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
       {items.map((item) => (
-        <Pin item={item} key={item.id} />
+        // <Pin item={item} key={item.id} />
+        <Pin item={item} key={item.propertyID || item.id} />
       ))}
     </MapContainer>
   );
