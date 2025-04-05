@@ -1,7 +1,6 @@
 import express from 'express';
-import upload from '../config/multer.js';
 import { addProperty, addPropertyImage, deleteProperty, deletePropertyImage, getProperties, getPropertyById, getPropertyImages, getPropertyUser } from '../controllers/propertyController.js';
-import { bookmarkProperty, getBookmarks, removeBookmarks } from '../controllers/bookmarkController.js';
+import { bookmarkProperty, checkBookmarkStatus, getBookmarks, removeBookmarks } from '../controllers/bookmarkController.js';
 import formidable from 'express-formidable';
 
 const router = express.Router();
@@ -20,8 +19,8 @@ router.delete('/property/image', deletePropertyImage);
 // Routes for bookmarks
 router.post('/bookmark',bookmarkProperty)
 router.delete('/bookmark', removeBookmarks); 
-router.get('/bookmark/:userId', getBookmarks);
-
+router.get('/bookmark/:userID', getBookmarks);
+router.get('/bookmark/check/:userID/:propertyID', checkBookmarkStatus);
 
 // Routes for user proerty
 router.get('/property/:id/user', getPropertyUser);

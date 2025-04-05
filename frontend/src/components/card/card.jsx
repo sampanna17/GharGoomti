@@ -8,8 +8,18 @@ import Beds from "../../assets/SinglePage/bedroom.png";
 import Pin from "../../assets/SinglePage/pin.png";
 import Chat from "../../assets/SinglePage/chat.png";
 import Bookmark from "../../assets/SinglePage/bookmark.png";
+import BookmarkFIlled from "../../assets/bookmarkfilled.png";
 
-function Card({ item }) {
+function Card({ item, onBookmark, isBookmarked }) {
+
+  const handleBookmarkClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onBookmark) {
+      onBookmark(item.propertyID);
+    }
+  };
+
   return (
     <div className="card">
       <Link to={`/${item?.propertyID}`} className="imageContainer">
@@ -27,7 +37,7 @@ function Card({ item }) {
           <span>{item?.propertyAddress}, {item?.propertyCity}</span>
         </p>
         <p className="price">
-          $ {item?.propertyPrice}
+          NPR. {item?.propertyPrice}
           {item?.propertyFor === 'Rent' && ' /month'}
         </p>
         <div className="bottom">
@@ -42,8 +52,12 @@ function Card({ item }) {
             </div>
           </div>
           <div className="icons">
-            <div className="icon">
-              <img src={Bookmark} alt="Bookmark" />
+             <div className="icon" onClick={handleBookmarkClick}>
+             <img 
+                src={isBookmarked ? BookmarkFIlled : Bookmark} 
+                alt="Bookmark" 
+                className={isBookmarked ? "bookmarked" : ""}
+              />
             </div>
             <div className="icon">
               <img src={Chat} alt="Chat" />

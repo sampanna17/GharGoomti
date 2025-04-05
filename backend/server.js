@@ -26,8 +26,8 @@ app.use(
 app.use(
     cors({
         origin: "http://localhost:5173", // Frontend URL
-        methods: ["GET", "POST"],
-        credentials: true, // Allow cookies to be sent with the request
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true,
     })
 );
 
@@ -35,7 +35,8 @@ app.use(bodyParser.json());
 
 app.use('/api/auth', authroute);
 app.use('/api/user', userRoute);
-app.use('/api', propertyroute)
+app.use('/api', propertyroute);
+
 const PORT = 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

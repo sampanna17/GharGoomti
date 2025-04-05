@@ -18,25 +18,22 @@ import Bookmark from "../../assets/SinglePage/bookmark.png";
 import Calendar from "../../assets/SinglePage/calendar.png";
 import PropertyFor from "../../assets/SinglePage/property-for.png";
 import PropertyType from "../../assets/SinglePage/property-type.png";
+import BookmarkFilled from "../../assets/bookmarkfilled.png";
 import axios from 'axios';
+import Cookies from 'js-cookie';
+import { toast } from "react-toastify";
 
 function SinglePage() {
-    const post = {
-        user: {
-            avatar: "user-avatar.jpg",
-            username: "Sampanna"
-        },
-        isSaved: false
-    };
 
     const { id } = useParams();
 
     const [property, setProperty] = useState(null)
     const [pImage, setPImage] = useState(null)
     const [user, setUser] = useState(null);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const userData = Cookies.get('user_data') ? JSON.parse(Cookies.get('user_data')) : null;
 
     useEffect(() => {
-
 
         const getUserDetails = async () => {
             try {
@@ -58,19 +55,61 @@ function SinglePage() {
             setPImage(res.data);
         }
 
+        const checkBookmarkStatus = async () => {
+            if (userData?.userID) {
+                try {
+                    const response = await axios.get(
+                        `http://localhost:8000/api/bookmark/check/${userData.userID}/${id}`
+                    );
+                    setIsBookmarked(response.data.isBookmarked);
+                } catch (error) {
+                    console.error("Error checking bookmark status:", error);
+                }
+            }
+        };
+
+        checkBookmarkStatus();
+
         getsingleproperty();
         getallimages();
         getUserDetails();
 
-    }, [id])
+    }, [id, userData])
 
-    const [saved, setSaved] = useState(false);
     const [visitDate, setVisitDate] = useState("");
 
-    const handleSave = () => {
-        setSaved((prev) => !prev);
+    const handleSave = async () => {
+        if (!userData?.userID) {
+            toast.error("Please login to bookmark properties");
+            return;
+        }
+    
+        try {
+            if (isBookmarked) {
+                // Remove bookmark
+                await axios.delete("http://localhost:8000/api/bookmark", {
+                    data: {
+                        userID: userData.userID,
+                        propertyID: id
+                    }   
+                });
+                setIsBookmarked(false);
+                toast.success("Bookmark removed successfully!");
+            } else {
+                // Add bookmark
+                await axios.post(
+                    "http://localhost:8000/api/bookmark",
+                    { userID: userData.userID, propertyID: id },
+                );
+                setIsBookmarked(true);
+                toast.success("Property bookmarked successfully!");
+            }
+        } catch (error) {
+            console.error("Error updating bookmark:", error);
+            toast.error("Failed to update bookmark");
+        }
     };
-
+    
     const handleDateChange = (event) => {
         setVisitDate(event.target.value);
     };
@@ -83,8 +122,6 @@ function SinglePage() {
             alert("Please select a visit date.");
         }
     };
-
-    console.log(pImage);
 
     return (
         <div className="singlePage mt-32 mb-5 mx-auto px-4">
@@ -211,13 +248,16 @@ function SinglePage() {
 
                         <button
                             onClick={handleSave}
-                            style={{ backgroundColor: saved ? "#fece51" : "white" }}
+                            style={{ backgroundColor: isBookmarked  ? "#fece51" : "white" }}
                             className="w-48 flex items-center justify-center gap-x-2 py-2 rounded-md"
                         >
-                            <img src={Bookmark} alt="Bookmark" className="w-5 h-5" />
-                            {saved ? "Place Saved" : "Save the Place"}
+                            <img
+                                src={isBookmarked  ? BookmarkFilled : Bookmark}
+                                alt="Bookmark"
+                                className="w-5 h-5"
+                            />
+                            {isBookmarked ? "Property saved" : "Save the Place"}
                         </button>
-
                     </div>
                     <div className="flex items-center justify-center gap-5 border border-gray-300 rounded-lg p-2 bg-white ">
                         <div className="relative flex items-center">
