@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'; // Import bcrypt for password hashing
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import cloudinary from '../config/cloudinary.js';
 
 dotenv.config();
 
@@ -96,6 +97,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
 export const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -123,9 +125,9 @@ export const verifyEmail = async (req, res) => {
     await db.query("UPDATE users SET otp = NULL WHERE userEmail = ?", [email]);
 
     // Return success response with user data
-    res.status(200).json({ 
-      message: "Email verified successfully!", 
-      user: { email } 
+    res.status(200).json({
+      message: "Email verified successfully!",
+      user: { email }
     });
   } catch (error) {
     console.error("Error verifying OTP:", error);
@@ -166,7 +168,7 @@ export const signin = async (req, res) => {
     });
 
     const refreshToken = jwt.sign({ id: validUser.id }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: rememberMe ? "30d" : "1d", 
+      expiresIn: rememberMe ? "30d" : "1d",
     });
 
     // Store access token 
@@ -181,7 +183,7 @@ export const signin = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000, 
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
     });
 
     const { password: hashedPassword, ...userDetails } = validUser;
@@ -239,7 +241,7 @@ export const google = async (req, res) => {
     res.status(200).json({
       message: "Google sign-in successful!",
       user: userDetails,
-      token, 
+      token,
     });
   } catch (error) {
     console.error("Error during Google sign-in:", error);
@@ -255,7 +257,7 @@ export const signOut = async (req, res, next) => {
       res.clearCookie('auth_token');
       res.clearCookie("connect.sid"); // Remove session cookie
       res.json({ message: "Logged out successfully" });
-  });
+    });
   } catch (error) {
     next(error);
   }
@@ -332,7 +334,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-const NumSaltRounds = 10; 
+const NumSaltRounds = 10;
 export const resetPassword = async (req, res) => {
   try {
     const { userID, password, reset_password_token } = req.body;

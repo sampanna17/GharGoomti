@@ -1,8 +1,6 @@
 
 import db from '../config/db.js';
-import fs from 'fs';
 import cloudinary from '../config/cloudinary.js';
-import upload from '../config/multer.js';
 
 // Add a new property
 export const addProperty = async (req, res) => {
@@ -32,7 +30,7 @@ export const addProperty = async (req, res) => {
         }
 
         // Validate enum values
-        const validPropertyTypes = ['Apartment', 'Building', 'Fiat'];
+        const validPropertyTypes = ['Apartment', 'Building', 'Flat'];
         const validPropertyFor = ['Rent', 'Sale'];
         const validPetPolicies = ['Available', 'Not Available'];
 
@@ -153,7 +151,7 @@ export const deleteProperty = async (req, res) => {
     }
 };
 
-// Add image to property (Cloudinary)
+// Add image to property 
 export const addPropertyImage = async (req, res) => {
     const { id } = req.params; 
     
@@ -179,7 +177,6 @@ export const addPropertyImage = async (req, res) => {
             });
         }
 
-        // 3. Validate file was uploaded
         if (!req.files || !req.files.image) {
             return res.status(400).json({ 
                 success: false, 
@@ -189,17 +186,14 @@ export const addPropertyImage = async (req, res) => {
 
         const { image } = req.files;
 
-        // 4. Upload to Cloudinary (accepts all file types)
         const result = await cloudinary.uploader.upload(image.path, {
             folder: "property_files",
-            resource_type: "auto" // Automatically detects file type
+            resource_type: "auto"
         });
 
-        // 5. Save to database
         const query = 'INSERT INTO property_image (propertyID, imageURL) VALUES (?, ?)';
         const [dbResult] = await db.query(query, [id, result.secure_url]);
 
-        // 6. Success response
         res.status(201).json({ 
             success: true,
             message: 'File uploaded successfully',
@@ -215,7 +209,6 @@ export const addPropertyImage = async (req, res) => {
     } catch (error) {
         console.error('File upload error:', error);
         
-        // Cloudinary-specific errors
         if (error.http_code) {
             return res.status(error.http_code).json({
                 success: false,
@@ -224,7 +217,6 @@ export const addPropertyImage = async (req, res) => {
             });
         }
 
-        // Generic server error
         res.status(500).json({
             success: false,
             message: 'Internal server error',
@@ -232,7 +224,6 @@ export const addPropertyImage = async (req, res) => {
         });
     }
 };
-
 
 
 // Get all images for a property

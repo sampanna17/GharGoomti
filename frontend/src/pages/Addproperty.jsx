@@ -35,6 +35,8 @@ function MapUpdater({ latitude, longitude }) {
 }
 
 export default function AddProperty() {
+
+    const [clearImages, setClearImages] = useState(false);
     const [inputs, setInputs] = useState({
         title: "",
         price: "",
@@ -301,7 +303,9 @@ export default function AddProperty() {
                     description: "",
                     petPolicy: "",
                     size: "",
+                    
                 });
+                setClearImages(true);
             } else {
                 toast.error("Failed to add property.");
             }
@@ -415,7 +419,7 @@ export default function AddProperty() {
 
             {/* Right Side: Image Uploader & Map */}
             <div className="flex-[40%] pl-4">
-                <ImageUploader onImagesUploaded={handleImagesUploaded} />
+                <ImageUploader onImagesUploaded={handleImagesUploaded}  clearImages={clearImages} />
 
                 {/* Map Section */}
                 <div className="mt-4">

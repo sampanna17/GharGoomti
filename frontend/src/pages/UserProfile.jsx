@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import Cookies from "js-cookie";
 
 const UserProfile = () => {
-
   const navigate = useNavigate();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    localStorage.getItem("isLoggedIn") === "true"
-  );
 
   const [user, setUser] = useState({
     userFirstName: "",
@@ -19,23 +14,38 @@ const UserProfile = () => {
     userAge: "",
     role: "",
   });
+
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      const userData = Cookies.get("user_data");
+
+      if (!userData) {
+        console.warn("No user_data cookie found.");
+        return;
+      }
+
       try {
-        const userId = JSON.parse(localStorage.getItem("user"))?.id; 
-        if (!userId) return;
-        
-        const response = await axios.get(`http://localhost:8000/api/auth/users/${userId}`);
-        
+        const parsed = JSON.parse(userData);
+        const userId = parsed?.userID;
+
+        if (!userId) {
+          console.warn("No user ID in cookie.");
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:8000/api/user/${userId}`);
+
         if (response.status === 200) {
           setUser(response.data);
+          setIsLoggedIn(true);
         } else {
-          console.error("Error fetching user profile:", response.data.message);
+          console.error("Failed to fetch user data.");
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      } catch (err) {
+        console.error("Error parsing or fetching user data:", err);
       }
     };
 
@@ -44,22 +54,12 @@ const UserProfile = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/signout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("user");
-        setIsLoggedIn(false);
-        navigate("/login");
-      } else {
-        // Handle logout error
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
+      await axios.post('http://localhost:8000/api/auth/signout', {}, { withCredentials: true });
+      Cookies.remove('user_data');
+      setIsLoggedIn(false);
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
     }
   };
 
@@ -70,54 +70,18 @@ const UserProfile = () => {
   const handleSave = async () => {
     try {
       const response = await axios.put('http://localhost:8000/api/auth/users/update', user, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.status === 200) {
         alert("Profile updated successfully!");
         setIsEditing(false);
       } else {
-        alert("Error updating profile: " + response.data.error);
+        alert("Failed to update profile.");
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
+    } catch (err) {
+      console.error("Error updating profile:", err);
     }
-  };
-
-  useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    console.log("isLoggedIn from localStorage on mount:", loggedIn);
-    setIsLoggedIn(loggedIn);
-
-    const handleStorageChange = () => {
-      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-      setIsLoggedIn(loggedIn);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
-  console.log("isLoggedIn state:", isLoggedIn);
-
-  const [appointments, setAppointments] = useState([
-    {},
-  ]);
-  const [listings, setListings] = useState([
-    {  },
-  ]);
-
-  const deleteAppointment = (id) => {
-    setAppointments(appointments.filter((appt) => appt.id !== id));
-  };
-
-  const deleteListing = (id) => {
-    setListings(listings.filter((listing) => listing.id !== id));
   };
 
   return (
@@ -144,14 +108,6 @@ const UserProfile = () => {
           </nav>
         </div>
       </header>
-      <main className="flex-grow flex items-center justify-center mt-10">
-          <div className="text-center">
-            {/* Displaying login status */}
-            <h2 className="text-2xl font-semibold">
-              {isLoggedIn ? "You are logged in!" : "You are not logged in."}
-            </h2>
-          </div>
-        </main>
 
       <div className="flex justify-center items-center min-h-screen p-4 -mt-10 mb-0">
         <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-6xl flex flex-col md:flex-row">
@@ -174,55 +130,16 @@ const UserProfile = () => {
               ))}
               <button
                 className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={isEditing ? handleSave : () => setIsEditing(true)}
               >
                 {isEditing ? "Save" : "Edit Profile"}
               </button>
             </div>
           </div>
 
-          {/* Right Side - Appointments & Listings */}
+          {/* Right Side - Placeholder for future appointments/listings */}
           <div className="w-full md:w-2/3 md:pl-6 mt-6 md:mt-0">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Upcoming Appointments</h3>
-            {appointments.length > 0 ? (
-              <ul className="space-y-2">
-                {appointments.map((appt) => (
-                  <li key={appt.id} className="border p-3 rounded-lg bg-gray-50 flex justify-between items-center">
-                    <div>
-                      <span className="block font-medium">{appt.date}</span>
-                      <span className="text-gray-600">{appt.property}</span>
-                    </div>
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
-                      onClick={() => deleteAppointment(appt.id)}
-                    >
-                      Delete
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No visit booked</p>
-            )}
-
-            <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-2">Your Listings</h3>
-            {listings.length > 0 ? (
-              <ul className="space-y-2">
-                {listings.map((listing) => (
-                  <li key={listing.id} className="border p-3 rounded-lg bg-gray-50 flex justify-between items-center">
-                    <span>{listing.title}</span>
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
-                      onClick={() => deleteListing(listing.id)}
-                    >
-                      Delete
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No properties listed</p>
-            )}
+            <p className="text-gray-500">Appointments and listings </p>
           </div>
         </div>
       </div>

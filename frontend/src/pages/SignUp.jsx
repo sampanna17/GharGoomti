@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Logo from "../assets/LOGO.png";
-import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { FaEye, FaEyeSlash, FaRegUser  } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "../css/SignUp.css";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     userFirstName: "",
     userLastName: "",
@@ -15,10 +16,43 @@ const Signup = () => {
     userAge: "",
     password: "",
     confirmPassword: "",
+    profileImage: null
   });
+  const [previewImage, setPreviewImage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+        setFormData({
+          ...formData,
+          profileImage: file
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  const removeImage = () => {
+    setPreviewImage(null);
+    setFormData({
+      ...formData,
+      profileImage: null
+    });
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,7 +121,7 @@ const Signup = () => {
       return "You must agree to the terms and conditions.";
     }
 
-    return null; // Validation passed
+    return null; 
   };
 
   const handleSubmit = async (e) => {
@@ -119,7 +153,6 @@ const Signup = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success("Signup successful! Redirecting...");
-        // Pass userEmail as state when navigating
         setTimeout(() => navigate("/verify-email", { state: { userEmail: formData.userEmail } }), 1000);
       } else {
         toast.error(data.message || "Signup failed. Please try again.");
@@ -133,7 +166,7 @@ const Signup = () => {
   return (
     <div className="signup-main">
       <ToastContainer position="bottom-center" autoClose={3000} limit={1}
-        newestOnTop={false} 
+        newestOnTop={false}
         closeOnClick />
       <div className="signup-left">
         <div className="signup-logo">
@@ -141,11 +174,41 @@ const Signup = () => {
         </div>
       </div>
       <div className="signup-right">
-        <div className="signup-right-container">
+        <div className="">
           <div className="signup-center">
             <h2>Create your Ghar Goomti account!</h2>
             <p>Please enter your details to sign up</p>
+
             <form onSubmit={handleSubmit} noValidate>
+              <div className="flex flex-col items-center relative -mt-4 -mb-5">
+                <div
+                  className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer overflow-hidden border-2 border-gray-300 hover:border-blue-500 transition-colors relative"
+                  onClick={triggerFileInput}
+                >
+                  {previewImage ? (
+                    <>
+                      <img src={previewImage} alt="Profile Preview" className="w-full h-full object-cover" /> 
+                    </>
+                  ) : (
+                    <div className="">
+                      <FaRegUser  className="text-gray-500 text-4xl" />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+                <p className="text-gray-600 text-sm mt-2 cursor-pointer" onClick={(e) => {
+                e.stopPropagation();
+                removeImage(); 
+              }}>
+                  {previewImage ? "Remove Picture" : "Add profile picture"}
+                </p>
+              </div>
               <div className="signup-name-fields">
                 <input
                   type="text"
@@ -203,7 +266,6 @@ const Signup = () => {
                 onChange={handleChange}
                 required
               />
-
               <div className="signup-pass-input-div">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -253,7 +315,7 @@ const Signup = () => {
             </form>
           </div>
 
-          <p className="signup-bottom-p">
+          <p className="signup-bottom-p ">
             Already have an account? <Link to="/login">Log In</Link>
           </p>
         </div>

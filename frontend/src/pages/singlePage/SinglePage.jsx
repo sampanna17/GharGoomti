@@ -51,7 +51,6 @@ function SinglePage() {
 
         const getallimages = async () => {
             const res = await axios.get(`http://localhost:8000/api/property/${id}/images`)
-            console.log(res.data);
             setPImage(res.data);
         }
 
@@ -83,7 +82,7 @@ function SinglePage() {
             toast.error("Please login to bookmark properties");
             return;
         }
-    
+
         try {
             if (isBookmarked) {
                 // Remove bookmark
@@ -91,7 +90,7 @@ function SinglePage() {
                     data: {
                         userID: userData.userID,
                         propertyID: id
-                    }   
+                    }
                 });
                 setIsBookmarked(false);
                 toast.success("Bookmark removed successfully!");
@@ -109,7 +108,7 @@ function SinglePage() {
             toast.error("Failed to update bookmark");
         }
     };
-    
+
     const handleDateChange = (event) => {
         setVisitDate(event.target.value);
     };
@@ -145,7 +144,6 @@ function SinglePage() {
                                 {user ? (
                                     <>
                                         <div className="avatar-placeholder">
-                                            {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                                         </div>
                                         <span>Seller: {user.fullName}</span>
                                         <p>Contact: {user.contact}</p>
@@ -248,11 +246,11 @@ function SinglePage() {
 
                         <button
                             onClick={handleSave}
-                            style={{ backgroundColor: isBookmarked  ? "#fece51" : "white" }}
+                            style={{ backgroundColor: isBookmarked ? "#fece51" : "white" }}
                             className="w-48 flex items-center justify-center gap-x-2 py-2 rounded-md"
                         >
                             <img
-                                src={isBookmarked  ? BookmarkFilled : Bookmark}
+                                src={isBookmarked ? BookmarkFilled : Bookmark}
                                 alt="Bookmark"
                                 className="w-5 h-5"
                             />

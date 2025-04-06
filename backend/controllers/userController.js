@@ -1,20 +1,25 @@
 import db from '../config/db.js';
 
 // **Get User Profile**
-export const getUser = (req, res) => {
-  const userId = req.params.id;
-  const sql = "SELECT userFirstName, userLastName, userContact, userEmail, userAge, role FROM users WHERE userID = ?";
+export const getUser = async (req, res) => {
+  const { id } = req.params;
 
-  db.query(sql, [userId], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Error fetching user details" });
-    }
-    if (result.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.json(result[0]);
-  });
+  try {
+      const [user] = await db.query(
+          'SELECT userFirstName, userLastName, userContact, userEmail, userAge, role FROM users WHERE userID = ?',
+          [id]
+      );
+
+      if (user.length === 0) {
+          return res.status(404).json({ message: 'User not found.' });
+      }
+
+      res.status(200).json(user[0]);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching user.', error });
+  }
 };
+
 
 // **Update User Profile**
 export const updateUser = (req, res) => {

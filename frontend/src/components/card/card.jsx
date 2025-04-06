@@ -1,14 +1,13 @@
 
 import { Link } from "react-router-dom";
 import "./card.scss";
-import Kitchen from "../../assets/SinglePage/Kitchen.png";
-import Hall from "../../assets/SinglePage/living.png";
 import Bathroom from "../../assets/SinglePage/toilet.png";
 import Beds from "../../assets/SinglePage/bedroom.png";
 import Pin from "../../assets/SinglePage/pin.png";
 import Chat from "../../assets/SinglePage/chat.png";
 import Bookmark from "../../assets/SinglePage/bookmark.png";
 import BookmarkFIlled from "../../assets/bookmarkfilled.png";
+import NumberFormat from "../../components/FormatNumber";
 
 function Card({ item, onBookmark, isBookmarked }) {
 
@@ -37,7 +36,7 @@ function Card({ item, onBookmark, isBookmarked }) {
           <span>{item?.propertyAddress}, {item?.propertyCity}</span>
         </p>
         <p className="price">
-          NPR. {item?.propertyPrice}
+          NPR. <NumberFormat value={item?.propertyPrice} />
           {item?.propertyFor === 'Rent' && ' /month'}
         </p>
         <div className="bottom">
@@ -52,10 +51,10 @@ function Card({ item, onBookmark, isBookmarked }) {
             </div>
           </div>
           <div className="icons">
-             <div className="icon" onClick={handleBookmarkClick}>
-             <img 
-                src={isBookmarked ? BookmarkFIlled : Bookmark} 
-                alt="Bookmark" 
+            <div className="icon" onClick={handleBookmarkClick}>
+              <img
+                src={isBookmarked ? BookmarkFIlled : Bookmark}
+                alt="Bookmark"
                 className={isBookmarked ? "bookmarked" : ""}
               />
             </div>

@@ -1,6 +1,5 @@
 
 import "./ListProperty.scss";
-import { listData } from "../../lib/dummydata";
 import Filter from "../../components/filter/Filter";
 import Card from "../../components/card/card";
 import Map from "../../components/map/Map";
@@ -43,7 +42,7 @@ function ListPage() {
                 setProperties(groupedProperties);
             } catch (error) {
                 console.error(error);
-                setProperties(listData);
+                setProperties();
             }
         };
 

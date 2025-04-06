@@ -2,6 +2,7 @@ import express from 'express';
 import {forgotPassword, google, refreshToken, registerUser, resetPassword, signin, signOut, verifyEmail } from '../controllers/authController.js';
 import {sendemail } from '../utils/sendemail.js';
 import {sendResetEmail} from '../utils/sendResetEmail.js';
+import formidable from 'express-formidable';
 
 const router = express.Router();
 
@@ -16,7 +17,5 @@ router.post('/forgotPassword', forgotPassword);
 router.post('/resetPassword', resetPassword);
 router.post('/sendResetEmail', sendResetEmail);
 router.post("/signout", signOut);
-
-
 
 export default router;
