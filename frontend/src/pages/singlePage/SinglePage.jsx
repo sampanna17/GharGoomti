@@ -31,6 +31,8 @@ function SinglePage() {
     const [pImage, setPImage] = useState(null)
     const [user, setUser] = useState(null);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [selectedTime, setSelectedTime] = useState('');
+
     const userData = Cookies.get('user_data') ? JSON.parse(Cookies.get('user_data')) : null;
 
     useEffect(() => {
@@ -112,13 +114,55 @@ function SinglePage() {
         setVisitDate(event.target.value);
     };
 
-    const handleBookVisit = () => {
-        if (visitDate) {
-            alert(`Visit booked for: ${visitDate}`);
-            setVisitDate("");
-        } else {
-            alert("Please select a visit date.");
+    const handleBookVisit = async () => {
+        if (!visitDate || !selectedTime) {
+            toast.error("Please select both date and time");
+            return;
         }
+
+        if (!userData?.userID) {
+            toast.error("Please login to book an appointment");
+            return;
+        }
+
+        try {
+            // Convert AM/PM time to 24-hour format for backend
+            const time24hr = convertTo24Hour(selectedTime);
+
+            // Remove the unused response variable and just await the axios call
+            await axios.post('http://localhost:8000/api/appointment/add', {
+                userID: userData.userID,
+                propertyID: id,
+                appointmentDate: visitDate,
+                appointmentTime: time24hr
+            },);
+
+            toast.success("Appointment booked successfully!");
+            setVisitDate("");
+            setSelectedTime("");
+
+        } catch (error) {
+            console.error("Error booking appointment:", error);
+            const errorMessage = error.response?.data?.message || "Failed to book appointment";
+            toast.error(errorMessage);
+        }
+    };
+
+    // Helper function to convert AM/PM to 24-hour format
+    const convertTo24Hour = (time12h) => {
+        if (!time12h) return '';
+
+        const [time, modifier] = time12h.split(' ');
+        let [hours, minutes] = time.split(':');
+
+        if (modifier === 'PM' && hours !== '12') {
+            hours = String(parseInt(hours, 10) + 12);
+        }
+        if (modifier === 'AM' && hours === '12') {
+            hours = '00';
+        }
+
+        return `${hours.padStart(2, '0')}:${minutes}`;
     };
 
     return (
@@ -257,25 +301,49 @@ function SinglePage() {
                             {isBookmarked ? "Property saved" : "Save the Place"}
                         </button>
                     </div>
-                    <div className="flex items-center justify-center gap-5 border border-gray-300 rounded-lg p-2 bg-white ">
-                        <div className="relative flex items-center">
 
-                            <img
-                                src={Calendar}
-                                alt="Calendar"
-                                className="absolute right-4 cursor-pointer"
-                                style={{ width: "21px", height: "21px" }}
-                                onClick={() => document.getElementById("customDateInput").showPicker()} // Opens calendar
-                            />
-                            <input
-                                id="customDateInput"
-                                type="date"
-                                value={visitDate}
-                                onChange={handleDateChange}
-                                className="p-2 pr-6 outline-none bg-transparent appearance-none"
-                            />
+                    <div className="flex items-center justify-between gap-4 border border-gray-300 rounded-lg p-3 bg-white">
+                        {/* Left side - Date and Time */}
+                        <div className="flex items-center gap-4">
+                            {/* Date Picker */}
+                            <div className="relative">
+                                <input
+                                    id="customDateInput"
+                                    type="date"
+                                    value={visitDate}
+                                    onChange={handleDateChange}
+                                    className="p-2 pr-8 outline-none bg-transparent border border-gray-300 rounded-md appearance-none w-40"
+                                />
+                                <img
+                                    src={Calendar}
+                                    alt="Calendar"
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                    style={{ width: "18px", height: "18px" }}
+                                    onClick={() => document.getElementById("customDateInput").showPicker()}
+                                />
+                            </div>
+
+                            {/* Time Selector */}
+                            <div className="relative">
+                                <select
+                                    value={selectedTime}
+                                    onChange={(e) => setSelectedTime(e.target.value)}
+                                    className="p-2 pl-3 pr-8 outline-none bg-transparent border border-gray-300 rounded-md appearance-none w-36"
+                                >
+                                    <option value="">Select Time</option>
+                                    {['10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'].map((time) => (
+                                        <option key={time} value={time}>{time}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
+                        {/* Right side - Book Button */}
                         <button
                             onClick={handleBookVisit}
                             className="p-2 bg-white text-gray-700 border-l border-gray-300 pl-5 pr-3 rounded-r-lg"

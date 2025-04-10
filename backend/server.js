@@ -7,6 +7,7 @@ import authroute from './routes/authRoute.js';
 import userRoute from './routes/userRoute.js'; 
 import db from './config/db.js'
 import propertyroute from './routes/PropertyRoute.js';
+import appointmentroute from './routes/appointmentRoute.js';
 dotenv.config();
 
 //connecting db
@@ -36,6 +37,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authroute);
 app.use('/api/user', userRoute);
 app.use('/api', propertyroute);
+app.use('/api/appointment', appointmentroute);
 
 const PORT = 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
