@@ -6,6 +6,7 @@ import HoverArrowText from '../components/HoverArrowText';
 
 export const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
@@ -22,7 +23,6 @@ export const Navbar = () => {
 
   const navigateToBookmarks = () => navigate('/bookmarks');
   const navigateToChats = () => navigate('/chats');
-  const navigateToProfile = () => navigate('/profile');
   const navigateToHome = () => navigate('/');
   const navigateToProperties = () => navigate('/properties');
   const navigateToAddProperty = () => navigate('/add-property');
@@ -88,13 +88,13 @@ export const Navbar = () => {
         </div>
         <div className="flex items-center gap-4 pt-4">
 
-          <div className="relative group">
+          <div className="relative">
             <Heart
               className="w-5 h-5 text-gray-600 cursor-pointer transition-all duration-500
-             group-hover:fill-red-800 group-hover:stroke-red-800"
+             hover:fill-red-800 hover:stroke-red-800"
               strokeWidth={2}
               fill="transparent"
-              onClick={navigateToBookmarks} // Navigate to /bookmarks on click
+              onClick={navigateToBookmarks}
             />
 
           </div>
@@ -102,10 +102,72 @@ export const Navbar = () => {
             className="w-5 h-5 text-gray-600 cursor-pointer"
             onClick={navigateToChats} // Navigate to /chats on click
           />
-          <CircleUser
-            className="w-6 h-6 text-gray-600 cursor-pointer"
-            onClick={navigateToProfile} // Navigate to /profile on click
-          />
+
+          <div className="relative">
+            {/* Only the icon should trigger the dropdown */}
+            <div className="inline-block hover:bg-gray-100 rounded-full p-1">
+              <CircleUser
+                className="w-6 h-6 text-gray-600 cursor-pointer"
+                onMouseEnter={() => setProfileDropdownOpen(true)}
+                onClick={() => {
+                  navigate('/profile', { state: { activeTab: 'user' } });
+                  setProfileDropdownOpen(false);
+                }}
+
+              />
+            </div>
+
+            {/* Dropdown */}
+            {profileDropdownOpen && (
+              <div
+                className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10"
+                onMouseEnter={() => setProfileDropdownOpen(true)}
+                onMouseLeave={() => setProfileDropdownOpen(false)}
+              >
+                <button
+                  onClick={() => {
+                    navigate('/profile', { state: { activeTab: 'user' } });
+                    setProfileDropdownOpen(false);
+                  }}
+                  className="group block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <HoverArrowText
+                    text="Profile"
+                    IconEnd={null}
+                    customClass="group-hover:translate-x-1 transition-transform duration-200 -ml-2"
+                  />
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate('/profile', { state: { activeTab: 'listing' } });
+                    setProfileDropdownOpen(false);
+                  }}
+                  className="group block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <HoverArrowText
+                    text="Listing"
+                    IconEnd={null}
+                    customClass="group-hover:translate-x-1 transition-transform duration-200 -ml-2"
+                  />
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate('/profile', { state: { activeTab: 'appointments' } });
+                    setProfileDropdownOpen(false);
+                  }}
+                  className="group block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <HoverArrowText
+                    text="Appointment"
+                    IconEnd={null}
+                    customClass="group-hover:translate-x-1 transition-transform duration-200 -ml-2"
+                  />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
       <div className="mt-20 fixed top-4 left-0 right-0 z-10 bg-white h-3"></div>

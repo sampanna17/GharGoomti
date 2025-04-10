@@ -9,7 +9,7 @@ import Bookmark from "../../assets/SinglePage/bookmark.png";
 import BookmarkFIlled from "../../assets/bookmarkfilled.png";
 import NumberFormat from "../../components/FormatNumber";
 
-function Card({ item, onBookmark, isBookmarked }) {
+function Card({ item, onBookmark, isBookmarked, showActions = true }) {
 
   const handleBookmarkClick = (e) => {
     e.preventDefault();
@@ -50,18 +50,20 @@ function Card({ item, onBookmark, isBookmarked }) {
               <span>{item?.bathrooms} bathroom{item?.bathrooms !== 1 ? 's' : ''}</span>
             </div>
           </div>
-          <div className="icons">
-            <div className="icon" onClick={handleBookmarkClick}>
-              <img
-                src={isBookmarked ? BookmarkFIlled : Bookmark}
-                alt="Bookmark"
-                className={isBookmarked ? "bookmarked" : ""}
-              />
+          {showActions && (
+            <div className="icons">
+              <div className="icon" onClick={handleBookmarkClick}>
+                <img
+                  src={isBookmarked ? BookmarkFIlled : Bookmark}
+                  alt="Bookmark"
+                  className={isBookmarked ? "bookmarked" : ""}
+                />
+              </div>
+              <div className="icon">
+                <img src={Chat} alt="Chat" />
+              </div>
             </div>
-            <div className="icon">
-              <img src={Chat} alt="Chat" />
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

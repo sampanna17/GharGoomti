@@ -3,7 +3,7 @@ import db from '../config/db.js';
 
 // Controller for adding an appointment
 export const addAppointment = async (req, res) => {
-    const { userID, propertyID, appointmentDate, appointmentTime, notes } = req.body;
+    const { userID, propertyID, appointmentDate, appointmentTime } = req.body;
 
     // Inputy validation 
     if (!userID || !propertyID || !appointmentDate || !appointmentTime) {
@@ -12,8 +12,8 @@ export const addAppointment = async (req, res) => {
 
     try {
         const query = `
-            INSERT INTO appointment (userID, propertyID, appointmentDate, appointmentTime, notes, appointmentStatus, created_at)
-            VALUES (?, ?, ?, ?, ?, 'pending', NOW())
+            INSERT INTO appointment (userID, propertyID, appointmentDate, appointmentTime, appointmentStatus, created_at)
+            VALUES (?, ?, ?, ?, 'pending', NOW())
         `;
         const [result] = await db.query(query, [userID, propertyID, appointmentDate, appointmentTime, notes || null]);
 

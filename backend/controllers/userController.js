@@ -20,7 +20,6 @@ export const getUser = async (req, res) => {
   }
 };
 
-
 // **Update User Profile**
 export const updateUser = (req, res) => {
     const { userFirstName, userLastName, userContact, userEmail, userAge } = req.body;

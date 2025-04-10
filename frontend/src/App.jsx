@@ -45,12 +45,10 @@ export default function App() {
           <Route path="/chats" element={<Chats />} />
           <Route path="/properties" element={<ListPage />} />
           <Route path="/add-property" element={<AddProperty />} />
-          
-
+          <Route path="/add-property/:propertyID" element={<AddProperty />} />
           <Route path="/:id" element={<SinglePage />} />
           <Route path="/single-page" element={<SinglePage />} />
           <Route path="/profile" element={<UserProfile />} />
-
         </Route>
 
         {/* Admin Routes */}

@@ -1,6 +1,410 @@
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from '../context/AuthContext';
+// import { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import axios from "axios";
+// import { toast, ToastContainer } from "react-toastify";
+// import FloatingLabelInput from "../components/FloatingLabel";
+// import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
+// import "leaflet/dist/leaflet.css";
+// import ImageUploader from "../components/ImageUploader";
+// import Cookies from 'js-cookie';
+
+// const INITIAL_FORM_STATE = {
+//     title: "",
+//     price: "",
+//     address: "",
+//     city: "",
+//     latitude: "",
+//     longitude: "",
+//     bedroom: "",
+//     bathroom: "",
+//     kitchen: "",
+//     hall: "",
+//     type: "",
+//     property: "",
+//     images: [],
+//     petPolicy: "",
+//     size: "",
+//     description: "",
+// };
+
+// const PROPERTY_TYPES = ["Apartment", "Building", "Flat"];
+// const PROPERTY_FOR = ["Rent", "Sale"];
+// const PET_POLICIES = ["Available", "Not Available"];
+
+// function LocationPicker({ setLatitude, setLongitude }) {
+//     useMapEvents({
+//         click(e) {
+//             setLatitude(e.latlng.lat.toFixed(6));
+//             setLongitude(e.latlng.lng.toFixed(6));
+//         },
+//     });
+//     return null;
+// }
+
+// function MapUpdater({ latitude, longitude }) {
+//     const map = useMap();
+//     useEffect(() => {
+//         if (latitude && longitude) {
+//             map.setView([latitude, longitude], 16);
+//         }
+//     }, [latitude, longitude, map]);
+//     return null;
+// }
+
+// const formatNumber = (value) => {
+//     if (!value) return "";
+//     return new Intl.NumberFormat("en-IN").format(value.replace(/\D/g, ""));
+// };
+
+// const validateNumber = (value, min, max, fieldName) => {
+//     const num = parseInt(value);
+//     return isNaN(num) || num < min || num > max
+//         ? `Please enter valid numbers for ${fieldName} (${min}-${max})`
+//         : null;
+// };
+
+// export default function AddProperty() {
+//     const [clearImages, setClearImages] = useState(false);
+//     const [inputs, setInputs] = useState(INITIAL_FORM_STATE);
+//     const [authStatus, setAuthStatus] = useState({
+//         isLoggedIn: false,
+//         isSeller: false,
+//         isLoading: true
+//     });
+//     const [isSubmitting, setIsSubmitting] = useState(false);
+//     const navigate = useNavigate();
+
+//     // Authentication check
+//     useEffect(() => {
+//         const checkAuth = () => {
+//             const userData = Cookies.get('user_data');
+
+//             if (!userData) {
+//                 setAuthStatus({
+//                     isLoggedIn: false,
+//                     isSeller: false,
+//                     isLoading: false
+//                 });
+//                 return;
+//             }
+
+//             try {
+//                 const parsedUser = JSON.parse(userData);
+//                 const isSeller = parsedUser?.role === 'seller';
+
+//                 setAuthStatus({
+//                     isLoggedIn: true,
+//                     isSeller,
+//                     isLoading: false
+//                 });
+
+//                 if (!isSeller) {
+//                     toast.error("You need seller privileges to access this page");
+//                 }
+//             } catch (error) {
+//                 console.error('Error parsing user data:', error);
+//                 setAuthStatus({
+//                     isLoggedIn: false,
+//                     isSeller: false,
+//                     isLoading: false
+//                 });
+//                 toast.error("Invalid session data");
+//             }
+//         };
+
+//         checkAuth();
+//     }, []);
+
+//     // Handlers
+//     const handleImagesUploaded = (newImages) => {
+//         setInputs(prev => ({ ...prev, images: newImages }));
+//     };
+
+//     const handleChange = (e) => {
+//         let { name, value } = e.target;
+
+//         if (name === "latitude" || name === "longitude") {
+//             value = value.replace(/[^0-9.-]/g, "");
+//             if (value) value = parseFloat(value).toFixed(6);
+//         } else if (name === "price") {
+//             value = value.replace(/[^0-9.]/g, "");
+//         }
+
+//         setInputs(prev => ({ ...prev, [name]: value }));
+//     };
+
+//     // Form validation
+//     const validateForm = () => {
+//         const requiredFields = [
+//             'title', 'price', 'address', 'city', 'latitude', 'longitude',
+//             'bedroom', 'bathroom', 'kitchen', 'hall', 'type', 'property',
+//             'petPolicy', 'size', 'description'
+//         ];
+
+//         // Check required fields
+//         const missingField = requiredFields.find(field => !inputs[field]);
+//         if (missingField) return "All fields are required.";
+
+//         // Validate numbers
+//         const numberValidations = [
+//             { field: 'price', min: 0, max: 99999999, message: "Price must be a valid positive number." },
+//             { field: 'bedroom', min: 0, max: 25, message: validateNumber(inputs.bedroom, 0, 25, "bedrooms") },
+//             { field: 'bathroom', min: 0, max: 20, message: validateNumber(inputs.bathroom, 0, 20, "bathrooms") },
+//             { field: 'kitchen', min: 0, max: 5, message: validateNumber(inputs.kitchen, 0, 5, "kitchens") },
+//             { field: 'hall', min: 0, max: 10, message: validateNumber(inputs.hall, 0, 10, "halls") },
+//             { field: 'size', min: 0, max: 100, message: "Size must be a valid positive number." }
+//         ];
+
+//         for (const validation of numberValidations) {
+//             const value = inputs[validation.field];
+//             const num = parseFloat(value);
+
+
+//             if (isNaN(num) || num < validation.min || (validation.max && num > validation.max)) {
+//                 return validation.message || `Invalid value for ${validation.field}`;
+//             }
+//         }
+
+//         // Validate dropdowns
+//         if (!PROPERTY_TYPES.includes(inputs.type)) {
+//             return "Please select a valid property type.";
+//         }
+//         if (!PROPERTY_FOR.includes(inputs.property)) {
+//             return "Please select either Rent or Sale.";
+//         }
+//         if (!PET_POLICIES.includes(inputs.petPolicy)) {
+//             return "Please select a valid pet policy.";
+//         }
+
+//         // Validate images
+//         if (inputs.images.length < 4) {
+//             return "Please upload at least 4 images.";
+//         }
+
+//         // Validate description
+//         if (inputs.description.length < 10) {
+//             return "Description must be at least 10 characters long.";
+//         }
+
+//         return null;
+//     };
+
+//     // Form submission
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+//         toast.dismiss();
+
+//         const errorMessage = validateForm();
+//         if (errorMessage) {
+//             toast.error(errorMessage);
+//             return;
+//         }
+
+//         if (isSubmitting) return;
+//         setIsSubmitting(true);
+
+//         try {
+//             const userData = Cookies.get('user_data');
+//             const parsedUser = JSON.parse(userData);
+
+//             const propertyData = {
+//                 userID: parsedUser.userID,
+//                 propertyTitle: inputs.title,
+//                 propertyPrice: inputs.price,
+//                 propertyAddress: inputs.address,
+//                 propertyCity: inputs.city,
+//                 bedrooms: parseInt(inputs.bedroom),
+//                 bathrooms: parseInt(inputs.bathroom),
+//                 kitchens: parseInt(inputs.kitchen),
+//                 halls: parseInt(inputs.hall),
+//                 propertyType: inputs.type,
+//                 propertyFor: inputs.property,
+//                 propertySize: parseInt(inputs.size),
+//                 petPolicy: inputs.petPolicy,
+//                 latitude: inputs.latitude,
+//                 longitude: inputs.longitude,
+//                 description: inputs.description
+//             };
+
+//             const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
+
+//             if (propertyResponse.status === 201) {
+//                 const propertyID = propertyResponse.data.propertyID;
+
+//                 // Upload images in parallel
+//                 await Promise.all(inputs.images.map(async (image) => {
+//                     const formData = new FormData();
+//                     formData.append("image", image);
+//                     return axios.post(
+//                         `http://localhost:8000/api/property/${propertyID}/images`,
+//                         formData,
+//                         { headers: { "Content-Type": "multipart/form-data" } }
+//                     );
+//                 }));
+
+//                 toast.success("Property added successfully!");
+//                 setInputs(INITIAL_FORM_STATE);
+//                 setClearImages(true);
+//             } else {
+//                 toast.error("Failed to add property.");
+//             }
+//         } catch (error) {
+//             console.error("Error adding property:", error);
+//             const errorMessage = error.response?.data?.error || "An error occurred while adding the property.";
+//             toast.error(errorMessage);
+//         } finally {
+//             setIsSubmitting(false);
+//         }
+//     };
+
+//     // Render unauthorized views
+//     if (!authStatus.isLoggedIn) {
+//         return (
+//             <div className="flex flex-col items-center justify-center h-screen text-center">
+//                 <p className="text-red-600 text-lg font-semibold mb-4">
+//                     You need to login to access this page
+//                 </p>
+//                 <button
+//                     onClick={() => navigate('/login')}
+//                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+//                 >
+//                     Login Now
+//                 </button>
+//             </div>
+//         );
+//     }
+
+//     if (!authStatus.isSeller) {
+//         return (
+//             <div className="flex flex-col items-center justify-center h-screen text-center">
+//                 <p className="text-red-600 text-lg font-semibold">
+//                     You are not a seller. Request the admin to become a seller.
+//                 </p>
+//                 <button
+//                     onClick={() => navigate('/home')}
+//                     className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+//                 >
+//                     Go Back to Home
+//                 </button>
+//             </div>
+//         );
+//     }
+
+//     return (
+//         <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg border border-gray-300 mt-32 mb-6 flex">
+//             <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick />
+
+//             {/* Left Side: Form Fields */}
+//             <div className="flex-[60%] pr-4 border-r border-gray-300">
+//                 <div className="grid grid-cols-2 gap-4">
+//                     <FloatingLabelInput name="title" label="Title" value={inputs.title} onChange={handleChange} required />
+//                     <FloatingLabelInput name="price" label="Price" value={formatNumber(inputs.price)} onChange={handleChange} required />
+//                     <FloatingLabelInput name="address" label="Address" value={inputs.address} onChange={handleChange} required />
+//                     <FloatingLabelInput name="city" label="City" value={inputs.city} onChange={handleChange} required />
+//                     <FloatingLabelInput name="bedroom" type="number" label="Bedrooms" value={inputs.bedroom} onChange={handleChange} required />
+//                     <FloatingLabelInput name="bathroom" type="number" label="Bathrooms" value={inputs.bathroom} onChange={handleChange} required />
+//                     <FloatingLabelInput name="kitchen" type="number" label="Kitchens" value={inputs.kitchen} onChange={handleChange} required />
+//                     <FloatingLabelInput name="hall" type="number" label="Halls" value={inputs.hall} onChange={handleChange} required />
+
+//                     <select
+//                         name="type"
+//                         value={inputs.type}
+//                         onChange={handleChange}
+//                         className={`p-2 border rounded border-gray-300 ${!inputs.type ? "text-gray-500" : "text-black"}`}
+//                     >
+//                         <option value="" disabled>Select Property Type</option>
+//                         {PROPERTY_TYPES.map(type => (
+//                             <option key={type} value={type} className="text-black">{type}</option>
+//                         ))}
+//                     </select>
+
+//                     <select
+//                         name="property"
+//                         value={inputs.property}
+//                         onChange={handleChange}
+//                         className={`p-2 border rounded border-gray-300 ${!inputs.property ? "text-gray-500" : "text-black"}`}
+//                     >
+//                         <option value="" disabled>Select Property For</option>
+//                         {PROPERTY_FOR.map(prop => (
+//                             <option key={prop} value={prop} className="text-black">{prop}</option>
+//                         ))}
+//                     </select>
+
+//                     <FloatingLabelInput name="size" type="number" label="Size (sq ft)" value={inputs.size} onChange={handleChange} required />
+
+//                     <select
+//                         name="petPolicy"
+//                         value={inputs.petPolicy}
+//                         onChange={handleChange}
+//                         className={`p-2 border rounded border-gray-300 ${!inputs.petPolicy ? "text-gray-500" : "text-black"}`}
+//                     >
+//                         <option value="" disabled>Pet Policy</option>
+//                         {PET_POLICIES.map(policy => (
+//                             <option key={policy} value={policy} className="text-black">{policy}</option>
+//                         ))}
+//                     </select>
+
+//                     <FloatingLabelInput name="latitude" label="Latitude" value={inputs.latitude} onChange={handleChange} required />
+//                     <FloatingLabelInput name="longitude" label="Longitude" value={inputs.longitude} onChange={handleChange} required />
+
+//                     <textarea
+//                         name="description"
+//                         placeholder="Description"
+//                         value={inputs.description}
+//                         onChange={handleChange}
+//                         className="col-span-2 h-20 p-2 border rounded border-gray-300"
+//                     />
+
+//                     <button
+//                         onClick={handleSubmit}
+//                         type="submit"
+//                         disabled={isSubmitting}
+//                         className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300"
+//                     >
+//                         {isSubmitting ? "Submitting..." : "Submit"}
+//                     </button>
+//                 </div>
+//             </div>
+
+//             {/* Right Side: Image Uploader & Map */}
+//             <div className="flex-[40%] pl-4">
+//                 <ImageUploader onImagesUploaded={handleImagesUploaded} clearImages={clearImages} />
+
+//                 {/* Map Section */}
+//                 <div className="mt-4">
+//                     <h3 className="font-medium mb-2">Select Location</h3>
+//                     <MapContainer
+//                         center={[27.707968, 85.319666]}
+//                         zoom={15}
+//                         scrollWheelZoom
+//                         style={{ height: "250px", width: "100%" }}
+//                         className="rounded z-0"
+//                         attributionControl={false}
+//                         zoomControl={false}
+//                     >
+//                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+//                         {inputs.latitude && inputs.longitude && (
+//                             <Marker position={[parseFloat(inputs.latitude), parseFloat(inputs.longitude)]}>
+//                                 <Popup>
+//                                     Latitude: {parseFloat(inputs.latitude).toFixed(6)} <br />
+//                                     Longitude: {parseFloat(inputs.longitude).toFixed(6)}
+//                                 </Popup>
+//                             </Marker>
+//                         )}
+//                         <MapUpdater latitude={parseFloat(inputs.latitude)} longitude={parseFloat(inputs.longitude)} />
+//                         <LocationPicker
+//                             setLatitude={(lat) => setInputs(prev => ({ ...prev, latitude: lat }))}
+//                             setLongitude={(lng) => setInputs(prev => ({ ...prev, longitude: lng }))}
+//                         />
+//                     </MapContainer>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import FloatingLabelInput from "../components/FloatingLabel";
@@ -8,11 +412,31 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "re
 import "leaflet/dist/leaflet.css";
 import ImageUploader from "../components/ImageUploader";
 import Cookies from 'js-cookie';
+import { FaSpinner } from "react-icons/fa";
 
-const formatNumber = (value) => {
-    if (!value) return "";
-    return new Intl.NumberFormat("en-IN").format(value.replace(/\D/g, ""));
+const INITIAL_FORM_STATE = {
+    title: "",
+    price: "",
+    address: "",
+    city: "",
+    latitude: "",
+    longitude: "",
+    bedroom: "",
+    bathroom: "",
+    kitchen: "",
+    hall: "",
+    type: "",
+    property: "",
+    images: [],
+    existingImages: [],
+    petPolicy: "",
+    size: "",
+    description: "",
 };
+
+const PROPERTY_TYPES = ["Apartment", "Building", "Flat"];
+const PROPERTY_FOR = ["Rent", "Sale"];
+const PET_POLICIES = ["Available", "Not Available"];
 
 function LocationPicker({ setLatitude, setLongitude }) {
     useMapEvents({
@@ -34,42 +458,38 @@ function MapUpdater({ latitude, longitude }) {
     return null;
 }
 
+const formatNumber = (value) => {
+    if (!value) return "";
+    return new Intl.NumberFormat("en-IN").format(value.replace(/\D/g, ""));
+};
+
+const validateNumber = (value, min, max, fieldName) => {
+    const num = parseInt(value);
+    return isNaN(num) || num < min || num > max
+        ? `Please enter valid numbers for ${fieldName} (${min}-${max})`
+        : null;
+};
+
 export default function AddProperty() {
-
     const [clearImages, setClearImages] = useState(false);
-    const [inputs, setInputs] = useState({
-        title: "",
-        price: "",
-        address: "",
-        city: "",
-        latitude: "",
-        longitude: "",
-        bedroom: "",
-        bathroom: "",
-        kitchen: "",
-        hall: "",
-        type: "",
-        property: "",
-        images: [],
-        petPolicy: "",
-        size: "",
-        description: "",
-    });
-    const { user } = useContext(AuthContext);
-
-    const navigate = useNavigate();
+    const [inputs, setInputs] = useState(INITIAL_FORM_STATE);
     const [authStatus, setAuthStatus] = useState({
         isLoggedIn: false,
         isSeller: false,
         isLoading: true
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingProperty, setIsLoadingProperty] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const navigate = useNavigate();
+    const { propertyID } = useParams();
 
+    // Authentication check
     useEffect(() => {
         const checkAuth = () => {
             const userData = Cookies.get('user_data');
 
             if (!userData) {
-                // User not logged in
                 setAuthStatus({
                     isLoggedIn: false,
                     isSeller: false,
@@ -80,15 +500,15 @@ export default function AddProperty() {
 
             try {
                 const parsedUser = JSON.parse(userData);
-                const sellerStatus = parsedUser?.role === 'seller';
+                const isSeller = parsedUser?.role === 'seller';
 
                 setAuthStatus({
                     isLoggedIn: true,
-                    isSeller: sellerStatus,
+                    isSeller,
                     isLoading: false
                 });
 
-                if (!sellerStatus) {
+                if (!isSeller) {
                     toast.error("You need seller privileges to access this page");
                 }
             } catch (error) {
@@ -105,140 +525,148 @@ export default function AddProperty() {
         checkAuth();
     }, []);
 
+    useEffect(() => {
+        // Fetch property data for editing
+        const fetchPropertyData = async () => {
+            setIsLoadingProperty(true);
+            try {
+                const response = await axios.get(`http://localhost:8000/api/property/${propertyID}`);
+                const property = response.data;
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+                const imagesResponse = await axios.get(`http://localhost:8000/api/property/${propertyID}/images`);
+                const propertyImages = imagesResponse.data.map(img => ({
+                    imageID: img.imageID,
+                    imageUrl: img.imageURL  
+                  }))
+                console.log("Fetched images:", propertyImages);
 
+                setInputs({
+                    title: property.propertyTitle,
+                    price: property.propertyPrice.toString(),
+                    address: property.propertyAddress,
+                    city: property.propertyCity,
+                    latitude: property.latitude.toString(),
+                    longitude: property.longitude.toString(),
+                    bedroom: property.bedrooms.toString(),
+                    bathroom: property.bathrooms.toString(),
+                    kitchen: property.kitchens.toString(),
+                    hall: property.halls.toString(),
+                    type: property.propertyType,
+                    property: property.propertyFor,
+                    petPolicy: property.petPolicy,
+                    size: property.propertySize.toString(),
+                    description: property.description,
+                    images: [],
+                    existingImages: propertyImages 
+                });
+
+            } catch (error) {
+                console.error("Error fetching property:", error);
+                toast.error("Failed to load property data");
+            } finally {
+                setIsLoadingProperty(false);
+            }
+        };
+
+        if (propertyID) {
+            setIsEditMode(true);
+            fetchPropertyData();
+        }
+    }, [propertyID]);
+
+    // Handlers
     const handleImagesUploaded = (newImages) => {
-        setInputs((prev) => ({ ...prev, images: newImages }));
+        setInputs(prev => ({ ...prev, images: newImages }));
     };
 
     const handleChange = (e) => {
         let { name, value } = e.target;
+
         if (name === "latitude" || name === "longitude") {
             value = value.replace(/[^0-9.-]/g, "");
             if (value) value = parseFloat(value).toFixed(6);
-        }
-
-        if (name === "price") {
+        } else if (name === "price") {
             value = value.replace(/[^0-9.]/g, "");
         }
 
-        setInputs((prev) => ({ ...prev, [name]: value }));
+        setInputs(prev => ({ ...prev, [name]: value }));
     };
 
-    // Validate form data
+    // Form validation
     const validateForm = () => {
-        const {
-            title,
-            price,
-            address,
-            city,
-            latitude,
-            longitude,
-            bedroom,
-            bathroom,
-            kitchen,
-            hall,
-            type,
-            property,
-            images,
-            petPolicy,
-            size,
-            description,
-        } = inputs;
+        const requiredFields = [
+            'title', 'price', 'address', 'city', 'latitude', 'longitude',
+            'bedroom', 'bathroom', 'kitchen', 'hall', 'type', 'property',
+            'petPolicy', 'size', 'description'
+        ];
 
-        // Check if all fields are filled
-        if (
-            !title ||
-            !price ||
-            !address ||
-            !city ||
-            !latitude ||
-            !longitude ||
-            !bedroom ||
-            !bathroom ||
-            !kitchen ||
-            !hall ||
-            !type ||
-            !property ||
-            !description ||
-            !petPolicy ||
-            !size
-        ) {
-            return "All fields are required.";
+        // Check required fields
+        const missingField = requiredFields.find(field => !inputs[field]);
+        if (missingField) return "All fields are required.";
+
+        // Validate numbers
+        const numberValidations = [
+            { field: 'price', min: 0, max: 99999999, message: "Price must be a valid positive number." },
+            { field: 'bedroom', min: 0, max: 25, message: validateNumber(inputs.bedroom, 0, 25, "bedrooms") },
+            { field: 'bathroom', min: 0, max: 20, message: validateNumber(inputs.bathroom, 0, 20, "bathrooms") },
+            { field: 'kitchen', min: 0, max: 5, message: validateNumber(inputs.kitchen, 0, 5, "kitchens") },
+            { field: 'hall', min: 0, max: 10, message: validateNumber(inputs.hall, 0, 10, "halls") },
+            { field: 'size', min: 0, max: 100, message: "Size must be a valid positive number." }
+        ];
+
+        for (const validation of numberValidations) {
+            const value = inputs[validation.field];
+            const num = parseFloat(value);
+
+            if (isNaN(num) || num < validation.min || (validation.max && num > validation.max)) {
+                return validation.message || `Invalid value for ${validation.field}`;
+            }
         }
 
-        // Validate price
-        const parsedPrice = parseFloat(price);
-        if (isNaN(parsedPrice) || parsedPrice <= 0) {
-            return "Price must be a valid positive number.";
+        // Validate dropdowns
+        if (!PROPERTY_TYPES.includes(inputs.type)) {
+            return "Please select a valid property type.";
         }
-
-        // Validate latitude and longitude
-        if (
-            isNaN(latitude) ||
-            latitude < -90 ||
-            latitude > 90 ||
-            isNaN(longitude) ||
-            longitude < -180 ||
-            longitude > 180
-        ) {
-            return "Please enter valid latitude and longitude.";
-        }
-
-        // Validate number of rooms
-        if (isNaN(bedroom) || bedroom < 0 || bedroom > 25) {
-            return "Please enter valid numbers for the bedroom.";
-        }
-
-        if (isNaN(bathroom) || bathroom < 0 || bathroom > 20) {
-            return "Please enter valid numbers for bathrooms.";
-        }
-
-        if (isNaN(kitchen) || kitchen < 0 || kitchen > 5) {
-            return "Please enter valid numbers for Kitchen.";
-        }
-
-        if (isNaN(hall) || hall < 0 || hall > 10) {
-            return "Please enter valid numbers for Hall.";
-        }
-
-        // Validate property type
-        if (!["Apartment", "Building", "Flat"].includes(type)) {
-            return "Please select a valid property type (Apartment, Building, Flat).";
-        }
-
-        // Validate property for sale or rent
-        if (!["Rent", "Sale"].includes(property)) {
+        if (!PROPERTY_FOR.includes(inputs.property)) {
             return "Please select either Rent or Sale.";
         }
-
-        // Validate size
-        if (isNaN(size) || parseFloat(size) <= 0) {
-            return "Size must be a valid positive number.";
-        }
-
-        // Validate pet policy
-        if (!["Available", "Not Available"].includes(petPolicy)) {
+        if (!PET_POLICIES.includes(inputs.petPolicy)) {
             return "Please select a valid pet policy.";
         }
 
-        // Validate image upload
-        if (images.length === 0 || images.length < 3) {
-            return "Please upload at least 3 images.";
+        // Validate images (only for new properties)
+        if (!isEditMode && inputs.images.length < 4) {
+            return "Please upload at least 4 images.";
         }
 
-        // Validate description length
-        if (description.length < 10) {
+        // Validate description
+        if (inputs.description.length < 10) {
             return "Description must be at least 10 characters long.";
         }
 
-        return null; // Validation passed
+        return null;
     };
 
+    // Handle image deletion
+    const handleDeleteImage = async (imageId) => {
+        try {
+            await axios.delete(`http://localhost:8000/api/property/${propertyID}/images/${imageId}`);
+            setInputs(prev => ({
+                ...prev,
+                existingImages: prev.existingImages.filter(img => img._id !== imageId)
+            }));
+            toast.success("Image deleted successfully");
+        } catch (error) {
+            console.error("Error deleting image:", error);
+            toast.error("Failed to delete image");
+        }
+    };
+
+    // Form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         toast.dismiss();
+
         const errorMessage = validateForm();
         if (errorMessage) {
             toast.error(errorMessage);
@@ -249,8 +677,11 @@ export default function AddProperty() {
         setIsSubmitting(true);
 
         try {
+            const userData = Cookies.get('user_data');
+            const parsedUser = JSON.parse(userData);
+
             const propertyData = {
-                userID: user.userID,
+                userID: parsedUser.userID,
                 propertyTitle: inputs.title,
                 propertyPrice: inputs.price,
                 propertyAddress: inputs.address,
@@ -268,50 +699,50 @@ export default function AddProperty() {
                 description: inputs.description
             };
 
-            const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
+            if (isEditMode) {
+                // Update existing property
+                await axios.put(`http://localhost:8000/api/property/${propertyID}`, propertyData);
 
-            if (propertyResponse.status === 201) {
-                const propertyID = propertyResponse.data.propertyID;
-
+                // Upload new images if any
                 if (inputs.images.length > 0) {
-                    for (const image of inputs.images) {
+                    await Promise.all(inputs.images.map(async (image) => {
                         const formData = new FormData();
                         formData.append("image", image);
-
-                        await axios.post(`http://localhost:8000/api/property/${propertyID}/images`, formData, {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
-                        });
-                    }
+                        return axios.post(
+                            `http://localhost:8000/api/property/${propertyID}/images`,
+                            formData,
+                            { headers: { "Content-Type": "multipart/form-data" } }
+                        );
+                    }));
                 }
-                toast.success("Property added successfully!");
-                setInputs({
-                    title: "",
-                    price: "",
-                    address: "",
-                    city: "",
-                    latitude: "",
-                    longitude: "",
-                    bedroom: "",
-                    bathroom: "",
-                    kitchen: "",
-                    hall: "",
-                    type: "",
-                    property: "",
-                    images: [],
-                    description: "",
-                    petPolicy: "",
-                    size: "",
-                    
-                });
-                setClearImages(true);
+
+                toast.success("Property updated successfully!");
+                navigate('/profile', { state: { activeTab: 'listing' } });
             } else {
-                toast.error("Failed to add property.");
+                const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
+
+                if (propertyResponse.status === 201) {
+                    const newPropertyID = propertyResponse.data.propertyID;
+
+                    // Upload images in parallel
+                    await Promise.all(inputs.images.map(async (image) => {
+                        const formData = new FormData();
+                        formData.append("image", image);
+                        return axios.post(
+                            `http://localhost:8000/api/property/${newPropertyID}/images`,
+                            formData,
+                            { headers: { "Content-Type": "multipart/form-data" } }
+                        );
+                    }));
+
+                    toast.success("Property added successfully!");
+                    setInputs(INITIAL_FORM_STATE);
+                    setClearImages(true);
+                }
             }
         } catch (error) {
-            console.error("Error adding property:", error);
-            const errorMessage = error.response?.data?.error || "An error occurred while adding the property.";
+            console.error("Error saving property:", error);
+            const errorMessage = error.response?.data?.error || "An error occurred while saving the property.";
             toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
@@ -341,7 +772,7 @@ export default function AddProperty() {
                     You are not a seller. Request the admin to become a seller.
                 </p>
                 <button
-                    onClick={() => window.location.href = "/home"}
+                    onClick={() => navigate('/home')}
                     className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
                 >
                     Go Back to Home
@@ -350,9 +781,18 @@ export default function AddProperty() {
         );
     }
 
+    if (isLoadingProperty) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <FaSpinner className="animate-spin text-4xl text-blue-600" />
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg border border-gray-300 mt-32 mb-6 flex">
             <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick />
+
             {/* Left Side: Form Fields */}
             <div className="flex-[60%] pr-4 border-r border-gray-300">
                 <div className="grid grid-cols-2 gap-4">
@@ -369,23 +809,24 @@ export default function AddProperty() {
                         name="type"
                         value={inputs.type}
                         onChange={handleChange}
-                        className={`p-2 border rounded border-gray-300 ${inputs.type === "" ? "text-gray-500" : "text-black"}`}
+                        className={`p-2 border rounded border-gray-300 ${!inputs.type ? "text-gray-500" : "text-black"}`}
                     >
                         <option value="" disabled>Select Property Type</option>
-                        <option value="Apartment" className="text-black">Apartment</option>
-                        <option value="Building" className="text-black">Building</option>
-                        <option value="Flat" className="text-black">Flat</option>
+                        {PROPERTY_TYPES.map(type => (
+                            <option key={type} value={type} className="text-black">{type}</option>
+                        ))}
                     </select>
 
                     <select
                         name="property"
                         value={inputs.property}
                         onChange={handleChange}
-                        className={`p-2 border rounded border-gray-300 ${inputs.property === "" ? "text-gray-500" : "text-black"}`}
+                        className={`p-2 border rounded border-gray-300 ${!inputs.property ? "text-gray-500" : "text-black"}`}
                     >
                         <option value="" disabled>Select Property For</option>
-                        <option value="Rent" className="text-black">Rent</option>
-                        <option value="Sale" className="text-black">Sale</option>
+                        {PROPERTY_FOR.map(prop => (
+                            <option key={prop} value={prop} className="text-black">{prop}</option>
+                        ))}
                     </select>
 
                     <FloatingLabelInput name="size" type="number" label="Size (sq ft)" value={inputs.size} onChange={handleChange} required />
@@ -394,17 +835,24 @@ export default function AddProperty() {
                         name="petPolicy"
                         value={inputs.petPolicy}
                         onChange={handleChange}
-                        className={`p-2 border rounded border-gray-300 ${inputs.petPolicy === "" ? "text-gray-500" : "text-black"}`}
+                        className={`p-2 border rounded border-gray-300 ${!inputs.petPolicy ? "text-gray-500" : "text-black"}`}
                     >
                         <option value="" disabled>Pet Policy</option>
-                        <option value="Available" className="text-black">Available</option>
-                        <option value="Not Available" className="text-black">Not Available</option>
+                        {PET_POLICIES.map(policy => (
+                            <option key={policy} value={policy} className="text-black">{policy}</option>
+                        ))}
                     </select>
 
                     <FloatingLabelInput name="latitude" label="Latitude" value={inputs.latitude} onChange={handleChange} required />
                     <FloatingLabelInput name="longitude" label="Longitude" value={inputs.longitude} onChange={handleChange} required />
 
-                    <textarea name="description" placeholder="Description" value={inputs.description} onChange={handleChange} className="col-span-2 h-20 p-2 border rounded border-gray-300"></textarea>
+                    <textarea
+                        name="description"
+                        placeholder="Description"
+                        value={inputs.description}
+                        onChange={handleChange}
+                        className="col-span-2 h-20 p-2 border rounded border-gray-300"
+                    />
 
                     <button
                         onClick={handleSubmit}
@@ -412,20 +860,35 @@ export default function AddProperty() {
                         disabled={isSubmitting}
                         className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300"
                     >
-                        {isSubmitting ? "Submitting..." : "Submit"}
+                        {isSubmitting ? (
+                            <span className="flex items-center justify-center">
+                                <FaSpinner className="animate-spin mr-2" />
+                                {isEditMode ? "Updating..." : "Submitting..."}
+                            </span>
+                        ) : isEditMode ? "Update Property" : "Submit"}
                     </button>
                 </div>
             </div>
 
             {/* Right Side: Image Uploader & Map */}
             <div className="flex-[40%] pl-4">
-                <ImageUploader onImagesUploaded={handleImagesUploaded}  clearImages={clearImages} />
+                <h2 className="text-xl mb-4 ">
+                    {isEditMode ? "Edit Property" : "Add New Property"}
+                </h2>
+                <ImageUploader
+                    onImagesUploaded={handleImagesUploaded}
+                    clearImages={clearImages}
+                    existingImages={inputs.existingImages}
+                    onDeleteImage={isEditMode ? handleDeleteImage : null}
+                />
 
                 {/* Map Section */}
                 <div className="mt-4">
                     <h3 className="font-medium mb-2">Select Location</h3>
                     <MapContainer
-                        center={[27.707968, 85.319666]}
+                        center={inputs.latitude && inputs.longitude ?
+                            [parseFloat(inputs.latitude), parseFloat(inputs.longitude)] :
+                            [27.707968, 85.319666]}
                         zoom={15}
                         scrollWheelZoom
                         style={{ height: "250px", width: "100%" }}
@@ -444,8 +907,8 @@ export default function AddProperty() {
                         )}
                         <MapUpdater latitude={parseFloat(inputs.latitude)} longitude={parseFloat(inputs.longitude)} />
                         <LocationPicker
-                            setLatitude={(lat) => setInputs((prev) => ({ ...prev, latitude: lat }))}
-                            setLongitude={(lng) => setInputs((prev) => ({ ...prev, longitude: lng }))}
+                            setLatitude={(lat) => setInputs(prev => ({ ...prev, latitude: lat }))}
+                            setLongitude={(lng) => setInputs(prev => ({ ...prev, longitude: lng }))}
                         />
                     </MapContainer>
                 </div>
@@ -453,3 +916,6 @@ export default function AddProperty() {
         </div>
     );
 }
+
+
+

@@ -240,10 +240,13 @@ export const getPropertyImages = async (req, res) => {
 
 // Delete property image from Cloudinary and database
 export const deletePropertyImage = async (req, res) => {
-    const { imageID } = req.body;
+    const { propertyID, imageID } = req.params;
 
     try {
-        const [result] = await db.query('SELECT imageURL FROM property_image WHERE imageID = ?', [imageID]);
+        const [result] = await db.query(
+            'SELECT imageURL FROM property_image WHERE imageID = ? AND propertyID = ?', 
+            [imageID, propertyID]
+        );;
 
         if (result.length === 0) {
             return res.status(404).json({ message: 'Image not found.' });
@@ -256,7 +259,10 @@ export const deletePropertyImage = async (req, res) => {
         await cloudinary.uploader.destroy(`property_images/${publicId}`);
 
         // Delete from Database
-        await db.query('DELETE FROM property_image WHERE imageID = ?', [imageID]);
+        await db.query(
+            'DELETE FROM property_image WHERE imageID = ? AND propertyID = ?', 
+            [imageID, propertyID]
+        );
 
         res.status(200).json({ message: 'Image deleted successfully.' });
     } catch (error) {
@@ -295,5 +301,298 @@ export const getPropertyUser = async (req, res) => {
     } catch (error) {
         console.error('Error fetching property user:', error);
         res.status(500).json({ message: 'Error fetching property user.', error });
+    }
+};
+
+export const getPropertyByUser = async (req, res) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        return res.status(400).json({ 
+            success: false,
+            message: 'User ID is required.' 
+        });
+    }
+
+    try {
+        // First get all properties for the user
+        const query = `
+            SELECT 
+                p.propertyID,
+                p.userID,
+                p.propertyTitle,
+                p.propertyPrice,
+                p.propertyAddress,
+                p.propertyCity,
+                p.bedrooms,
+                p.bathrooms,
+                p.kitchens,
+                p.halls,
+                p.propertyType,
+                p.propertyFor,
+                p.propertySize,
+                p.petPolicy,
+                p.latitude,
+                p.longitude,
+                p.description,
+                p.created_at
+            FROM property p
+            WHERE p.userID = ?
+            ORDER BY p.created_at DESC
+        `;
+
+        const [properties] = await db.query(query, [userId]);
+
+        if (properties.length === 0) {
+            return res.status(404).json({ 
+                success: true,
+                message: 'No properties found for this user.',
+                properties: [] 
+            });
+        }
+
+        // Then get all images for each property
+        const propertiesWithImages = await Promise.all(
+            properties.map(async (property) => {
+                const [images] = await db.query(
+                    'SELECT imageURL FROM property_image WHERE propertyID = ?',
+                    [property.propertyID]
+                );
+                
+                // Convert created_at to JavaScript Date if needed
+                const createdAt = property.created_at 
+                    ? new Date(property.created_at) 
+                    : null;
+                
+                return {
+                    ...property,
+                    images: images.map(img => img.imageURL),
+                };
+            })
+        );
+
+        res.status(200).json({ 
+            success: true,
+            count: propertiesWithImages.length,
+            properties: propertiesWithImages
+        });
+
+    } catch (error) {
+        console.error('Error fetching properties by user:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error while fetching properties.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+
+// Update property details
+export const updateProperty = async (req, res) => {
+    const { id } = req.params;
+    const {
+        propertyTitle,
+        propertyPrice,
+        propertyAddress,
+        propertyCity,
+        bedrooms,
+        bathrooms,
+        kitchens,
+        halls,
+        propertyType,
+        propertyFor,
+        propertySize,
+        petPolicy,
+        latitude,
+        longitude,
+        description
+    } = req.body;
+
+    try {
+        // Validate required fields
+        if (!propertyTitle || !propertyPrice || !propertyAddress || !propertyCity) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Validate enum values
+        const validPropertyTypes = ['Apartment', 'Building', 'Flat'];
+        const validPropertyFor = ['Rent', 'Sale'];
+        const validPetPolicies = ['Available', 'Not Available'];
+
+        if (!validPropertyTypes.includes(propertyType)) {
+            return res.status(400).json({ error: 'Invalid property type' });
+        }
+
+        if (!validPropertyFor.includes(propertyFor)) {
+            return res.status(400).json({ error: 'Invalid property for value' });
+        }
+
+        if (!validPetPolicies.includes(petPolicy)) {
+            return res.status(400).json({ error: 'Invalid pet policy' });
+        }
+
+        // Convert numeric fields to integers
+        const numericFields = {
+            bedrooms: parseInt(bedrooms),
+            bathrooms: parseInt(bathrooms),
+            kitchens: parseInt(kitchens),
+            halls: parseInt(halls),
+            propertySize: parseInt(propertySize)
+        };
+
+        // Check if numeric fields are valid
+        for (const [field, value] of Object.entries(numericFields)) {
+            if (isNaN(value)) {
+                return res.status(400).json({ error: `${field} must be a valid number` });
+            }
+        }
+
+        // Check if property exists
+        const [property] = await db.query('SELECT * FROM property WHERE propertyID = ?', [id]);
+        if (property.length === 0) {
+            return res.status(404).json({ error: 'Property not found' });
+        }
+
+        // Update the property in the database
+        const query = `
+            UPDATE property SET
+                propertyTitle = ?,
+                propertyPrice = ?,
+                propertyAddress = ?,
+                propertyCity = ?,
+                bedrooms = ?,
+                bathrooms = ?,
+                kitchens = ?,
+                halls = ?,
+                propertyType = ?,
+                propertyFor = ?,
+                propertySize = ?,
+                petPolicy = ?,
+                latitude = ?,
+                longitude = ?,
+                description = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE propertyID = ?
+        `;
+
+        await db.execute(query, [
+            propertyTitle,
+            propertyPrice,
+            propertyAddress,
+            propertyCity,
+            numericFields.bedrooms,
+            numericFields.bathrooms,
+            numericFields.kitchens,
+            numericFields.halls,
+            propertyType,
+            propertyFor,
+            numericFields.propertySize,
+            petPolicy,
+            latitude,
+            longitude,
+            description,
+            id
+        ]);
+
+        res.status(200).json({
+            success: true,
+            message: 'Property updated successfully',
+            propertyID: id
+        });
+
+    } catch (error) {
+        console.error('Error updating property:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+export const updatePropertyImages = async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        // Check if property exists
+        const [property] = await db.query('SELECT propertyID FROM property WHERE propertyID = ?', [id]);
+        if (property.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Property not found' 
+            });
+        }
+
+        // Check if files were uploaded
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'No files were uploaded' 
+            });
+        }
+
+        // Get the uploaded files from formidable
+        const files = req.files.images;
+        const filesArray = Array.isArray(files) ? files : [files];
+
+        // Get existing images to delete from Cloudinary
+        const [existingImages] = await db.query('SELECT imageURL FROM property_image WHERE propertyID = ?', [id]);
+        
+        // Delete existing images from Cloudinary
+        await Promise.all(existingImages.map(async (image) => {
+            const publicId = image.imageURL.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`property_files/${publicId}`);
+        }));
+
+        // Delete existing images from database
+        await db.query('DELETE FROM property_image WHERE propertyID = ?', [id]);
+
+        // Upload new images
+        const uploadResults = [];
+
+        for (const file of filesArray) {
+            const result = await cloudinary.uploader.upload(file.path, {
+                folder: "property_files",
+                resource_type: "auto"
+            });
+
+            const [dbResult] = await db.query(
+                'INSERT INTO property_image (propertyID, imageURL) VALUES (?, ?)',
+                [id, result.secure_url]
+            );
+
+            uploadResults.push({
+                fileID: dbResult.insertId,
+                fileURL: result.secure_url,
+                fileType: result.resource_type
+            });
+        }
+
+        res.status(200).json({ 
+            success: true,
+            message: 'Property images updated successfully',
+            data: {
+                images: uploadResults,
+                totalImages: uploadResults.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating property images:', error);
+        
+        if (error.http_code) {
+            return res.status(error.http_code).json({
+                success: false,
+                message: 'Image update failed',
+                error: error.message
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };

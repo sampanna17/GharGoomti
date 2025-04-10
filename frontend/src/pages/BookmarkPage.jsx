@@ -122,7 +122,7 @@ import Card from "../components/card/card";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { toast } from "react-toastify";
+import { toast ,ToastContainer} from "react-toastify";
 
 function BookmarkPage() {
   const [properties, setProperties] = useState([]);
@@ -192,7 +192,7 @@ function BookmarkPage() {
 
   return (
     <div className="h-screen flex justify-center items-center p-10 overflow-hidden">
-
+      <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
       <div className="w-5/6 flex-2 max-h-[90%] h-full overflow-y-auto pr-5 mt-20 
                   scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full hover:scrollbar-thumb-gray-600">
 

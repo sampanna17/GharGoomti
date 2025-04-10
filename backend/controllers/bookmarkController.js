@@ -1,28 +1,5 @@
 import db from '../config/db.js';
 
-
-// export const bookmarkProperty = async (req, res) => {
-//     const { userID, propertyID } = req.body;
-
-//     if (!userID || !propertyID) {
-//         return res.status(400).json({ message: 'User ID and Property ID are required.' });
-//     }
-
-//     try {
-//         await db.query(
-//             'INSERT INTO bookmark (userID, propertyID) VALUES (?, ?)',
-//             [userID, propertyID]
-//         );
-//         res.status(201).json({ message: 'Property added to bookmark.' });
-//     } catch (error) {
-//         if (error.code === 'ER_DUP_ENTRY') {
-//             res.status(400).json({ message: 'Property already in bookmark.' });
-//         } else {
-//             res.status(500).json({ message: 'Error adding property to bookmark.', error });
-//         }
-//     }
-// };
-
 // Add bookmark
 export const bookmarkProperty = async (req, res) => {
     const { userID, propertyID } = req.body;
@@ -122,7 +99,6 @@ export const getBookmarks = async (req, res) => {
                 };
             })
         );
-
         res.status(200).json(bookmarksWithImages);
     } catch (error) {
         console.error('Get bookmarks error:', error);
@@ -132,7 +108,6 @@ export const getBookmarks = async (req, res) => {
         });
     }
 };
-
 
 
 // Add this to your bookmark controller file

@@ -21,7 +21,7 @@ import PropertyType from "../../assets/SinglePage/property-type.png";
 import BookmarkFilled from "../../assets/bookmarkfilled.png";
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 function SinglePage() {
 
@@ -68,7 +68,6 @@ function SinglePage() {
         };
 
         checkBookmarkStatus();
-
         getsingleproperty();
         getallimages();
         getUserDetails();
@@ -124,6 +123,7 @@ function SinglePage() {
 
     return (
         <div className="singlePage mt-32 mb-5 mx-auto px-4">
+            <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
             <div className="details">
                 <div className="wrapper">
                     <Slider images={pImage} />

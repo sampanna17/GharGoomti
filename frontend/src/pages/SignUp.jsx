@@ -146,7 +146,8 @@ const Signup = () => {
           userEmail: formData.userEmail,
           userAge: formData.userAge,
           password: formData.password,
-          role: "Buyer", // Default role
+          role: "Buyer", 
+          profileImage: formData.profileImage
         }),
       });
 
@@ -198,6 +199,7 @@ const Signup = () => {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleImageChange}
+                    value={formData.profileImage}
                     accept="image/*"
                     className="hidden"
                   />

@@ -6,7 +6,7 @@ import Map from "../../components/map/Map";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 function ListPage() {
     const [properties, setProperties] = useState([]);
@@ -53,7 +53,7 @@ function ListPage() {
                 try {
                     const response = await axios.get(`http://localhost:8000/api/bookmark/${userData.userID}`
                     );
-                    setBookmarkedProperties(response.data.map((property) => property.propertyID)); // Store only property IDs
+                    setBookmarkedProperties(response.data.map((property) => property.propertyID)); 
                 } catch (error) {
                     console.error("Error fetching bookmarked properties:", error);
                 }
@@ -85,7 +85,7 @@ function ListPage() {
                     { userID: userData.userID, propertyID },
                     { headers: { Authorization: `Bearer ${userData.token}` } }
                 );
-                setBookmarkedProperties([...bookmarkedProperties, propertyID]); // Update state
+                setBookmarkedProperties([...bookmarkedProperties, propertyID]); 
                 toast.success("Property bookmarked successfully!");
             }
         } catch (error) {
@@ -96,6 +96,7 @@ function ListPage() {
 
     return (
         <div className="listPage">
+            <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
             <div className="listContainer">
                 <div className="wrapper">
                     {properties.map(property => (

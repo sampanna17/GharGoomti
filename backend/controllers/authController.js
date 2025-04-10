@@ -10,7 +10,7 @@ import cloudinary from '../config/cloudinary.js';
 dotenv.config();
 
 export const registerUser = async (req, res) => {
-  const { userFirstName, userLastName, userContact, userEmail, userAge, password, role } = req.body;
+  const { userFirstName, userLastName, userContact, userEmail, userAge, password, role, profileimage } = req.body;
 
   // Validate the incoming data
   if (!userFirstName || !userLastName || !userContact || !userEmail || !userAge || !password || !role) {
@@ -53,13 +53,14 @@ export const registerUser = async (req, res) => {
       userAge,
       password: hashedPassword,
       role,
+      profileimage: profileimage || null,
       otp,
       otpExpiry,
     };
 
     // Insert the new user into the database
     const [results] = await db.query(
-      'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, profile_picture, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
       [
         userData.userFirstName,
         userData.userLastName,
@@ -68,6 +69,7 @@ export const registerUser = async (req, res) => {
         userData.userAge,
         userData.password,
         userData.role,
+        userData.profileimage,
         userData.otp,
         userData.otpExpiry,
       ]
@@ -90,12 +92,51 @@ export const registerUser = async (req, res) => {
     res.status(201).json({
       message: 'User registered successfully and email sent!',
       data: results,
+      data: {
+        userId: results.insertId,
+        userEmail: userData.userEmail,
+        hasProfileImage: userData.profileimage !== null},
     });
   } catch (error) {
     console.error('Error during registration:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// export const registerUser = async (req, res) => {
+//   try {
+//     const { userFirstName, userLastName, userContact, userEmail, userAge, password, role } = req.fields;
+//     const { image } = req.files;
+
+//     const result = await cloudinary.uploader.upload(image.path, {
+//       folder: "property_files",
+//       resource_type: "auto"
+//     });
+
+//     // Generate OTP and hash password
+//     const otp = Math.floor(100000 + Math.random() * 900000);
+//     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+//       .toISOString()
+//       .slice(0, 19)
+//       .replace('T', ' ');
+
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(password, salt);
+
+
+//     const query = 'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, profile_picture, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+//     const [dbResult] = await db.query(query, [userFirstName, userLastName, userContact, userEmail, userAge, hashedPassword, role, result.secure_url, otp, otpExpiry]);
+
+
+//   } catch (error) {
+//     console.error('Registration failed:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Registration failed',
+//       error: process.env.NODE_ENV === 'development' ? error.message : undefined
+//     });
+//   }
+// }
 
 
 export const verifyEmail = async (req, res) => {

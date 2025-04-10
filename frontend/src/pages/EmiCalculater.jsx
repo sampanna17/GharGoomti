@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Loan from "../assets/loan.png";
 
 const HomeLoanEMICalculator = () => {
@@ -12,9 +12,12 @@ const HomeLoanEMICalculator = () => {
     const [isMonthly, setIsMonthly] = useState(true);
 
     const calculateEMI = () => {
+        setEmi(null);
+        setTotalInterest(null);
+        setTotalAmount(null);
         if (!loanAmount || !interestRate || !loanTenure) {
             toast.error("Please fill all the fields.", {
-                autoClose: 5000,
+                autoClose: 2000,
                 position: "top-right",
             });
             return;
@@ -23,21 +26,21 @@ const HomeLoanEMICalculator = () => {
         // Validate loan amount and interest rate
         if (parseFloat(loanAmount) < 10000) {
             toast.error("Loan amount must be greater than 10,000.", {
-                autoClose: 5000,
+                autoClose: 2000,
                 position: "top-right",
             });
             return;
         }
         if (parseFloat(interestRate) <= 1) {
             toast.error("Interest rate must be greater than 1%.", {
-                autoClose: 5000,
+                autoClose: 2000,
                 position: "top-right",
             });
             return;
         }
         if (parseFloat(loanTenure) >= 30) {
             toast.error("Tenure must be less than 30 Years", {
-                autoClose: 5000,
+                autoClose: 2000,
                 position: "top-right",
             });
             return;
@@ -59,7 +62,7 @@ const HomeLoanEMICalculator = () => {
                 (Math.pow(1 + rateOfInterest, tenureInMonths) - 1);
             totalInterestAmount = emiAmount * tenureInMonths - principal;
             totalAmountToPay = emiAmount * tenureInMonths;
-            setEmi(Math.round(emiAmount)); 
+            setEmi(Math.round(emiAmount));
         } else {
             // For Yearly EMI
             const yearlyRate = parseFloat(interestRate) / 100; // Yearly Interest Rate
@@ -75,13 +78,14 @@ const HomeLoanEMICalculator = () => {
         setTotalInterest(Math.round(totalInterestAmount)); // Total Interest Payable (rounded)
         setTotalAmount(Math.round(totalAmountToPay)); // Total Amount to Pay (rounded)
         toast.success("EMI calculated successfully!", {
-            autoClose: 5000,
+            autoClose: 2000,
             position: "top-right",
         });
     };
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-white px-4 sm:px-6 lg:px-8 mt-12">
+            <ToastContainer position="top-right" autoClose={2000} limit={1} newestOnTop={false} closeOnClick />
             <div className="flex flex-col lg:flex-row w-full max-w-screen-xl p-6 bg-white rounded-lg shadow-lg border-x-gray-100 border-t">
                 {/* Left section: EMI calculator form */}
                 <div className="flex-1 p-6 bg-white rounded-lg lg:mr-6 mb-6 lg:mb-0">
@@ -107,7 +111,7 @@ const HomeLoanEMICalculator = () => {
                                 onChange={(e) => setLoanAmount(e.target.value)}
                                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none"
                                 placeholder="Enter loan amount"
-                                
+
                             />
                         </div>
 
@@ -223,10 +227,22 @@ const HomeLoanEMICalculator = () => {
                     </div>
                     <div className="space-y-10 -mt-2 flex-1">
                         {/* Loan EMI */}
+                        {/* <div className="flex flex-col">
+                            <h3 className="block text-gray-700 font-semibold mb-2">Loan EMI</h3>
+                            <p className="text-2xl font-semibold">
+                                <span className="text-sm text-gray-500">NRS</span> {emi && emi}
+                            </p>
+                        </div> */}
+            
                         <div className="flex flex-col">
                             <h3 className="block text-gray-700 font-semibold mb-2">Loan EMI</h3>
                             <p className="text-2xl font-semibold">
                                 <span className="text-sm text-gray-500">NRS</span> {emi && emi}
+                                {emi && ( 
+                                    <span className="text-sm text-gray-500">
+                                        {isMonthly ? " /month" : " /year"}
+                                    </span>
+                                )}
                             </p>
                         </div>
                         <div className="border-b border-gray-300"></div>
