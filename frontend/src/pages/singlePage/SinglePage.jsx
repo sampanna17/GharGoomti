@@ -32,6 +32,7 @@ function SinglePage() {
     const [user, setUser] = useState(null);
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [selectedTime, setSelectedTime] = useState('');
+    const [appointment, setAppointment] = useState(null);
 
     const userData = Cookies.get('user_data') ? JSON.parse(Cookies.get('user_data')) : null;
 
@@ -69,10 +70,24 @@ function SinglePage() {
             }
         };
 
+        const checkAppointment = async () => {
+            if (userData?.userID) {
+                try {
+                    const res = await axios.get(`http://localhost:8000/api/appointment/check/${userData.userID}/${id}`);
+                    if (res.data.exists) {
+                        setAppointment(res.data.appointment);
+                    }
+                } catch (error) {
+                    console.error('Error checking appointment:', error);
+                }
+            }
+        };
+
         checkBookmarkStatus();
         getsingleproperty();
         getallimages();
         getUserDetails();
+        checkAppointment();
 
     }, [id, userData])
 
@@ -138,6 +153,11 @@ function SinglePage() {
             },);
 
             toast.success("Appointment booked successfully!");
+            setAppointment({
+                appointmentDate: visitDate,
+                appointmentTime: selectedTime,
+                status: 'Pending'
+            });
             setVisitDate("");
             setSelectedTime("");
 
@@ -302,55 +322,74 @@ function SinglePage() {
                         </button>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4 border border-gray-300 rounded-lg p-3 bg-white">
-                        {/* Left side - Date and Time */}
-                        <div className="flex items-center gap-4">
-                            {/* Date Picker */}
-                            <div className="relative">
-                                <input
-                                    id="customDateInput"
-                                    type="date"
-                                    value={visitDate}
-                                    onChange={handleDateChange}
-                                    className="p-2 pr-8 outline-none bg-transparent border border-gray-300 rounded-md appearance-none w-40"
-                                />
-                                <img
-                                    src={Calendar}
-                                    alt="Calendar"
-                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                                    style={{ width: "18px", height: "18px" }}
-                                    onClick={() => document.getElementById("customDateInput").showPicker()}
-                                />
-                            </div>
-
-                            {/* Time Selector */}
-                            <div className="relative">
-                                <select
-                                    value={selectedTime}
-                                    onChange={(e) => setSelectedTime(e.target.value)}
-                                    className="p-2 pl-3 pr-8 outline-none bg-transparent border border-gray-300 rounded-md appearance-none w-36"
-                                >
-                                    <option value="">Select Time</option>
-                                    {['10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'].map((time) => (
-                                        <option key={time} value={time}>{time}</option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
+                    {appointment ? (
+                        <div className="flex items-center justify-between gap-4 border border-gray-300 rounded-lg p-3 bg-white">
+                            <div className="flex flex-col">
+                                <p className="font-medium">You have booked an appointment on:</p>
+                                <p>
+                                    {new Date(appointment.appointmentDate).toLocaleDateString()} at {appointment.appointmentTime}
+                                </p>
+                                <p className="mt-1">
+                                    Status: <span className={`font-semibold ${appointment.status === 'Confirmed' ? 'text-green-600' :
+                                            appointment.status === 'Pending' ? 'text-yellow-600' :
+                                                'text-red-600'
+                                        }`}>
+                                        {appointment.status}
+                                    </span>
+                                </p>
                             </div>
                         </div>
+                    ) : (
+                        <div className="flex items-center justify-between gap-4 border border-gray-300 rounded-lg p-3 bg-white">
+                            {/* Left side - Date and Time */}
+                            <div className="flex items-center gap-4">
+                                {/* Date Picker */}
+                                <div className="relative">
+                                    <input
+                                        id="customDateInput"
+                                        type="date"
+                                        value={visitDate}
+                                        onChange={handleDateChange}
+                                        className="p-2 pr-8 outline-none bg-transparent border border-gray-300 rounded-md appearance-none w-40"
+                                    />
+                                    <img
+                                        src={Calendar}
+                                        alt="Calendar"
+                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                                        style={{ width: "18px", height: "18px" }}
+                                        onClick={() => document.getElementById("customDateInput").showPicker()}
+                                    />
+                                </div>
 
-                        {/* Right side - Book Button */}
-                        <button
-                            onClick={handleBookVisit}
-                            className="p-2 bg-white text-gray-700 border-l border-gray-300 pl-5 pr-3 rounded-r-lg"
-                        >
-                            Book a Visit
-                        </button>
-                    </div>
+                                {/* Time Selector */}
+                                <div className="relative">
+                                    <select
+                                        value={selectedTime}
+                                        onChange={(e) => setSelectedTime(e.target.value)}
+                                        className="p-2 pl-3 pr-8 outline-none bg-transparent border border-gray-300 rounded-md appearance-none w-36"
+                                    >
+                                        <option value="">Select Time</option>
+                                        {['10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'].map((time) => (
+                                            <option key={time} value={time}>{time}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right side - Book Button */}
+                            <button
+                                onClick={handleBookVisit}
+                                className="p-2 bg-white text-gray-700 border-l border-gray-300 pl-5 pr-3 rounded-r-lg"
+                            >
+                                Book a Visit
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div >

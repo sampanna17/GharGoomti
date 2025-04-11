@@ -1,5 +1,5 @@
 import express from 'express';
-import { addAppointment, getSellerPendingAppointments, getUserAppointments, removeAppointment, updateAppointmentStatus } from '../controllers/appointmentController.js';
+import { addAppointment, checkAppointment, getAppointmentDetails, getSellerPendingAppointments, getUserAppointments, removeAppointment, updateAppointment, updateAppointmentStatus } from '../controllers/appointmentController.js';
 
 const router = express.Router();
 
@@ -9,5 +9,9 @@ router.get('/user/:userID', getUserAppointments);
 router.put('/seller/:appointmentID/status', updateAppointmentStatus);
 router.delete('/:appointmentID', removeAppointment);
 router.get('/seller/:userID', getSellerPendingAppointments);  
+router.get('/check/:userID/:propertyID', checkAppointment);
+
+router.put('/:appointmentID', updateAppointment); 
+router.get('/:appointmentID', getAppointmentDetails); 
 
 export default router;

@@ -508,9 +508,6 @@ export default function AddProperty() {
                     isLoading: false
                 });
 
-                if (!isSeller) {
-                    toast.error("You need seller privileges to access this page");
-                }
             } catch (error) {
                 console.error('Error parsing user data:', error);
                 setAuthStatus({

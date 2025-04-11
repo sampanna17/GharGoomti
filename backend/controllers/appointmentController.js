@@ -377,3 +377,198 @@ export const updateAppointmentStatus = async (req, res) => {
     }
 };
 
+// Controller to check if user has an appointment for a property
+export const checkAppointment = async (req, res) => {
+    const { userID, propertyID } = req.params;
+
+    if (!userID || !propertyID) {
+        return res.status(400).json({ message: 'User ID and Property ID are required.' });
+    }
+
+    try {
+        // Check if user exists
+        const [user] = await db.query('SELECT userID FROM users WHERE userID = ?', [userID]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if property exists
+        const [property] = await db.query('SELECT propertyID FROM property WHERE propertyID = ?', [propertyID]);
+        if (property.length === 0) {
+            return res.status(404).json({ message: 'Property not found.' });
+        }
+
+        // Check for existing appointment
+        const [appointments] = await db.query(`
+            SELECT 
+                appointmentID, 
+                appointmentDate, 
+                appointmentTime, 
+                appointmentStatus,
+                DATE_FORMAT(appointmentDate, '%Y-%m-%d') as formattedDate,
+                DATE_FORMAT(appointmentTime, '%h:%i %p') as formattedTime
+            FROM appointment 
+            WHERE userID = ? 
+            AND propertyID = ?
+            AND appointmentStatus != 'cancelled'
+            ORDER BY appointmentDate DESC, appointmentTime DESC
+            LIMIT 1
+        `, [userID, propertyID]);
+
+        if (appointments.length > 0) {
+            const appointment = appointments[0];
+            return res.status(200).json({ 
+                exists: true,
+                appointment: {
+                    appointmentDate: appointment.formattedDate,
+                    appointmentTime: appointment.formattedTime,
+                    status: appointment.appointmentStatus
+                }
+            });
+        }
+
+        res.status(200).json({ exists: false });
+    } catch (error) {
+        console.error('Error checking appointment:', error);
+        res.status(500).json({ message: 'Error checking appointment status.', error });
+    }
+};
+
+// Add to your appointmentController.js
+
+// Get single appointment details
+export const getAppointmentDetails = async (req, res) => {
+    const { appointmentID } = req.params;
+
+    try {
+        const [appointments] = await db.query(`
+            SELECT a.*, 
+                   p.propertyTitle, p.propertyAddress,
+                   CONCAT(u.userFirstName, ' ', u.userLastName) as otherPartyName,
+                   u.userContact as otherPartyContact
+            FROM appointment a
+            JOIN property p ON a.propertyID = p.propertyID
+            JOIN users u ON 
+                (${req.user.role === 'buyer' ? 'p.userID' : 'a.userID'} = u.userID)
+            WHERE a.appointmentID = ?
+        `, [appointmentID]);
+
+        if (appointments.length === 0) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        const appointment = appointments[0];
+        
+        // Format for frontend
+        const response = {
+            ...appointment,
+            formattedDate: new Date(appointment.appointmentDate).toISOString().split('T')[0],
+            formattedTime: formatTimeForDisplay(appointment.appointmentTime)
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        console.error('Error fetching appointment:', error);
+        res.status(500).json({ message: 'Error fetching appointment details', error });
+    }
+};
+
+// Update appointment date/time
+export const updateAppointment = async (req, res) => {
+    const { appointmentID } = req.params;
+    const { appointmentDate, appointmentTime, userID, userRole } = req.body;
+
+    if (!appointmentDate || !appointmentTime || !userID || !userRole) {
+        return res.status(400).json({ message: 'Date, time, user ID, and user role are required' });
+    }
+
+    try {
+        // Get the appointment details first
+        const [appointment] = await db.query(
+            'SELECT a.*, p.userID as propertyOwner FROM appointment a JOIN property p ON a.propertyID = p.propertyID WHERE a.appointmentID = ?',
+            [appointmentID]
+        );
+
+        if (appointment.length === 0) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        // Authorization check
+        if (userRole === 'buyer') {
+            if (appointment[0].userID !== parseInt(userID)) {
+                return res.status(403).json({ message: 'Unauthorized to update this appointment' });
+            }
+        } else if (userRole === 'seller') {
+            if (appointment[0].propertyOwner !== parseInt(userID)) {
+                return res.status(403).json({ message: 'Unauthorized to update this appointment' });
+            }
+        } else {
+            return res.status(403).json({ message: 'Invalid user role' });
+        }
+
+        // Check if status allows editing
+        if (appointment[0].appointmentStatus !== 'pending') {
+            return res.status(400).json({ 
+                message: 'Only pending appointments can be modified' 
+            });
+        }
+
+        // Parse the date and time to ensure proper format
+        const formattedDate = new Date(appointmentDate).toISOString().split('T')[0];
+        const formattedTime = appointmentTime.includes(':') 
+            ? appointmentTime.split(':').slice(0, 2).join(':')
+            : appointmentTime;
+
+        // Check time slot availability
+        const isAvailable = await isTimeSlotAvailable(
+            appointment[0].propertyID,
+            formattedDate,
+            formattedTime,
+            appointmentID
+        );
+
+        if (!isAvailable) {
+            return res.status(409).json({ 
+                message: 'This time slot is already booked' 
+            });
+        }
+
+        // Update the appointment
+        await db.query(`
+            UPDATE appointment 
+            SET appointmentDate = ?, appointmentTime = ?
+            WHERE appointmentID = ?
+        `, [`${formattedDate}T00:00:00.000Z`, `${formattedTime}:00`, appointmentID]);
+
+        // Get updated appointment for response
+        const [updated] = await db.query(`
+            SELECT * FROM appointment WHERE appointmentID = ?
+        `, [appointmentID]);
+
+        res.status(200).json({
+            message: 'Appointment updated successfully',
+            appointment: updated[0]
+        });
+    } catch (error) {
+        console.error('Error updating appointment:', error);
+        res.status(500).json({ message: 'Error updating appointment', error: error.message });
+    }
+};
+
+// Helper function to format time for display
+function formatTimeForDisplay(time) {
+    if (!time) return '';
+    
+    // If already in AM/PM format, return as-is
+    if (time.includes('AM') || time.includes('PM')) {
+        return time;
+    }
+    
+    // Convert 24-hour to 12-hour format
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours, 10);
+    const suffix = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    
+    return `${displayHour}:${minutes} ${suffix}`;
+}

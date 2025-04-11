@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation  } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import Card from "../components/Card/card"; // Import your Card component
+import Card from "../components/Card/card";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import AppointmentsTab from "../components/appointmentTab";
+
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ const UserProfile = () => {
   const location = useLocation();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
+
 
   const [user, setUser] = useState({
     userFirstName: "",
@@ -21,8 +24,20 @@ const UserProfile = () => {
     role: "",
   });
 
+
   const [isEditing, setIsEditing] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const userData = Cookies.get("user_data");
+  let userId = null;
+
+  try {
+    const parsed = JSON.parse(userData);
+    userId = parsed?.userID;
+  } catch (e) {
+    console.error("Invalid cookie data", e);
+  }
+
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -138,6 +153,21 @@ const UserProfile = () => {
       console.error("Error updating profile:", err);
     }
   };
+
+  useEffect(() => {
+    const stateTab = location.state?.activeTab;
+
+    // Get from query if no state
+    const queryParams = new URLSearchParams(location.search);
+    const queryTab = queryParams.get('activeTab');
+
+    // Prioritize state over query
+    if (stateTab) {
+      setActiveTab(stateTab);
+    } else if (queryTab) {
+      setActiveTab(queryTab);
+    }
+  }, [location]);
 
   return (
     <div className="mt-28">
@@ -315,8 +345,15 @@ const UserProfile = () => {
 
             {activeTab === 'appointments' && (
               <div className="p-4 bg-gray-50 rounded-lg">
-                <p>This is appointments content</p>
-                <p>Appointment details would go here</p>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                  {user.role === 'buyer' ? 'Your Appointments' : 'Property Viewings'}
+                </h2>
+                <AppointmentsTab
+                  userID={userId}
+                  role={user.role}
+                  userFirstName={user.userFirstName}
+                  userLastName={user.userLastName}
+                />
               </div>
             )}
           </div>

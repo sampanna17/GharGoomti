@@ -47,7 +47,7 @@ export const sendAppointmentRequestEmail = async (to, sellerName, appointmentDet
                     </div>
                     
                     <p>Please log in to your account to confirm or cancel this appointment:</p>
-                    <a href="${process.env.FRONTEND_URL}/seller/appointments" 
+                    <a href="${process.env.FRONTEND_URL}/profile?activeTab=appointments"
                        style="background-color: #4CAF50; color: white; padding: 10px 20px; 
                               text-decoration: none; border-radius: 5px; display: inline-block;">
                         Manage Appointments
