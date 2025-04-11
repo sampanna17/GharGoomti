@@ -14,7 +14,6 @@ const UserProfile = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
 
-
   const [user, setUser] = useState({
     userFirstName: "",
     userLastName: "",
@@ -22,6 +21,7 @@ const UserProfile = () => {
     userEmail: "",
     userAge: "",
     role: "",
+    profile_picture: null
   });
 
 
@@ -66,7 +66,16 @@ const UserProfile = () => {
         const response = await axios.get(`http://localhost:8000/api/user/${userId}`);
 
         if (response.status === 200) {
-          setUser(response.data);
+          // setUser(response.data);
+          setUser({
+            userFirstName: response.data.userFirstName,
+            userLastName: response.data.userLastName,
+            userContact: response.data.userContact,
+            userEmail: response.data.userEmail,
+            userAge: response.data.userAge,
+            role: response.data.role,
+            profile_picture: response.data.profile_picture
+          });
           setIsLoggedIn(true);
         } else {
           console.error("Failed to fetch user data.");
@@ -241,36 +250,57 @@ const UserProfile = () => {
             {activeTab === 'user' && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="space-y-6">
-                  {/* Grid layout for form fields */}
+                  {/* Profile Picture Display */}
+                  <div className="flex flex-col items-center">
+                    <div className="relative">
+                      <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                        {user.profile_picture ? (
+                          <img
+                            src={user.profile_picture}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-gray-500 text-4xl">
+                            {user.userFirstName?.charAt(0)}{user.userLastName?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rest of your form fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {Object.keys(user).map((key) => (
-                      <div className="space-y-2" key={key}>
-                        <label className="block text-sm font-medium text-gray-700">
-                          {key.replace(/([A-Z])/g, ' $1')
-                            .replace(/^./, (str) => str.toUpperCase())
-                            .trim()}
-                        </label>
-                        <input
-                          type={key === "userAge" ? "number" :
-                            key === "userEmail" ? "email" : "text"}
-                          name={key}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                    transition duration-150"
-                          value={user[key]}
-                          onChange={handleUserChange}
-                          readOnly={!isEditing}
-                        />
-                      </div>
+                      key !== 'profile_picture' && ( // Exclude profile_picture from the form fields
+                        <div className="space-y-2" key={key}>
+                          <label className="block text-sm font-medium text-gray-700">
+                            {key.replace(/([A-Z])/g, ' $1')
+                              .replace(/^./, (str) => str.toUpperCase())
+                              .trim()}
+                          </label>
+                          <input
+                            type={key === "userAge" ? "number" :
+                              key === "userEmail" ? "email" : "text"}
+                            name={key}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  transition duration-150"
+                            value={user[key]}
+                            onChange={handleUserChange}
+                            readOnly={!isEditing}
+                          />
+                        </div>
+                      )
                     ))}
                   </div>
 
                   <div className="flex justify-center">
                     <button
                       className="px-8 py-3 bg-blue-600 text-white font-medium rounded-md
-                hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 
-                focus:ring-offset-2 transition-colors duration-200 shadow-sm
-                min-w-[200px] text-center"
+            hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 
+            focus:ring-offset-2 transition-colors duration-200 shadow-sm
+            min-w-[200px] text-center"
                       onClick={isEditing ? handleSave : () => setIsEditing(true)}
                     >
                       {isEditing ? "Save Profile" : "Edit Profile"}

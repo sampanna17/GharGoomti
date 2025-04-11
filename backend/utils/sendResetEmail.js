@@ -8,20 +8,20 @@ const sendResetEmail = async ({ email, subject, message }) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'piyasampanna@gmail.com', 
-      pass: 'ugdalllppzqdwcjd', 
+      user: 'piyasampanna@gmail.com',
+      pass: 'ugdalllppzqdwcjd',
     },
   });
 
   const mailOptions = {
-    from: 'piyasampanna@gmail.com', 
-    to: email, 
+    from: 'piyasampanna@gmail.com',
+    to: email,
     subject,
-    html: message, 
+    html: message,
   };
 
   try {
-    await transporter.sendMail(mailOptions); 
+    await transporter.sendMail(mailOptions);
     console.log('Email sent successfully!');
     return true;
   } catch (error) {
@@ -45,9 +45,11 @@ const mailTemplate = (content, buttonUrl, buttonText) => {
           text-align: left;
         ">
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-            <img src="${logoUrl}" alt="Ghar Goomti Logo" style="height: 50px; margin-right: 10px;">
-            <span style="font-size: 22px; font-weight: bold; color: #444394;">Ghar Gomti</span>
-          </div
+            <div style="display: flex; align-items: center;">
+              <img src="https://res.cloudinary.com/dszzmdq4a/image/upload/v1744388438/LOGO_xiswbu.png" alt="Ghar Goomti Logo" style="height: 50px; margin-right: 10px;">
+              <span style="font-size: 22px; font-weight: bold; color: #444394;">Ghar Goomti</span>
+            </div>
+          </div>  
           
           <!-- Horizontal Line -->
           <hr style="border: none; height: 1px; background-color: #ddd; margin: 20px 0;">

@@ -10,14 +10,21 @@ import cloudinary from '../config/cloudinary.js';
 dotenv.config();
 
 export const registerUser = async (req, res) => {
-  const { userFirstName, userLastName, userContact, userEmail, userAge, password, role, profileimage } = req.body;
-
-  // Validate the incoming data
-  if (!userFirstName || !userLastName || !userContact || !userEmail || !userAge || !password || !role) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-
   try {
+    const { userFirstName, userLastName, userContact, userEmail, userAge, password, role } = req.fields;
+    const { image } = req.files || {}; // Handle case where req.files might be undefined
+
+    // Validate the incoming data
+    if (!userFirstName || !userLastName || !userContact || !userEmail || !userAge || !password || !role) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
     // Check if the email already exists
     const [existingUser] = await db.query(
       'SELECT * FROM users WHERE userEmail = ?',
@@ -26,6 +33,22 @@ export const registerUser = async (req, res) => {
 
     if (existingUser.length > 0) {
       return res.status(400).json({ message: 'Email already exists' });
+    }
+
+    let profileImageUrl = null;
+    
+    // Upload image to Cloudinary if provided
+    if (image && image.path) {
+      try {
+        const result = await cloudinary.uploader.upload(image.path, {
+          folder: "user_profile_images",
+          resource_type: "auto"
+        });
+        profileImageUrl = result.secure_url;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(500).json({ error: 'Failed to upload profile image' });
+      }
     }
 
     // Generate a random 6-digit OTP
@@ -44,62 +67,47 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Prepare the data object
-    const userData = {
-      userFirstName,
-      userLastName,
-      userContact,
-      userEmail,
-      userAge,
-      password: hashedPassword,
-      role,
-      profileimage: profileimage || null,
-      otp,
-      otpExpiry,
-    };
-
     // Insert the new user into the database
     const [results] = await db.query(
-      'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, profile_picture, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
+      'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, profile_picture, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
-        userData.userFirstName,
-        userData.userLastName,
-        userData.userContact,
-        userData.userEmail,
-        userData.userAge,
-        userData.password,
-        userData.role,
-        userData.profileimage,
-        userData.otp,
-        userData.otpExpiry,
+        userFirstName.toString(), // Ensure string conversion
+        userLastName.toString(),
+        userContact.toString(),
+        userEmail.toString(),
+        parseInt(userAge), // Ensure age is a number
+        hashedPassword,
+        role.toString(),
+        profileImageUrl,
+        otp.toString(),
+        otpExpiry
       ]
     );
 
-    // Update Database with OTP details
-    const [updateResult] = await db.query(
-      'UPDATE users SET otp = ?, otp_expiry = ? WHERE userEmail = ?',
-      [otp, otpExpiry, userEmail]
-    );
-
-    if (updateResult.affectedRows === 0) {
-      return res.status(404).json({ error: "User not found. OTP not updated." });
-    }
-
-    console.log("OTP updated successfully in the database.");
     // Send the email with OTP
-    await sendemail(userEmail, 'Registration Successful', otp);
+    try {
+      await sendemail(userEmail, 'Registration Successful', otp.toString());
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      // Don't fail the registration if email fails
+    }
 
     res.status(201).json({
       message: 'User registered successfully and email sent!',
-      data: results,
       data: {
         userId: results.insertId,
-        userEmail: userData.userEmail,
-        hasProfileImage: userData.profileimage !== null},
+        userEmail: userEmail,
+        hasProfileImage: profileImageUrl !== null
+      },
     });
   } catch (error) {
     console.error('Error during registration:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Internal server error',
+      message: 'Registration failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

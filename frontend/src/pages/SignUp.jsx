@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import Logo from "../assets/LOGO.png";
-import { FaEye, FaEyeSlash, FaRegUser  } from "react-icons/fa6";
+import { FaEye, FaEyeSlash, FaRegUser } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "../css/SignUp.css";
@@ -35,6 +35,9 @@ const Signup = () => {
         });
       };
       reader.readAsDataURL(file);
+    } else {
+      // Handle case where file selection was cancelled
+      removeImage();
     }
   };
 
@@ -48,9 +51,9 @@ const Signup = () => {
       ...formData,
       profileImage: null
     });
-    // Clear file input
+    // Proper way to clear file input
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = null;
     }
   };
 
@@ -121,7 +124,7 @@ const Signup = () => {
       return "You must agree to the terms and conditions.";
     }
 
-    return null; 
+    return null;
   };
 
   const handleSubmit = async (e) => {
@@ -134,21 +137,22 @@ const Signup = () => {
     }
 
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('userFirstName', formData.userFirstName);
+      formDataToSend.append('userLastName', formData.userLastName);
+      formDataToSend.append('userContact', formData.userContact);
+      formDataToSend.append('userEmail', formData.userEmail);
+      formDataToSend.append('userAge', formData.userAge);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('role', 'Buyer');
+
+      if (formData.profileImage) {
+        formDataToSend.append('image', formData.profileImage);
+      }
+
       const response = await fetch("http://localhost:8000/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userFirstName: formData.userFirstName,
-          userLastName: formData.userLastName,
-          userContact: formData.userContact,
-          userEmail: formData.userEmail,
-          userAge: formData.userAge,
-          password: formData.password,
-          role: "Buyer", 
-          profileImage: formData.profileImage
-        }),
+        body: formDataToSend,
       });
 
       const data = await response.json();
@@ -188,26 +192,26 @@ const Signup = () => {
                 >
                   {previewImage ? (
                     <>
-                      <img src={previewImage} alt="Profile Preview" className="w-full h-full object-cover" /> 
+                      <img src={previewImage} alt="Profile Preview" className="w-full h-full object-cover" />
                     </>
                   ) : (
                     <div className="">
-                      <FaRegUser  className="text-gray-500 text-4xl" />
+                      <FaRegUser className="text-gray-500 text-4xl" />
                     </div>
                   )}
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleImageChange}
-                    value={formData.profileImage}
+                    // value={formData.profileImage}
                     accept="image/*"
                     className="hidden"
                   />
                 </div>
                 <p className="text-gray-600 text-sm mt-2 cursor-pointer" onClick={(e) => {
-                e.stopPropagation();
-                removeImage(); 
-              }}>
+                  e.stopPropagation();
+                  removeImage();
+                }}>
                   {previewImage ? "Remove Picture" : "Add profile picture"}
                 </p>
               </div>

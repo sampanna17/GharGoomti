@@ -6,7 +6,7 @@ export const getUser = async (req, res) => {
 
   try {
       const [user] = await db.query(
-          'SELECT userFirstName, userLastName, userContact, userEmail, userAge, role FROM users WHERE userID = ?',
+          'SELECT userFirstName, userLastName, userContact, userEmail, userAge, role, profile_picture FROM users WHERE userID = ?',
           [id]
       );
 
