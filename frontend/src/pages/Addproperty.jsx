@@ -650,7 +650,7 @@ export default function AddProperty() {
             await axios.delete(`http://localhost:8000/api/property/${propertyID}/images/${imageId}`);
             setInputs(prev => ({
                 ...prev,
-                existingImages: prev.existingImages.filter(img => img._id !== imageId)
+                existingImages: prev.existingImages.filter(img => img.imageID !== imageId)  // Changed from _id to imageID
             }));
             toast.success("Image deleted successfully");
         } catch (error) {

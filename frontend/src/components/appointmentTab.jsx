@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer} from 'react-toastify';
 import { FaCalendarAlt, FaClock, FaCheck, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 import Calendar from "../assets/SinglePage/calendar.png";
 import Card from "./Card/card.jsx";
@@ -14,13 +14,20 @@ const AppointmentsTab = ({ userID, role }) => {
 
     const [properties, setProperties] = useState({});
 
+    const isBuyerForThisAppointment = (appointment) => {
+        return appointment.buyerID === userID;
+    };
+
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
                 const response = await axios.get(
                     `http://localhost:8000/api/appointment/user/${userID}`
                 );
+                console.log('API Response:', response.data);
                 setAppointments(response.data.appointments);
+
+               
 
                 const propertyIds = [
                     ...new Set(response.data.appointments.map(a => a.propertyID))
@@ -99,13 +106,14 @@ const AppointmentsTab = ({ userID, role }) => {
 
     const handleUpdateAppointment = async (appointmentId) => {
         try {
+            const appointment = appointments.find(a => a.appointmentID === appointmentId);
             await axios.put(
                 `http://localhost:8000/api/appointment/${appointmentId}`,
                 {
                     appointmentDate: `${newDate}T${newTime}:00.000Z`,
                     appointmentTime: `${newTime}:00`,
                     userID: userID,
-                    userRole: role
+                    userRole: isBuyerForThisAppointment(appointment) ? 'buyer' : 'seller'
                 }
             );
 
@@ -170,6 +178,7 @@ const AppointmentsTab = ({ userID, role }) => {
 
     return (
         <div className="space-y-6">
+            <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
             {appointments.map((appointment) => (
                 <div key={appointment.appointmentID} className="flex flex-col md:flex-row gap-0">
                     {/* Left side - Appointment details */}
@@ -200,24 +209,31 @@ const AppointmentsTab = ({ userID, role }) => {
                                     </div>
                                     <div className="pt-2 mt-2 border-t text-sm text-gray-600 space-y-2">
                                         <p><strong>Address:</strong> {appointment.propertyAddress}, {appointment.propertyCity}</p>
-                                        {role === 'buyer' ? (
+
+                                        {/* Dynamic display based on user's role in this appointment */}
+                                        {appointment.userRoleInAppointment === 'buyer' ? (
+                                            /* When user is the buyer (even if they're normally a seller) */
                                             <>
-                                                <p><strong>Seller:</strong> {appointment.sellerName}</p>
-                                                <p><strong>Contact:</strong> {appointment.sellerContact}</p>
-                                                <p><strong>Email:</strong> {appointment.sellerEmail}</p>
+                                                <p><strong>Property Owner:</strong> {appointment.sellerName}</p>
+                                                <p><strong>Owner Contact:</strong> {appointment.sellerContact}</p>
+                                                <p><strong>Owner Email:</strong> {appointment.sellerEmail}</p>
                                             </>
                                         ) : (
+                                            /* When user is the seller */
                                             <>
-                                                <p><strong>Buyer:</strong> {appointment.buyerName}</p>
-                                                <p><strong>Contact:</strong> {appointment.buyerContact}</p>
-                                                <p><strong>Email:</strong> {appointment.buyerEmail}</p>
+                                                <p><strong>Visitor:</strong> {appointment.buyerName}</p>
+                                                <p><strong>Visitor Contact:</strong> {appointment.buyerContact}</p>
+                                                <p><strong>Visitor Email:</strong> {appointment.buyerEmail}</p>
                                             </>
                                         )}
+
+                                        {/* Additional appointment details */}
+                                        <p><strong>Status:</strong> {appointment.appointmentStatus}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            {role === 'seller' && (
+                            {appointment.sellerID === userID && (
                                 <div className="flex space-x-2">
                                     {appointment.appointmentStatus === 'pending' && (
                                         <>
@@ -240,7 +256,7 @@ const AppointmentsTab = ({ userID, role }) => {
                                 </div>
                             )}
 
-                            {role === 'buyer' && appointment.appointmentStatus === 'pending' && (
+                            {appointment.buyerID === userID && appointment.appointmentStatus === 'pending' && (
                                 <div className="flex space-x-2">
                                     <button
                                         onClick={() => handleEditClick(appointment)}

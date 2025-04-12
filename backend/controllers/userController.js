@@ -1,44 +1,269 @@
 import db from '../config/db.js';
+import cloudinary from '../config/cloudinary.js';
 
 // **Get User Profile**
 export const getUser = async (req, res) => {
   const { id } = req.params;
 
   try {
-      const [user] = await db.query(
-          'SELECT userFirstName, userLastName, userContact, userEmail, userAge, role, profile_picture FROM users WHERE userID = ?',
-          [id]
-      );
+    const [user] = await db.query(
+      'SELECT userFirstName, userLastName, userContact, userEmail, userAge, role, profile_picture FROM users WHERE userID = ?',
+      [id]
+    );
 
-      if (user.length === 0) {
-          return res.status(404).json({ message: 'User not found.' });
-      }
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
 
-      res.status(200).json(user[0]);
+    res.status(200).json(user[0]);
   } catch (error) {
-      res.status(500).json({ message: 'Error fetching user.', error });
+    res.status(500).json({ message: 'Error fetching user.', error });
   }
 };
 
 // **Update User Profile**
-export const updateUser = (req, res) => {
-    const { userFirstName, userLastName, userContact, userEmail, userAge } = req.body;
-    const userId = req.params.id; 
+// export const updateUser = async (req, res) => {
+//   try {
+//     const userId = req.params.id;
+//     const { userFirstName, userLastName, userContact, userAge } = req.fields;
+//     const { image } = req.files || {};
+
+//     // Check if user exists
+//     const [existingUser] = await db.query(
+//       'SELECT * FROM users WHERE userID = ?',
+//       [userId]
+//     );
+
+//     if (existingUser.length === 0) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+
+//     // Use existing values as defaults for partial updates
+//     const currentUser = existingUser[0];
+//     const updatedFirstName = userFirstName || currentUser.userFirstName;
+//     const updatedLastName = userLastName || currentUser.userLastName;
+//     const updatedContact = userContact || currentUser.userContact;
+//     const updatedAge = userAge || currentUser.userAge;
+
+//     // Validate phone number
+//     if (userContact) {
+//       const phoneRegex = /^\d{10}$/; // Exactly 10 digits
+//       if (!phoneRegex.test(userContact)) {
+//         return res.status(400).json({ error: 'Phone number must be 10 digits' });
+//       }
+//     }
+
+//     // Validate age range if provided (13-120 years)
+//     if (userAge) {
+//       const ageNum = parseInt(userAge);
+//       if (isNaN(ageNum)) {
+//         return res.status(400).json({ error: 'Age must be a number' });
+//       }
+//       if (ageNum < 13 || ageNum > 120) {
+//         return res.status(400).json({ error: 'Age must be between 13 and 120' });
+//       }
+//     }
+
+//     let profileImageUrl = currentUser.profile_picture;
     
-    if (!userFirstName || !userLastName || !userContact || !userEmail || !userAge) {
-      return res.status(400).json({ message: "All fields are required." });
+//     // Handle image update if provided
+//     if (image && image.path) {
+//       try {
+//         // Delete old image if exists
+//         if (profileImageUrl) {
+//           const publicId = profileImageUrl.split('/').pop().split('.')[0];
+//           await cloudinary.uploader.destroy(`user_profile_images/${publicId}`);
+//         }
+
+//         // Upload new image
+//         const result = await cloudinary.uploader.upload(image.path, {
+//           folder: "user_profile_images",
+//           resource_type: "auto"
+//         });
+//         profileImageUrl = result.secure_url;
+//       } catch (uploadError) {
+//         console.error('Cloudinary upload error:', uploadError);
+//         return res.status(500).json({ error: 'Failed to update profile image' });
+//       }
+//     }
+
+//     // Update only the provided fields
+//     const [results] = await db.query(
+//       'UPDATE users SET userFirstName = ?, userLastName = ?, userContact = ?, userAge = ?, profile_picture = ? WHERE userID = ?',
+//       [
+//         updatedFirstName.toString(),
+//         updatedLastName.toString(),
+//         updatedContact.toString(),
+//         parseInt(updatedAge),
+//         profileImageUrl,
+//         userId
+//       ]
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'User updated successfully',
+//       data: {
+//         userId,
+//         updatedFields: {
+//           ...(userFirstName && { userFirstName: updatedFirstName }),
+//           ...(userLastName && { userLastName: updatedLastName }),
+//           ...(userContact && { userContact: updatedContact }),
+//           ...(userAge && { userAge: parseInt(updatedAge) }),
+//           ...(image && { hasProfileImage: profileImageUrl !== null })
+//         }
+//       }
+//     });
+
+//   } catch (error) {
+//     console.error('Error during user update:', error);
+//     res.status(500).json({ 
+//       success: false,
+//       error: 'Internal server error',
+//       message: 'Update failed',
+//       details: process.env.NODE_ENV === 'development' ? error.message : undefined
+//     });
+//   }
+// };
+
+export const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { userFirstName, userLastName, userContact, userAge, deleteProfileImage } = req.fields;
+    const { image } = req.files || {};
+
+    // Check if user exists
+    const [existingUser] = await db.query(
+      'SELECT * FROM users WHERE userID = ?',
+      [userId]
+    );
+
+    if (existingUser.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
     }
-  
-    const sql = "UPDATE users SET userFirstName=?, userLastName=?, userContact=?, userEmail=?, userAge=? WHERE userID=?";
-  
-    db.query(sql, [userFirstName, userLastName, userContact, userEmail, userAge, userId], (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: "Error updating user profile" });
+
+    const currentUser = existingUser[0];
+    let profileImageUrl = currentUser.profile_picture;
+
+    // Handle image deletion if flag is set
+    if (deleteProfileImage === 'true' && profileImageUrl) {
+      try {
+        const publicId = profileImageUrl.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`user_profile_images/${publicId}`);
+        profileImageUrl = null;
+      } catch (uploadError) {
+        console.error('Cloudinary deletion error:', uploadError);
+        // Continue with update even if deletion fails
+        profileImageUrl = null;
       }
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "User not found." });
+    }
+
+    // Handle new image upload
+    if (image && image.path) {
+      try {
+        // Delete old image if exists
+        if (profileImageUrl) {
+          const publicId = profileImageUrl.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`user_profile_images/${publicId}`);
+        }
+
+        // Upload new image
+        const result = await cloudinary.uploader.upload(image.path, {
+          folder: "user_profile_images",
+          resource_type: "auto"
+        });
+        profileImageUrl = result.secure_url;
+      } catch (uploadError) {
+        console.error('Cloudinary upload error:', uploadError);
+        return res.status(500).json({ error: 'Failed to update profile image' });
       }
-      res.json({ message: "Profile updated successfully." });
+    }
+
+    // Update user data
+    const [results] = await db.query(
+      'UPDATE users SET userFirstName = ?, userLastName = ?, userContact = ?, userAge = ?, profile_picture = ? WHERE userID = ?',
+      [
+        userFirstName || currentUser.userFirstName,
+        userLastName || currentUser.userLastName,
+        userContact || currentUser.userContact,
+        userAge ? parseInt(userAge) : currentUser.userAge,
+        profileImageUrl,
+        userId
+      ]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'User updated successfully',
+      data: {
+        userId,
+        updatedFields: {
+          userFirstName: userFirstName || currentUser.userFirstName,
+          userLastName: userLastName || currentUser.userLastName,
+          userContact: userContact || currentUser.userContact,
+          userAge: userAge ? parseInt(userAge) : currentUser.userAge,
+          hasProfileImage: profileImageUrl
+        }
+      }
     });
-  };
-  
+
+  } catch (error) {
+    console.error('Error during user update:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Internal server error',
+      message: 'Update failed'
+    });
+  }
+};
+
+export const removeProfileImage = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const [user] = await db.query(
+      'SELECT profile_picture FROM users WHERE userID = ?',
+      [userId]
+    );
+
+    if (user.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const currentImageUrl = user[0].profile_picture;
+
+    if (!currentImageUrl) {
+      return res.status(200).json({ 
+        success: true, 
+        message: 'No profile image to remove' 
+      });
+    }
+
+    try {
+      const publicId = currentImageUrl.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`user_profile_images/${publicId}`);
+    } catch (cloudinaryError) {
+      console.error('Cloudinary deletion error:', cloudinaryError);
+      // Continue even if Cloudinary deletion fails to maintain DB consistency
+    }
+
+    await db.query(
+      'UPDATE users SET profile_picture = NULL WHERE userID = ?',
+      [userId]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile image removed successfully'
+    });
+
+  } catch (error) {
+    console.error('Error removing profile image:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: 'Failed to remove profile image'
+    });
+  }
+};
+

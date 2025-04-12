@@ -37,34 +37,54 @@ function SinglePage() {
     const userData = Cookies.get('user_data') ? JSON.parse(Cookies.get('user_data')) : null;
 
     useEffect(() => {
+        const abortController = new AbortController();
 
         const getUserDetails = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/api/property/${id}/user`);
+                const res = await axios.get(`http://localhost:8000/api/property/${id}/user`, {
+                    signal: abortController.signal
+                });
                 setUser(res.data);
             } catch (error) {
+                if (axios.isCancel(error)) return;
                 console.error('Error fetching user details:', error);
             }
         };
 
         const getsingleproperty = async () => {
-            const res = await axios.get(`http://localhost:8000/api/property/${id}`)
-            setProperty(res.data);
-        }
+            try {
+                const res = await axios.get(`http://localhost:8000/api/property/${id}`, {
+                    signal: abortController.signal
+                });
+                setProperty(res.data);
+            } catch (error) {
+                if (axios.isCancel(error)) return;
+                console.error('Error fetching property:', error);
+            }
+        };
 
         const getallimages = async () => {
-            const res = await axios.get(`http://localhost:8000/api/property/${id}/images`)
-            setPImage(res.data);
-        }
+            try {
+                const res = await axios.get(`http://localhost:8000/api/property/${id}/images`, {
+                    signal: abortController.signal
+                });
+                setPImage(res.data);
+            } catch (error) {
+                if (axios.isCancel(error)) return;
+                console.error('Error fetching images:', error);
+            }
+        };
 
         const checkBookmarkStatus = async () => {
             if (userData?.userID) {
                 try {
                     const response = await axios.get(
-                        `http://localhost:8000/api/bookmark/check/${userData.userID}/${id}`
+                        `http://localhost:8000/api/bookmark/check/${userData.userID}/${id}`,
+                        { signal: abortController.signal }
                     );
                     setIsBookmarked(response.data.isBookmarked);
                 } catch (error) {
+                    if (axios.isCancel(error)) return;
                     console.error("Error checking bookmark status:", error);
                 }
             }
@@ -73,23 +93,30 @@ function SinglePage() {
         const checkAppointment = async () => {
             if (userData?.userID) {
                 try {
-                    const res = await axios.get(`http://localhost:8000/api/appointment/check/${userData.userID}/${id}`);
+                    const res = await axios.get(
+                        `http://localhost:8000/api/appointment/check/${userData.userID}/${id}`,
+                        { signal: abortController.signal }
+                    );
                     if (res.data.exists) {
                         setAppointment(res.data.appointment);
                     }
                 } catch (error) {
+                    if (axios.isCancel(error)) return;
                     console.error('Error checking appointment:', error);
                 }
             }
         };
 
-        checkBookmarkStatus();
         getsingleproperty();
         getallimages();
         getUserDetails();
+        checkBookmarkStatus();
         checkAppointment();
 
-    }, [id, userData])
+        return () => {
+            abortController.abort();
+        };
+    }, [id, userData?.userID]);
 
     const [visitDate, setVisitDate] = useState("");
 
@@ -162,7 +189,7 @@ function SinglePage() {
             setSelectedTime("");
 
         } catch (error) {
-            console.error("Error booking appointment:", error);
+            // console.error("Error booking appointment:", error);
             const errorMessage = error.response?.data?.message || "Failed to book appointment";
             toast.error(errorMessage);
         }

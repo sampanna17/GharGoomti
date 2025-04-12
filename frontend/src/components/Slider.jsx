@@ -167,25 +167,6 @@
 // export default Slider;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useState, useEffect } from "react";
 import LeftArrow from '../assets/left-arrow.png';
 import RightArrow from '../assets/right-arrow.png';
@@ -292,3 +273,4 @@ function Slider({ images = [] }) {
 }
 
 export default Slider;
+

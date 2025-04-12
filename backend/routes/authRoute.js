@@ -9,7 +9,6 @@ const router = express.Router();
 // Routes for authentication
 router.post('/sendmail',sendemail)
 router.post('/register',formidable(), registerUser);
-// router.post('/register', registerUser);
 router.post('/signin', signin);
 router.post("/refresh-token", refreshToken);
 router.post('/google', google);

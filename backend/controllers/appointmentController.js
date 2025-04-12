@@ -170,76 +170,132 @@ export const addAppointment = async (req, res) => {
     }
 };
 
+// export const getUserAppointments = async (req, res) => {
+//     const { userID } = req.params;
+
+//     try {
+//         // Get user role and name
+//         const [user] = await db.query(
+//             'SELECT role, userFirstName, userLastName FROM users WHERE userID = ?', 
+//             [userID]
+//         );
+        
+//         if (user.length === 0) {
+//             return res.status(404).json({ message: 'User not found.' });
+//         }
+
+//         let query;
+//         let params = [userID];
+        
+//         if (user[0].role === 'buyer') {
+//             query = `
+//                 SELECT a.*, 
+//                        p.propertyTitle, p.propertyAddress, p.propertyCity,
+//                        CONCAT(s.userFirstName, ' ', s.userLastName) as sellerName,
+//                        s.userContact as sellerContact,
+//                        s.userEmail as sellerEmail
+//                 FROM appointment a
+//                 JOIN property p ON a.propertyID = p.propertyID
+//                 JOIN users s ON p.userID = s.userID
+//                 WHERE a.userID = ?
+//                 ORDER BY a.appointmentDate DESC
+//             `;
+//         } else if (user[0].role === 'seller') {
+//             query = `
+//                 (SELECT a.*, 
+//                         p.propertyTitle, p.propertyAddress, p.propertyCity,
+//                         CONCAT(b.userFirstName, ' ', b.userLastName) as buyerName,
+//                         b.userContact as buyerContact,
+//                         b.userEmail as buyerEmail
+//                  FROM appointment a
+//                  JOIN property p ON a.propertyID = p.propertyID
+//                  JOIN users b ON a.userID = b.userID
+//                  WHERE p.userID = ?)
+                
+//                 UNION
+                
+//                 (SELECT a.*, 
+//                         p.propertyTitle, p.propertyAddress, p.propertyCity,
+//                         CONCAT(s.userFirstName, ' ', s.userLastName) as sellerName,
+//                         s.userContact as sellerContact,
+//                         s.userEmail as sellerEmail
+//                  FROM appointment a
+//                  JOIN property p ON a.propertyID = p.propertyID
+//                  JOIN users s ON p.userID = s.userID
+//                  WHERE a.userID = ?)
+//                 ORDER BY appointmentDate DESC
+//             `;
+//             params = [userID, userID];
+//         } else {
+//             return res.status(403).json({ message: 'Access denied.' });
+//         }
+
+//         const [appointments] = await db.query(query, params);
+
+//         if (appointments.length === 0) {
+//             return res.status(404).json({ message: 'No appointments found.' });
+//         }
+
+//         res.status(200).json({ 
+//             user: {
+//                 name: `${user[0].userFirstName} ${user[0].userLastName}`,
+//                 role: user[0].role
+//             },
+//             appointments 
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Error retrieving appointments.', error });
+//     }
+// };
+
 export const getUserAppointments = async (req, res) => {
     const { userID } = req.params;
 
     try {
-        // Get user role and name
-        const [user] = await db.query(
+        // Get current user's info
+        const [currentUser] = await db.query(
             'SELECT role, userFirstName, userLastName FROM users WHERE userID = ?', 
             [userID]
         );
         
-        if (user.length === 0) {
+        if (currentUser.length === 0) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        let query;
-        let params = [userID];
-        
-        if (user[0].role === 'buyer') {
-            query = `
-                SELECT a.*, 
-                       p.propertyTitle, p.propertyAddress, p.propertyCity,
-                       CONCAT(s.userFirstName, ' ', s.userLastName) as sellerName,
-                       s.userContact as sellerContact,
-                       s.userEmail as sellerEmail
-                FROM appointment a
-                JOIN property p ON a.propertyID = p.propertyID
-                JOIN users s ON p.userID = s.userID
-                WHERE a.userID = ?
-                ORDER BY a.appointmentDate DESC
-            `;
-        } else if (user[0].role === 'seller') {
-            query = `
-                (SELECT a.*, 
-                        p.propertyTitle, p.propertyAddress, p.propertyCity,
-                        CONCAT(b.userFirstName, ' ', b.userLastName) as buyerName,
-                        b.userContact as buyerContact,
-                        b.userEmail as buyerEmail
-                 FROM appointment a
-                 JOIN property p ON a.propertyID = p.propertyID
-                 JOIN users b ON a.userID = b.userID
-                 WHERE p.userID = ?)
-                
-                UNION
-                
-                (SELECT a.*, 
-                        p.propertyTitle, p.propertyAddress, p.propertyCity,
-                        CONCAT(s.userFirstName, ' ', s.userLastName) as sellerName,
-                        s.userContact as sellerContact,
-                        s.userEmail as sellerEmail
-                 FROM appointment a
-                 JOIN property p ON a.propertyID = p.propertyID
-                 JOIN users s ON p.userID = s.userID
-                 WHERE a.userID = ?)
-                ORDER BY appointmentDate DESC
-            `;
-            params = [userID, userID];
-        } else {
-            return res.status(403).json({ message: 'Access denied.' });
-        }
+        // Unified query that works for both roles and handles sellers-as-buyers
+        const query = `
+            SELECT 
+                a.*,
+                p.propertyTitle, p.propertyAddress, p.propertyCity,
+                a.userID as buyerID,
+                p.userID as sellerID,
+                CONCAT(buyer.userFirstName, ' ', buyer.userLastName) as buyerName,
+                buyer.userContact as buyerContact,
+                buyer.userEmail as buyerEmail,
+                CONCAT(seller.userFirstName, ' ', seller.userLastName) as sellerName,
+                seller.userContact as sellerContact,
+                seller.userEmail as sellerEmail,
+                CASE
+                    WHEN a.userID = ? THEN 'buyer'
+                    WHEN p.userID = ? THEN 'seller'
+                    ELSE 'unknown'
+                END as userRoleInAppointment
+            FROM appointment a
+            JOIN property p ON a.propertyID = p.propertyID
+            JOIN users buyer ON a.userID = buyer.userID   
+            JOIN users seller ON p.userID = seller.userID 
+            WHERE a.userID = ? OR p.userID = ?
+            ORDER BY a.appointmentDate DESC
+        `;
 
-        const [appointments] = await db.query(query, params);
-
-        if (appointments.length === 0) {
-            return res.status(404).json({ message: 'No appointments found.' });
-        }
+        const [appointments] = await db.query(query, [userID, userID, userID, userID]);
 
         res.status(200).json({ 
-            user: {
-                name: `${user[0].userFirstName} ${user[0].userLastName}`,
-                role: user[0].role
+            currentUser: {
+                id: userID,
+                name: `${currentUser[0].userFirstName} ${currentUser[0].userLastName}`,
+                role: currentUser[0].role
             },
             appointments 
         });
@@ -473,7 +529,6 @@ export const getAppointmentDetails = async (req, res) => {
     }
 };
 
-// Update appointment date/time
 export const updateAppointment = async (req, res) => {
     const { appointmentID } = req.params;
     const { appointmentDate, appointmentTime, userID, userRole } = req.body;
@@ -483,27 +538,37 @@ export const updateAppointment = async (req, res) => {
     }
 
     try {
-        // Get the appointment details first
-        const [appointment] = await db.query(
-            'SELECT a.*, p.userID as propertyOwner FROM appointment a JOIN property p ON a.propertyID = p.propertyID WHERE a.appointmentID = ?',
-            [appointmentID]
-        );
+        // Get the appointment details with both buyer and property owner info
+        const [appointment] = await db.query(`
+            SELECT 
+                a.*, 
+                a.userID as buyerID,
+                p.userID as sellerID,
+                a.appointmentStatus
+            FROM appointment a 
+            JOIN property p ON a.propertyID = p.propertyID 
+            WHERE a.appointmentID = ?
+        `, [appointmentID]);
 
         if (appointment.length === 0) {
             return res.status(404).json({ message: 'Appointment not found' });
         }
 
-        // Authorization check
-        if (userRole === 'buyer') {
-            if (appointment[0].userID !== parseInt(userID)) {
-                return res.status(403).json({ message: 'Unauthorized to update this appointment' });
-            }
-        } else if (userRole === 'seller') {
-            if (appointment[0].propertyOwner !== parseInt(userID)) {
-                return res.status(403).json({ message: 'Unauthorized to update this appointment' });
-            }
-        } else {
-            return res.status(403).json({ message: 'Invalid user role' });
+        // Enhanced authorization check
+        const isBuyer = appointment[0].buyerID === parseInt(userID);
+        const isSeller = appointment[0].sellerID === parseInt(userID);
+
+        if (!isBuyer && !isSeller) {
+            return res.status(403).json({ 
+                message: 'Unauthorized - you must be either the buyer or property owner' 
+            });
+        }
+
+        // Validate role consistency
+        if ((userRole === 'buyer' && !isBuyer) || (userRole === 'seller' && !isSeller)) {
+            return res.status(403).json({ 
+                message: 'Role mismatch with appointment ownership' 
+            });
         }
 
         // Check if status allows editing
@@ -513,13 +578,13 @@ export const updateAppointment = async (req, res) => {
             });
         }
 
-        // Parse the date and time to ensure proper format
+        // Parse and validate date/time
         const formattedDate = new Date(appointmentDate).toISOString().split('T')[0];
         const formattedTime = appointmentTime.includes(':') 
             ? appointmentTime.split(':').slice(0, 2).join(':')
             : appointmentTime;
 
-        // Check time slot availability
+        // Check time slot availability (excluding current appointment)
         const isAvailable = await isTimeSlotAvailable(
             appointment[0].propertyID,
             formattedDate,
@@ -536,22 +601,36 @@ export const updateAppointment = async (req, res) => {
         // Update the appointment
         await db.query(`
             UPDATE appointment 
-            SET appointmentDate = ?, appointmentTime = ?
+            SET 
+                appointmentDate = ?, 
+                appointmentTime = ?
+               
             WHERE appointmentID = ?
         `, [`${formattedDate}T00:00:00.000Z`, `${formattedTime}:00`, appointmentID]);
 
         // Get updated appointment for response
         const [updated] = await db.query(`
-            SELECT * FROM appointment WHERE appointmentID = ?
+            SELECT 
+                a.*,
+                p.userID as sellerID
+            FROM appointment a
+            JOIN property p ON a.propertyID = p.propertyID
+            WHERE a.appointmentID = ?
         `, [appointmentID]);
 
         res.status(200).json({
             message: 'Appointment updated successfully',
-            appointment: updated[0]
+            appointment: {
+                ...updated[0],
+                buyerID: appointment[0].buyerID // Ensure buyerID is included in response
+            }
         });
     } catch (error) {
         console.error('Error updating appointment:', error);
-        res.status(500).json({ message: 'Error updating appointment', error: error.message });
+        res.status(500).json({ 
+            message: 'Error updating appointment', 
+            error: error.message 
+        });
     }
 };
 

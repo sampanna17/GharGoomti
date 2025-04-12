@@ -23,7 +23,7 @@
 //     // Validate file types
 //     const validTypes = ["image/jpeg", "image/png", "image/webp"];
 //     const invalidFiles = files.filter(file => !validTypes.includes(file.type));
-    
+
 //     if (invalidFiles.length > 0) {
 //       setError("Only JPG, PNG, and WebP images are allowed");
 //       return;
@@ -51,12 +51,12 @@
 //     setImages(prevImages => {
 //       const updatedImages = prevImages.filter((_, i) => i !== index);
 //       onImagesUploaded(updatedImages);
-      
+
 //       // Adjust current index if needed
 //       if (currentIndex >= updatedImages.length) {
 //         setCurrentIndex(Math.max(0, updatedImages.length - imagesPerPage));
 //       }
-      
+
 //       return updatedImages;
 //     });
 //   }, [currentIndex, imagesPerPage, onImagesUploaded]);
@@ -198,7 +198,7 @@
 //     // Validate file types
 //     const validTypes = ["image/jpeg", "image/png", "image/webp"];
 //     const invalidFiles = files.filter(file => !validTypes.includes(file.type));
-    
+
 //     if (invalidFiles.length > 0) {
 //       setError("Only JPG, PNG, and WebP images are allowed");
 //       return;
@@ -224,7 +224,7 @@
 
 //   const removeImage = useCallback((index) => {
 //     const imageToRemove = allImages[index];
-    
+
 //     if (imageToRemove.isExisting) {
 //       if (onDeleteImage && imageToRemove.imageID) {
 //         onDeleteImage(imageToRemove.imageID);
@@ -236,12 +236,12 @@
 //     setImages(prevImages => {
 //       const updatedImages = prevImages.filter((_, i) => i !== (index - existingImages.length));
 //       onImagesUploaded(updatedImages);
-      
+
 //       // Adjust current index if needed
 //       if (currentIndex >= updatedImages.length + existingImages.length) {
 //         setCurrentIndex(Math.max(0, (updatedImages.length + existingImages.length) - imagesPerPage));
 //       }
-      
+
 //       return updatedImages;
 //     });
 //   }, [currentIndex, imagesPerPage, onImagesUploaded, existingImages.length, onDeleteImage, allImages]);
@@ -355,11 +355,11 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { CloudUpload, X, ChevronLeft, ChevronRight } from "lucide-react";
 
-const ImageUploader = ({ 
-  onImagesUploaded, 
-  clearImages, 
-  existingImages = [], 
-  onDeleteImage 
+const ImageUploader = ({
+  onImagesUploaded,
+  clearImages,
+  existingImages = [],
+  onDeleteImage
 }) => {
   const [images, setImages] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -368,6 +368,7 @@ const ImageUploader = ({
   const imagesPerPage = 2;
 
   // Memoize the combined images to prevent unnecessary re-calculations
+
   const allImages = useMemo(() => [
     ...existingImages.map(img => ({ ...img, isExisting: true })),
     ...images.map(img => ({ file: img, isExisting: false }))
@@ -375,7 +376,7 @@ const ImageUploader = ({
 
   useEffect(() => {
     if (clearImages) {
-      setImages([]); 
+      setImages([]);
     }
   }, [clearImages]);
 
@@ -386,7 +387,7 @@ const ImageUploader = ({
     // Validate file types
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     const invalidFiles = files.filter(file => !validTypes.includes(file.type));
-    
+
     if (invalidFiles.length > 0) {
       setError("Only JPG, PNG, and WebP images are allowed");
       return;
@@ -407,12 +408,12 @@ const ImageUploader = ({
     });
 
     setCurrentIndex(0);
-    setError(""); 
+    setError("");
   }, [onImagesUploaded, existingImages.length]);
 
   const removeImage = useCallback((index) => {
     const imageToRemove = allImages[index];
-    
+
     if (imageToRemove.isExisting) {
       if (onDeleteImage && imageToRemove.imageID) {
         onDeleteImage(imageToRemove.imageID);
@@ -424,12 +425,12 @@ const ImageUploader = ({
     setImages(prevImages => {
       const updatedImages = prevImages.filter((_, i) => i !== (index - existingImages.length));
       onImagesUploaded(updatedImages);
-      
+
       // Adjust current index if needed
       if (currentIndex >= updatedImages.length + existingImages.length) {
         setCurrentIndex(Math.max(0, (updatedImages.length + existingImages.length) - imagesPerPage));
       }
-      
+
       return updatedImages;
     });
   }, [currentIndex, imagesPerPage, onImagesUploaded, existingImages.length, onDeleteImage, allImages]);
