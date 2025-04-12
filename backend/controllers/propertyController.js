@@ -1,6 +1,7 @@
 
 import db from '../config/db.js';
 import cloudinary from '../config/cloudinary.js';
+import { sendPropertyNotificationEmail } from '../utils/subscribeMail.js';
 
 // Add a new property
 export const addProperty = async (req, res) => {
@@ -103,10 +104,43 @@ export const addProperty = async (req, res) => {
             description
         ]);
 
+        const [subscribedUsers] = await db.query(`
+            SELECT userEmail, CONCAT(userFirstName, ' ', userLastName) as userName
+            FROM users
+            WHERE hasSubscribed = TRUE AND userID != ?
+        `, [userID]);
+
+        // Send notifications to subscribed users
+        if (subscribedUsers.length > 0) {
+            const propertyDetails = {
+                title: propertyTitle,
+                price: propertyPrice,
+                address: propertyAddress,
+                city: propertyCity,
+                type: propertyType,
+                for: propertyFor,
+                size: propertySize
+            };
+
+            for (const user of subscribedUsers) {
+                await sendPropertyNotificationEmail(
+                    user.userEmail,
+                    user.userName,
+                    propertyDetails
+                );
+            }
+        }
+
         res.status(201).json({
             message: 'Property added successfully',
-            propertyID: result.insertId
+            propertyID: result.insertId,
+            notifiedUsers: subscribedUsers.length
         });
+
+        // res.status(201).json({
+        //     message: 'Property added successfully',
+        //     propertyID: result.insertId
+        // });
 
     } catch (error) {
         console.error('Error adding property:', error);

@@ -65,7 +65,7 @@ export const getUser = async (req, res) => {
 //     }
 
 //     let profileImageUrl = currentUser.profile_picture;
-    
+
 //     // Handle image update if provided
 //     if (image && image.path) {
 //       try {
@@ -209,7 +209,7 @@ export const updateUser = async (req, res) => {
 
   } catch (error) {
     console.error('Error during user update:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Internal server error',
       message: 'Update failed'
@@ -233,9 +233,9 @@ export const removeProfileImage = async (req, res) => {
     const currentImageUrl = user[0].profile_picture;
 
     if (!currentImageUrl) {
-      return res.status(200).json({ 
-        success: true, 
-        message: 'No profile image to remove' 
+      return res.status(200).json({
+        success: true,
+        message: 'No profile image to remove'
       });
     }
 
@@ -267,3 +267,64 @@ export const removeProfileImage = async (req, res) => {
   }
 };
 
+// Subscribe endpoint
+export const subscribeToNotifications = async (req, res) => {
+  const userID = req.params.id;
+  if (!userID) {
+    return res.status(400).json({ error: 'Missing user ID in params' });
+  }
+  try {
+    await db.execute(
+      'UPDATE users SET hasSubscribed = TRUE WHERE userID = ?',
+      [userID]
+    );
+    res.status(200).json({ message: 'Successfully subscribed to property notifications' });
+  } catch (error) {
+    console.error('Error subscribing:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Unsubscribe endpoint
+export const unsubscribeFromNotifications = async (req, res) => {
+  const userID = req.params.id;
+
+  try {
+    await db.execute(
+      'UPDATE users SET hasSubscribed = FALSE WHERE userID = ?',
+      [userID]
+    );
+    res.status(200).json({ message: 'Successfully unsubscribed from property notifications' });
+  } catch (error) {
+    console.error('Error unsubscribing:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const checkSubscriptionStatus = async (req, res) => {
+  const userId = req.params.id;
+  
+  if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  try {
+      // Using parameterized query to prevent SQL injection
+      const [user] = await db.query(
+          'SELECT userID, hasSubscribed FROM users WHERE userID = ? LIMIT 1', 
+          [userId]
+      );
+      
+      if (!user || user.length === 0) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.status(200).json({ 
+          isSubscribed: user[0].hasSubscribed === 1, 
+          userId: user[0].userID
+      });
+  } catch (error) {
+      console.error('Error checking subscription status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
