@@ -328,7 +328,6 @@ const UserProfile = () => {
                   </div>
                 )}
 
-
                 {!loading && properties.length === 0 && (
                   <div className="text-center py-8">
                     <p className="text-gray-600">You haven't listed any properties yet.</p>

@@ -207,13 +207,34 @@ function SinglePage() {
                             <div className="user">
                                 {user ? (
                                     <>
-                                        <div className="avatar-placeholder">
+                                        <div className="flex flex-col items-center gap-3">
+                                            {/* Avatar - shows image or initials */}
+                                            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center">
+                                                {user.profile ? (
+                                                    <img
+                                                        src={user.profile}
+                                                        alt="Seller profile"
+                                                        className="!w-20 !h-20 rounded-full object-cover"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <span className="text-lg font-semibold text-gray-700">
+                                                        {user.fullName?.split(' ').map(n => n[0]).join('')}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Seller info */}
+                                            <div>
+                                                <p className="font-medium text-gray-900">Seller: {user.fullName}</p>
+                                                <p className="text-sm text-gray-600">Contact: {user.contact}</p>
+                                            </div>
                                         </div>
-                                        <span>Seller: {user.fullName}</span>
-                                        <p>Contact: {user.contact}</p>
                                     </>
                                 ) : (
-                                    <p>Loading user information...</p>
+                                    <p className="text-gray-500">Loading user information...</p>
                                 )}
                             </div>
                         </div>
@@ -331,8 +352,8 @@ function SinglePage() {
                                 </p>
                                 <p className="mt-1">
                                     Status: <span className={`font-semibold ${appointment.status === 'Confirmed' ? 'text-green-600' :
-                                            appointment.status === 'Pending' ? 'text-yellow-600' :
-                                                'text-red-600'
+                                        appointment.status === 'Pending' ? 'text-yellow-600' :
+                                            'text-red-600'
                                         }`}>
                                         {appointment.status}
                                     </span>

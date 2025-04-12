@@ -125,15 +125,44 @@ export const getProperties = async (req, res) => {
 };
 
 // Get a single property by ID
+// export const getPropertyById = async (req, res) => {
+//     const { id } = req.params;
+
+//     try {
+//         const [property] = await db.query('SELECT * FROM property WHERE propertyID = ?', [id]);
+//         if (property.length === 0) {
+//             return res.status(404).json({ message: 'Property not found.' });
+//         }
+//         res.status(200).json(property[0]);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching property.', error });
+//     }
+// };
+
 export const getPropertyById = async (req, res) => {
     const { id } = req.params;
 
     try {
+        // Fetch property details
         const [property] = await db.query('SELECT * FROM property WHERE propertyID = ?', [id]);
+        
         if (property.length === 0) {
             return res.status(404).json({ message: 'Property not found.' });
         }
-        res.status(200).json(property[0]);
+
+        // Fetch property images
+        const [images] = await db.query(
+            'SELECT imageURL FROM property_image WHERE propertyID = ?', 
+            [id]
+        );
+
+        // Combine the data
+        const propertyWithImages = {
+            ...property[0],
+            images: images.map(img => ({ imageURL: img.imageURL }))
+        };
+
+        res.status(200).json(propertyWithImages);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching property.', error });
     }
@@ -279,7 +308,8 @@ export const getPropertyUser = async (req, res) => {
                 u.userID,
                 u.userFirstName,
                 u.userLastName,
-                u.userContact
+                u.userContact,
+                u.profile_picture
             FROM property p
             JOIN users u ON p.userID = u.userID
             WHERE p.propertyID = ?
@@ -295,7 +325,8 @@ export const getPropertyUser = async (req, res) => {
             firstName: user[0].userFirstName,
             lastName: user[0].userLastName,
             contact: user[0].userContact,
-            fullName: `${user[0].userFirstName} ${user[0].userLastName}`
+            fullName: `${user[0].userFirstName} ${user[0].userLastName}`,
+            profile: user[0].profile_picture,
         });
 
     } catch (error) {
