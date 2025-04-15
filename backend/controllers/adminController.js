@@ -30,3 +30,23 @@ export const getDashboardStats = async (req, res) => {
         });
     }
 };
+
+// controllers/userController.js
+export const deleteUser = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      // First check if user exists
+      const [user] = await db.query('SELECT userID FROM users WHERE userID = ?', [id]);
+      
+      if (user.length === 0) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+  
+      // Delete the user
+      await db.query('DELETE FROM users WHERE userID = ?', [id]);
+      res.status(200).json({ message: 'User deleted successfully.' });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting user.', error });
+    }
+  };
