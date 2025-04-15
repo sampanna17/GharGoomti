@@ -438,7 +438,7 @@ import { useState, useEffect, useCallback  } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import Card from "../components/Card/card";
+import Card from "../components/card/card";
 import { FaEdit, FaTrash, FaCamera, FaTimes, FaUser } from "react-icons/fa";
 import AppointmentsTab from "../components/appointmentTab";
 import DeleteConfirmationModal from '../components/DeleteConfirmation';

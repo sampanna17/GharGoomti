@@ -111,41 +111,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// export const registerUser = async (req, res) => {
-//   try {
-//     const { userFirstName, userLastName, userContact, userEmail, userAge, password, role } = req.fields;
-//     const { image } = req.files;
-
-//     const result = await cloudinary.uploader.upload(image.path, {
-//       folder: "property_files",
-//       resource_type: "auto"
-//     });
-
-//     // Generate OTP and hash password
-//     const otp = Math.floor(100000 + Math.random() * 900000);
-//     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
-//       .toISOString()
-//       .slice(0, 19)
-//       .replace('T', ' ');
-
-//     const salt = await bcrypt.genSalt(10);
-//     const hashedPassword = await bcrypt.hash(password, salt);
-
-
-//     const query = 'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, profile_picture, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-//     const [dbResult] = await db.query(query, [userFirstName, userLastName, userContact, userEmail, userAge, hashedPassword, role, result.secure_url, otp, otpExpiry]);
-
-
-//   } catch (error) {
-//     console.error('Registration failed:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Registration failed',
-//       error: process.env.NODE_ENV === 'development' ? error.message : undefined
-//     });
-//   }
-// }
-
 
 export const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;

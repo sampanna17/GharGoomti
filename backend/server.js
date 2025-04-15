@@ -8,6 +8,9 @@ import userRoute from './routes/userRoute.js';
 import db from './config/db.js'
 import propertyroute from './routes/PropertyRoute.js';
 import appointmentroute from './routes/appointmentRoute.js';
+import adminroute from './routes/adminRoute.js'
+import sellerroute from './routes/sellerRoute.js'
+
 dotenv.config();
 
 //connecting db
@@ -38,6 +41,10 @@ app.use('/api/auth', authroute);
 app.use('/api/user', userRoute);
 app.use('/api', propertyroute);
 app.use('/api/appointment', appointmentroute);
+app.use('/api/admin', adminroute);
+app.use('/api/seller', sellerroute);
+// app.use('/api/chats', chatRoute);
+// app.use('/api/messgaes', messgaeRoute);
 
 const PORT = 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

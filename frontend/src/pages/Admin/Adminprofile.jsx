@@ -1,39 +1,162 @@
-import { useState } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaMapMarkerAlt, FaCamera } from "react-icons/fa";
+import { useState, useCallback, useEffect } from "react";
+import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaMapMarkerAlt, FaCamera, FaTimes, FaEdit } from "react-icons/fa";
 import { MdSave } from "react-icons/md";
 import Sidebar from "../../components/AdminSideBar";
 import Navbar from "../../components/AdminNav";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 const AdminProfile = () => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
-    const [age, setAge] = useState("");
-    const [address, setAddress] = useState("");
-    const [profilePicture, setProfilePicture] = useState(
-    );
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        age: "",
+        role: ""
+    });
 
-    const handleProfilePictureChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePicture(reader.result);
-            };
-            reader.readAsDataURL(file);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [initialData, setInitialData] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const getAdminData = () => {
+        try {
+            const adminData = Cookies.get("user_data");
+            return adminData ? JSON.parse(adminData) : null;
+        } catch (e) {
+            console.error("Error parsing admin data:", e);
+            return null;
         }
     };
 
-    const handleSave = () => {
-        alert("Profile Updated Successfully!");
+    const adminData = getAdminData();
+    const adminId = adminData?.userID;
+
+    const fetchAdminProfile = useCallback(async () => {
+        if (!adminId) return;
+
+        try {
+            const response = await axios.get(`http://localhost:8000/api/user/${adminId}`);
+            if (response.status === 200) {
+                const data = response.data;
+                setInitialData(data);
+                setFormData({
+                    firstName: data.userFirstName || "",
+                    lastName: data.userLastName || "",
+                    email: data.userEmail || "",
+                    phone: data.userContact || "",
+                    age: data.userAge || "",
+                    role: data.role || ""
+                });
+                setImagePreview(data.profile_picture || null);
+            }
+        } catch (err) {
+            console.error("Error fetching admin data:", err);
+            toast.error("Failed to load profile data");
+        }
+    }, [adminId]);
+
+    useEffect(() => {
+        fetchAdminProfile();
+    }, [fetchAdminProfile]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.match('image.*')) {
+            setSelectedImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        } else {
+            toast.error("Please select a valid image file");
+        }
     };
 
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSave = async () => {
+        setIsSubmitting(true);
+        try {
+            const formDataToSend = new FormData();
+
+            // Append all form data
+            formDataToSend.append('userFirstName', formData.firstName);
+            formDataToSend.append('userLastName', formData.lastName);
+            formDataToSend.append('userContact', formData.phone);
+            formDataToSend.append('userAge', formData.age);
+
+            // Handle image changes
+            if (selectedImage) {
+                formDataToSend.append('image', selectedImage);
+            } else if (!imagePreview) {
+                // If no preview and no selected image, we're removing the image
+                formDataToSend.append('deleteProfileImage', 'true');
+            }
+
+            const response = await axios.put(
+                `http://localhost:8000/api/user/${adminId}`,
+                formDataToSend,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success("Profile updated successfully");
+                // Update the initial data with new data
+                setInitialData(response.data);
+                // If there's a new profile picture, update it
+                if (response.data.profile_picture) {
+                    setImagePreview(response.data.profile_picture);
+                }
+                setSelectedImage(null);
+                setIsEditing(false);
+            }
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            toast.error(err.response?.data?.message || "Failed to update profile");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const cancelEdit = () => {
+        setIsEditing(false);
+        if (initialData) {
+            setFormData({
+                firstName: initialData.userFirstName || "",
+                lastName: initialData.userLastName || "",
+                email: initialData.userEmail || "",
+                phone: initialData.userContact || "",
+                age: initialData.userAge || "",
+                role: initialData.role || ""
+            });
+            setImagePreview(initialData.profile_picture || null);
+        }
+    };
     return (
         <div className="flex">
             <Sidebar />
             <div className="flex-1">
-                <Navbar />
+                <Navbar
+                    firstName={adminData?.userFirstName || formData.firstName}
+                    lastName={adminData?.userLastName || formData.lastName}
+                />
                 <div className="p-6 bg-gray-100 ">
                     {/* Admin Profile Section */}
                     <div className="bg-white rounded-lg shadow-lg p-6 ">
@@ -41,33 +164,40 @@ const AdminProfile = () => {
 
                         <div className="flex justify-center mb-4">
                             {/* Profile Picture */}
-                            <div className="relative flex justify-center items-center">
-                                {profilePicture ? (
-                                    <img
-                                        src={profilePicture}
-                                        alt="Profile Logo"
-                                        className="w-28 h-28 rounded-full object-cover border-4 border-blue-500"
-                                    />
-                                ) : (
-                                    <div className="w-28 h-28 flex justify-center items-center rounded-full border-4 border-blue-500 bg-blue-100">
-                                        <FaUser className="text-4xl text-blue-500" />
+                            <div className="relative group">
+                                <div className="w-32 h-32 rounded-full flex items-centerjustify-center overflow-hidden">
+                                    {imagePreview ? (
+                                        <img
+                                            src={imagePreview}
+                                            alt="Profile"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <FaUser className="text-4xl" />
+                                    )}
+                                </div>
+
+                                {isEditing && (
+                                    <div className="absolute inset-0 rounded-full bg-black bg-opacity-30 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <label className="cursor-pointer p-2 text-white hover:text-blue-200 transition-colors">
+                                            <FaCamera className="text-2xl" />
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleImageChange}
+                                            />
+                                        </label>
+                                        {imagePreview && (
+                                            <button
+                                                onClick={removeImage}
+                                                className="p-2 text-white hover:text-red-200 transition-colors"
+                                            >
+                                                <FaTimes className="text-xl" />
+                                            </button>
+                                        )}
                                     </div>
                                 )}
-
-                                {/* Profile Picture Change Button */}
-                                <label
-                                    htmlFor="profilePic"
-                                    className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 cursor-pointer"
-                                >
-                                    <FaCamera />
-                                </label>
-                                <input
-                                    type="file"
-                                    id="profilePic"
-                                    accept="image/*"
-                                    onChange={handleProfilePictureChange}
-                                    className="hidden"
-                                />
                             </div>
                         </div>
 
@@ -84,10 +214,12 @@ const AdminProfile = () => {
                                     <input
                                         type="text"
                                         id="firstName"
-                                        value={firstName}
-                                        onChange={(e) => setFirstName(e.target.value)}
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleInputChange}
                                         className="w-auto p-2 outline-none"
                                         placeholder="Enter your first name"
+                                        readOnly={!isEditing}
                                     />
                                 </div>
 
@@ -100,10 +232,12 @@ const AdminProfile = () => {
                                     <input
                                         type="email"
                                         id="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
                                         className="w-full p-2 outline-none"
                                         placeholder="Enter your email"
+                                        readOnly
                                     />
                                 </div>
 
@@ -116,10 +250,12 @@ const AdminProfile = () => {
                                     <input
                                         type="text"
                                         id="age"
-                                        value={age}
-                                        onChange={(e) => setAge(e.target.value)}
+                                        name="age"
+                                        value={formData.age}
+                                        onChange={handleInputChange}
                                         className="w-full p-2 outline-none"
                                         placeholder="Enter your age"
+                                        readOnly={!isEditing}
                                     />
                                 </div>
                             </div>
@@ -135,10 +271,12 @@ const AdminProfile = () => {
                                     <input
                                         type="text"
                                         id="lastName"
-                                        value={lastName}
-                                        onChange={(e) => setLastName(e.target.value)}
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleInputChange}
                                         className="w-full p-2 outline-none"
                                         placeholder="Enter your last name"
+                                        readOnly={!isEditing}
                                     />
                                 </div>
 
@@ -151,33 +289,29 @@ const AdminProfile = () => {
                                     <input
                                         type="text"
                                         id="phone"
-                                        value={phone}
-                                        onChange={(e) => {
-                                            // Ensure the phone number starts with +977-
-                                            if (!e.target.value.startsWith("+977-")) {
-                                                setPhone("+977-" + e.target.value.slice(5)); // Keep the user input after +977-
-                                            } else {
-                                                setPhone(e.target.value);
-                                            }
-                                        }}
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
                                         className="w-full p-2 outline-none"
                                         placeholder="Enter your phone number"
+                                        readOnly={!isEditing}
                                     />
                                 </div>
 
-                                {/* Address */}
-                                <label htmlFor="address" className="text-sm font-semibold text-gray-600">
-                                    Address
+                                {/* Role */}
+                                <label htmlFor="role" className="text-sm font-semibold text-gray-600">
+                                    Role
                                 </label>
                                 <div className="flex items-center border-b border-gray-300 mb-4">
                                     <FaMapMarkerAlt className="text-gray-500 mr-2" />
                                     <input
                                         type="text"
-                                        id="address"
-                                        value={address}
-                                        onChange={(e) => setAddress(e.target.value)}
+                                        id="role"
+                                        name="role"
+                                        value={formData.role}
+                                        onChange={handleInputChange}
                                         className="w-full p-2 outline-none"
-                                        placeholder="Enter your address"
+                                        readOnly
                                     />
                                 </div>
                             </div>
@@ -185,12 +319,30 @@ const AdminProfile = () => {
 
                         {/* Save Button */}
                         <div className="mt-0">
-                            <button
-                                onClick={handleSave}
-                                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-blue-600 transition"
-                            >
-                                <MdSave className="mr-2" /> Save Changes
-                            </button>
+                            {!isEditing ? (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-blue-600 transition"
+                                >
+                                    <FaEdit className="mr-2" /> Edit Profile
+                                </button>
+                            ) : (
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={isSubmitting}
+                                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-blue-600 transition disabled:opacity-70"
+                                    >
+                                        <MdSave className="mr-2" /> {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                    <button
+                                        onClick={cancelEdit}
+                                        className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-gray-600 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

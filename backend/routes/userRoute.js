@@ -15,5 +15,4 @@ router.put('/:id/subscribe', subscribeToNotifications);
 router.put('/:id/unsubscribe', unsubscribeFromNotifications);
 router.get('/:id/subscription-status', checkSubscriptionStatus);
 
-
 export default router;

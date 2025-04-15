@@ -484,6 +484,24 @@ export default function AddProperty() {
     const navigate = useNavigate();
     const { propertyID } = useParams();
 
+    const RequestSellerButton = () => {
+        return (
+            <button
+                onClick={() => navigate('/home')}
+                className="group relative mt-4 px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
+            >
+                <span className="relative z-10">Request for Seller</span>
+    
+                {/* Animated outline elements - increased border width to 3px */}
+                <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
+                <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
+                <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
+                <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
+            </button>
+        );
+    };
+    
+
     // Authentication check
     useEffect(() => {
         const checkAuth = () => {
@@ -533,8 +551,8 @@ export default function AddProperty() {
                 const imagesResponse = await axios.get(`http://localhost:8000/api/property/${propertyID}/images`);
                 const propertyImages = imagesResponse.data.map(img => ({
                     imageID: img.imageID,
-                    imageUrl: img.imageURL  
-                  }))
+                    imageUrl: img.imageURL
+                }))
                 console.log("Fetched images:", propertyImages);
 
                 setInputs({
@@ -554,7 +572,7 @@ export default function AddProperty() {
                     size: property.propertySize.toString(),
                     description: property.description,
                     images: [],
-                    existingImages: propertyImages 
+                    existingImages: propertyImages
                 });
 
             } catch (error) {
@@ -768,12 +786,7 @@ export default function AddProperty() {
                 <p className="text-red-600 text-lg font-semibold">
                     You are not a seller. Request the admin to become a seller.
                 </p>
-                <button
-                    onClick={() => navigate('/home')}
-                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                    Go Back to Home
-                </button>
+                <RequestSellerButton />
             </div>
         );
     }

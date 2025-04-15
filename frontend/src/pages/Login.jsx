@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useContext } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie';
 import Image from "../assets/image.png";
@@ -6,12 +6,14 @@ import ImageUP from "../assets/image-up.png";
 import Logo from "../assets/LOGO.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import OAuth from "../components/OAuth";
 import "../css/Login.css";
+import { UserContext } from '../context/UserContext.jsx';
 
 
 const Login = () => {
+  const { refreshUserData } = useContext(UserContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +21,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const toastOptions = {
-    autoClose: 3000,
+    autoClose: 1000,
     position: "top-right",
     limit: 1,
     newestOnTop: false,
@@ -62,7 +64,14 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("isLoggedIn", "true");
 
-      navigate("/home");
+      // navigate("/home");
+      refreshUserData();
+
+      if (user.role === 'admin') {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/home");
+      }
     } catch (err) {
       console.error("Login error:", err);
       toast.error(err.response?.data?.error || "Unable to log in. Please try again.", toastOptions);
@@ -71,6 +80,7 @@ const Login = () => {
 
   return (
     <div className="login-main">
+      <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
       <div className="login-left">
         <img src={Image} alt="image" className="center-image" />
         <img src={ImageUP} alt="image" className="corner-image" />
