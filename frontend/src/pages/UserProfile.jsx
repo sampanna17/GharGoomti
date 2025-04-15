@@ -523,7 +523,6 @@ const UserProfile = () => {
       setProperties(response.data.success ? response.data.properties : []);
     } catch (err) {
       console.error("Error fetching properties:", err);
-      toast.error("Failed to load properties");
     } finally {
       setLoading(false);
     }

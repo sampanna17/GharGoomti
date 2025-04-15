@@ -1,5 +1,6 @@
+
 // import { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
+// import { useNavigate, useParams } from "react-router-dom";
 // import axios from "axios";
 // import { toast, ToastContainer } from "react-toastify";
 // import FloatingLabelInput from "../components/FloatingLabel";
@@ -7,6 +8,7 @@
 // import "leaflet/dist/leaflet.css";
 // import ImageUploader from "../components/ImageUploader";
 // import Cookies from 'js-cookie';
+// import { FaSpinner } from "react-icons/fa";
 
 // const INITIAL_FORM_STATE = {
 //     title: "",
@@ -22,6 +24,7 @@
 //     type: "",
 //     property: "",
 //     images: [],
+//     existingImages: [],
 //     petPolicy: "",
 //     size: "",
 //     description: "",
@@ -30,6 +33,7 @@
 // const PROPERTY_TYPES = ["Apartment", "Building", "Flat"];
 // const PROPERTY_FOR = ["Rent", "Sale"];
 // const PET_POLICIES = ["Available", "Not Available"];
+
 
 // function LocationPicker({ setLatitude, setLongitude }) {
 //     useMapEvents({
@@ -72,11 +76,87 @@
 //         isLoading: true
 //     });
 //     const [isSubmitting, setIsSubmitting] = useState(false);
+//     const [isLoadingProperty, setIsLoadingProperty] = useState(false);
+//     const [isEditMode, setIsEditMode] = useState(false);
 //     const navigate = useNavigate();
+//     const { propertyID } = useParams();
+
+//     const [sellerRequestStatus, setSellerRequestStatus] = useState(null);
+
+//     const RequestSellerButton = () => {
+//         const handleRequestSeller = async () => {
+//             try {
+//                 const userData = Cookies.get('user_data');
+//                 if (!userData) {
+//                     toast.error("User data not found");
+//                     return;
+//                 }
+
+//                 const parsedUser = JSON.parse(userData);
+//                 const response = await axios.post('http://localhost:8000/api/seller/request', {
+//                     userID: parsedUser.userID
+//                 });
+
+//                 if (response.data.message) {
+//                     setSellerRequestStatus('pending');
+//                     toast.success(response.data.message);
+//                 }
+//             } catch (error) {
+//                 console.error("Error requesting seller status:", error);
+//                 setSellerRequestStatus('error');
+//                 toast.error(error.response?.data?.message || "Failed to submit seller request");
+//             }
+//         };
+
+//         if (sellerRequestStatus === 'pending') {
+//             return (
+//                 <div className="mt-4">
+//                     <p className="text-green-600 mb-2">
+//                         Your request is pending. Please wait for admin response.
+//                     </p>
+//                     <FaSpinner className="animate-spin text-blue-800" />
+//                 </div>
+//             );
+//         }
+
+//         if (sellerRequestStatus === 'rejected') {
+//             return (
+//                 <div className="mt-4">
+//                     <p className="text-red-600">
+//                         Your seller request was rejected. You can try again.
+//                     </p>
+//                     <button
+//                         onClick={handleRequestSeller}
+//                         className="group relative mt-2 px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
+//                     >
+//                         <span className="relative z-10">Request Again</span>
+//                         <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
+//                         <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
+//                         <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
+//                         <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
+//                     </button>
+//                 </div>
+//             );
+//         }
+
+//         return (
+//             <button
+//                 onClick={handleRequestSeller}
+//                 className="group relative mt-4 px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
+//             >
+//                 <span className="relative z-10">Request for Seller</span>
+//                 <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
+//                 <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
+//                 <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
+//                 <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
+//             </button>
+//         );
+//     };
 
 //     // Authentication check
+//     // Update your existing auth check useEffect
 //     useEffect(() => {
-//         const checkAuth = () => {
+//         const checkAuth = async () => {
 //             const userData = Cookies.get('user_data');
 
 //             if (!userData) {
@@ -90,6 +170,20 @@
 
 //             try {
 //                 const parsedUser = JSON.parse(userData);
+
+//                 if (!parsedUser.role || parsedUser.role !== 'seller') {
+//                     const statusResponse = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
+//                     if (statusResponse.data.requestStatus === 'Approved') {
+//                         // Update the user data in cookies
+//                         const updatedUser = {
+//                             ...parsedUser,
+//                             role: 'seller'
+//                         };
+//                         Cookies.set('user_data', JSON.stringify(updatedUser));
+//                         parsedUser.role = 'seller';
+//                     }
+//                 }
+                
 //                 const isSeller = parsedUser?.role === 'seller';
 
 //                 setAuthStatus({
@@ -99,7 +193,12 @@
 //                 });
 
 //                 if (!isSeller) {
-//                     toast.error("You need seller privileges to access this page");
+//                     const response = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
+//                     if (response.data.requestStatus === 'Pending') {
+//                         setSellerRequestStatus('pending');
+//                     } else if (response.data.requestStatus === 'Rejected') {
+//                         setSellerRequestStatus('rejected');
+//                     }
 //                 }
 //             } catch (error) {
 //                 console.error('Error parsing user data:', error);
@@ -114,6 +213,112 @@
 
 //         checkAuth();
 //     }, []);
+
+//     // Add this useEffect hook right after your existing auth check useEffect
+//     useEffect(() => {
+//         let intervalId;
+
+//         if (sellerRequestStatus === 'pending') {
+//             // Check seller status every 5 seconds
+//             intervalId = setInterval(async () => {
+//                 try {
+//                     const userData = Cookies.get('user_data');
+//                     if (!userData) return;
+
+//                     const parsedUser = JSON.parse(userData);
+//                     const response = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
+
+//                     if (response.data.requestStatus === 'Approved') {
+//                         // Update the user data in cookies
+//                         const updatedUser = {
+//                             ...parsedUser,
+//                             role: 'seller'
+//                         };
+//                         Cookies.set('user_data', JSON.stringify(updatedUser));
+
+//                         const checkAuth = async () => {
+//                             setAuthStatus({
+//                                 isLoggedIn: true,
+//                                 isSeller: true,
+//                                 isLoading: false
+//                             });
+//                         };
+
+//                         await checkAuth();
+
+//                         // Update state
+//                         setAuthStatus({
+//                             isLoggedIn: true,
+//                             isSeller: true,
+//                             isLoading: false
+//                         });
+//                         setSellerRequestStatus('approved');
+//                         clearInterval(intervalId);
+//                         toast.success("Your seller request has been approved!");
+//                     } else if (response.data.requestStatus === 'Rejected') {
+//                         setSellerRequestStatus('rejected');
+//                         clearInterval(intervalId);
+//                         toast.error("Your seller request has been rejected");
+//                     }
+//                 } catch (error) {
+//                     console.error("Error checking seller status:", error);
+//                 }
+//             }, 5000); // Check every 5 seconds
+//         }
+
+//         return () => {
+//             if (intervalId) clearInterval(intervalId);
+//         };
+//     }, [sellerRequestStatus]);
+
+//     useEffect(() => {
+//         // Fetch property data for editing
+//         const fetchPropertyData = async () => {
+//             setIsLoadingProperty(true);
+//             try {
+//                 const response = await axios.get(`http://localhost:8000/api/property/${propertyID}`);
+//                 const property = response.data;
+
+//                 const imagesResponse = await axios.get(`http://localhost:8000/api/property/${propertyID}/images`);
+//                 const propertyImages = imagesResponse.data.map(img => ({
+//                     imageID: img.imageID,
+//                     imageUrl: img.imageURL
+//                 }))
+//                 console.log("Fetched images:", propertyImages);
+
+//                 setInputs({
+//                     title: property.propertyTitle,
+//                     price: property.propertyPrice.toString(),
+//                     address: property.propertyAddress,
+//                     city: property.propertyCity,
+//                     latitude: property.latitude.toString(),
+//                     longitude: property.longitude.toString(),
+//                     bedroom: property.bedrooms.toString(),
+//                     bathroom: property.bathrooms.toString(),
+//                     kitchen: property.kitchens.toString(),
+//                     hall: property.halls.toString(),
+//                     type: property.propertyType,
+//                     property: property.propertyFor,
+//                     petPolicy: property.petPolicy,
+//                     size: property.propertySize.toString(),
+//                     description: property.description,
+//                     images: [],
+//                     existingImages: propertyImages
+//                 });
+
+//             } catch (error) {
+//                 console.error("Error fetching property:", error);
+//                 toast.error("Failed to load property data");
+//             } finally {
+//                 setIsLoadingProperty(false);
+//             }
+//         };
+
+//         if (propertyID) {
+//             setIsEditMode(true);
+//             fetchPropertyData();
+//         }
+//     }, [propertyID]);
 
 //     // Handlers
 //     const handleImagesUploaded = (newImages) => {
@@ -159,7 +364,6 @@
 //             const value = inputs[validation.field];
 //             const num = parseFloat(value);
 
-
 //             if (isNaN(num) || num < validation.min || (validation.max && num > validation.max)) {
 //                 return validation.message || `Invalid value for ${validation.field}`;
 //             }
@@ -176,8 +380,8 @@
 //             return "Please select a valid pet policy.";
 //         }
 
-//         // Validate images
-//         if (inputs.images.length < 4) {
+//         // Validate images (only for new properties)
+//         if (!isEditMode && inputs.images.length < 4) {
 //             return "Please upload at least 4 images.";
 //         }
 
@@ -187,6 +391,21 @@
 //         }
 
 //         return null;
+//     };
+
+//     // Handle image deletion
+//     const handleDeleteImage = async (imageId) => {
+//         try {
+//             await axios.delete(`http://localhost:8000/api/property/${propertyID}/images/${imageId}`);
+//             setInputs(prev => ({
+//                 ...prev,
+//                 existingImages: prev.existingImages.filter(img => img.imageID !== imageId)  // Changed from _id to imageID
+//             }));
+//             toast.success("Image deleted successfully");
+//         } catch (error) {
+//             console.error("Error deleting image:", error);
+//             toast.error("Failed to delete image");
+//         }
 //     };
 
 //     // Form submission
@@ -226,38 +445,56 @@
 //                 description: inputs.description
 //             };
 
-//             const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
+//             if (isEditMode) {
+//                 // Update existing property
+//                 await axios.put(`http://localhost:8000/api/property/${propertyID}`, propertyData);
 
-//             if (propertyResponse.status === 201) {
-//                 const propertyID = propertyResponse.data.propertyID;
+//                 // Upload new images if any
+//                 if (inputs.images.length > 0) {
+//                     await Promise.all(inputs.images.map(async (image) => {
+//                         const formData = new FormData();
+//                         formData.append("image", image);
+//                         return axios.post(
+//                             `http://localhost:8000/api/property/${propertyID}/images`,
+//                             formData,
+//                             { headers: { "Content-Type": "multipart/form-data" } }
+//                         );
+//                     }));
+//                 }
 
-//                 // Upload images in parallel
-//                 await Promise.all(inputs.images.map(async (image) => {
-//                     const formData = new FormData();
-//                     formData.append("image", image);
-//                     return axios.post(
-//                         `http://localhost:8000/api/property/${propertyID}/images`,
-//                         formData,
-//                         { headers: { "Content-Type": "multipart/form-data" } }
-//                     );
-//                 }));
-
-//                 toast.success("Property added successfully!");
-//                 setInputs(INITIAL_FORM_STATE);
-//                 setClearImages(true);
+//                 toast.success("Property updated successfully!");
+//                 navigate('/profile', { state: { activeTab: 'listing' } });
 //             } else {
-//                 toast.error("Failed to add property.");
+//                 const propertyResponse = await axios.post("http://localhost:8000/api/property", propertyData);
+
+//                 if (propertyResponse.status === 201) {
+//                     const newPropertyID = propertyResponse.data.propertyID;
+
+//                     // Upload images in parallel
+//                     await Promise.all(inputs.images.map(async (image) => {
+//                         const formData = new FormData();
+//                         formData.append("image", image);
+//                         return axios.post(
+//                             `http://localhost:8000/api/property/${newPropertyID}/images`,
+//                             formData,
+//                             { headers: { "Content-Type": "multipart/form-data" } }
+//                         );
+//                     }));
+
+//                     toast.success("Property added successfully!");
+//                     setInputs(INITIAL_FORM_STATE);
+//                     setClearImages(true);
+//                 }
 //             }
 //         } catch (error) {
-//             console.error("Error adding property:", error);
-//             const errorMessage = error.response?.data?.error || "An error occurred while adding the property.";
+//             console.error("Error saving property:", error);
+//             const errorMessage = error.response?.data?.error || "An error occurred while saving the property.";
 //             toast.error(errorMessage);
 //         } finally {
 //             setIsSubmitting(false);
 //         }
 //     };
 
-//     // Render unauthorized views
 //     if (!authStatus.isLoggedIn) {
 //         return (
 //             <div className="flex flex-col items-center justify-center h-screen text-center">
@@ -274,18 +511,21 @@
 //         );
 //     }
 
-//     if (!authStatus.isSeller) {
+//     if (!authStatus.isSeller && sellerRequestStatus !== 'approved') {
 //         return (
 //             <div className="flex flex-col items-center justify-center h-screen text-center">
 //                 <p className="text-red-600 text-lg font-semibold">
 //                     You are not a seller. Request the admin to become a seller.
 //                 </p>
-//                 <button
-//                     onClick={() => navigate('/home')}
-//                     className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-//                 >
-//                     Go Back to Home
-//                 </button>
+//                 <RequestSellerButton />
+//             </div>
+//         );
+//     }
+
+//     if (isLoadingProperty) {
+//         return (
+//             <div className="flex items-center justify-center h-screen">
+//                 <FaSpinner className="animate-spin text-4xl text-blue-600" />
 //             </div>
 //         );
 //     }
@@ -361,20 +601,35 @@
 //                         disabled={isSubmitting}
 //                         className="col-span-2 bg-[#2E4156] text-white p-2 rounded hover:bg-[#1A2D42] transition duration-300"
 //                     >
-//                         {isSubmitting ? "Submitting..." : "Submit"}
+//                         {isSubmitting ? (
+//                             <span className="flex items-center justify-center">
+//                                 <FaSpinner className="animate-spin mr-2" />
+//                                 {isEditMode ? "Updating..." : "Submitting..."}
+//                             </span>
+//                         ) : isEditMode ? "Update Property" : "Submit"}
 //                     </button>
 //                 </div>
 //             </div>
 
 //             {/* Right Side: Image Uploader & Map */}
 //             <div className="flex-[40%] pl-4">
-//                 <ImageUploader onImagesUploaded={handleImagesUploaded} clearImages={clearImages} />
+//                 <h2 className="text-xl mb-4 ">
+//                     {isEditMode ? "Edit Property" : "Add New Property"}
+//                 </h2>
+//                 <ImageUploader
+//                     onImagesUploaded={handleImagesUploaded}
+//                     clearImages={clearImages}
+//                     existingImages={inputs.existingImages}
+//                     onDeleteImage={isEditMode ? handleDeleteImage : null}
+//                 />
 
 //                 {/* Map Section */}
 //                 <div className="mt-4">
 //                     <h3 className="font-medium mb-2">Select Location</h3>
 //                     <MapContainer
-//                         center={[27.707968, 85.319666]}
+//                         center={inputs.latitude && inputs.longitude ?
+//                             [parseFloat(inputs.latitude), parseFloat(inputs.longitude)] :
+//                             [27.707968, 85.319666]}
 //                         zoom={15}
 //                         scrollWheelZoom
 //                         style={{ height: "250px", width: "100%" }}
@@ -403,6 +658,9 @@
 //     );
 // }
 
+
+
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -414,6 +672,7 @@ import ImageUploader from "../components/ImageUploader";
 import Cookies from 'js-cookie';
 import { FaSpinner } from "react-icons/fa";
 
+// Keep your constants and helper functions as they are
 const INITIAL_FORM_STATE = {
     title: "",
     price: "",
@@ -437,6 +696,7 @@ const INITIAL_FORM_STATE = {
 const PROPERTY_TYPES = ["Apartment", "Building", "Flat"];
 const PROPERTY_FOR = ["Rent", "Sale"];
 const PET_POLICIES = ["Available", "Not Available"];
+
 
 function LocationPicker({ setLatitude, setLongitude }) {
     useMapEvents({
@@ -484,27 +744,11 @@ export default function AddProperty() {
     const navigate = useNavigate();
     const { propertyID } = useParams();
 
-    const RequestSellerButton = () => {
-        return (
-            <button
-                onClick={() => navigate('/home')}
-                className="group relative mt-4 px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
-            >
-                <span className="relative z-10">Request for Seller</span>
-    
-                {/* Animated outline elements - increased border width to 3px */}
-                <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
-                <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
-                <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
-                <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
-            </button>
-        );
-    };
-    
+    const [sellerRequestStatus, setSellerRequestStatus] = useState(null);
 
-    // Authentication check
+    // Authentication check - Refactored for clarity and to fix issues
     useEffect(() => {
-        const checkAuth = () => {
+        const checkAuth = async () => {
             const userData = Cookies.get('user_data');
 
             if (!userData) {
@@ -517,15 +761,76 @@ export default function AddProperty() {
             }
 
             try {
-                const parsedUser = JSON.parse(userData);
-                const isSeller = parsedUser?.role === 'seller';
+                let parsedUser = JSON.parse(userData);
+                let isSeller = parsedUser?.role === 'seller';
+                
+                // First, check if user data in cookie says they're a seller
+                if (isSeller) {
+                    setAuthStatus({
+                        isLoggedIn: true,
+                        isSeller: true,
+                        isLoading: false
+                    });
+                    return; // If already a seller according to cookie, no need to check further
+                }
+                
+                // If not a seller according to cookie, check with the server
+                // This is critical for when the database has been updated but the cookie hasn't
+                try {
+                    const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
+                    
+                    // If server says user is a seller, update the cookie and state
+                    if (userResponse.data && userResponse.data.role === 'seller') {
+                        // Update cookie
+                        const updatedUser = {
+                            ...parsedUser,
+                            role: 'seller'
+                        };
+                        Cookies.set('user_data', JSON.stringify(updatedUser));
+                        
+                        // Update state to reflect seller status
+                        setAuthStatus({
+                            isLoggedIn: true,
+                            isSeller: true,
+                            isLoading: false
+                        });
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error checking user status from server:", error);
+                    // Continue with cookie data if server check fails
+                }
 
+                // If we're here, the user is not a seller - check if they have a pending request
                 setAuthStatus({
                     isLoggedIn: true,
-                    isSeller,
+                    isSeller: false,
                     isLoading: false
                 });
-
+                
+                // Check for seller request status
+                try {
+                    const response = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
+                    if (response.data.requestStatus === 'Pending') {
+                        setSellerRequestStatus('pending');
+                    } else if (response.data.requestStatus === 'Rejected') {
+                        setSellerRequestStatus('rejected');
+                    } else if (response.data.requestStatus === 'Approved') {
+                        // Double-check: if the status is approved but cookie wasn't updated, fix it now
+                        const updatedUser = {
+                            ...parsedUser,
+                            role: 'seller'
+                        };
+                        Cookies.set('user_data', JSON.stringify(updatedUser));
+                        setAuthStatus({
+                            isLoggedIn: true,
+                            isSeller: true,
+                            isLoading: false
+                        });
+                    }
+                } catch (sellerStatusError) {
+                    console.error("Error checking seller request status:", sellerStatusError);
+                }
             } catch (error) {
                 console.error('Error parsing user data:', error);
                 setAuthStatus({
@@ -540,6 +845,252 @@ export default function AddProperty() {
         checkAuth();
     }, []);
 
+    // Real-time polling for seller request status
+    useEffect(() => {
+        let intervalId;
+
+        // Only set up polling if user is logged in but not a seller and has a pending request
+        if (authStatus.isLoggedIn && !authStatus.isSeller && sellerRequestStatus === 'pending') {
+            intervalId = setInterval(async () => {
+                try {
+                    const userData = Cookies.get('user_data');
+                    if (!userData) return;
+
+                    const parsedUser = JSON.parse(userData);
+                    
+                    // First check latest user data from server
+                    const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
+                    
+                    if (userResponse.data && userResponse.data.role === 'seller') {
+                        // User is now a seller in the database - update cookie and state
+                        const updatedUser = {
+                            ...parsedUser,
+                            role: 'seller'
+                        };
+                        Cookies.set('user_data', JSON.stringify(updatedUser));
+                        
+                        setAuthStatus({
+                            isLoggedIn: true,
+                            isSeller: true,
+                            isLoading: false
+                        });
+                        setSellerRequestStatus(null);
+                        clearInterval(intervalId);
+                        toast.success("Your seller request has been approved!");
+                        return;
+                    }
+                    
+                    // If user wasn't found as seller in db, check request status
+                    const response = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
+
+                    if (response.data.requestStatus === 'Approved') {
+                        // Update the user data in cookies
+                        const updatedUser = {
+                            ...parsedUser,
+                            role: 'seller'
+                        };
+                        Cookies.set('user_data', JSON.stringify(updatedUser));
+
+                        // Update state
+                        setAuthStatus({
+                            isLoggedIn: true,
+                            isSeller: true,
+                            isLoading: false
+                        });
+                        setSellerRequestStatus(null);
+                        clearInterval(intervalId);
+                        toast.success("Your seller request has been approved!");
+                    } else if (response.data.requestStatus === 'Rejected') {
+                        setSellerRequestStatus('rejected');
+                        clearInterval(intervalId);
+                        toast.error("Your seller request has been rejected");
+                    }
+                } catch (error) {
+                    console.error("Error checking seller status:", error);
+                }
+            }, 5000); // Check every 5 seconds
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [authStatus.isLoggedIn, authStatus.isSeller, sellerRequestStatus]);
+
+    // RequestSellerButton Component
+    const RequestSellerButton = () => {
+        const handleRequestSeller = async () => {
+            try {
+                const userData = Cookies.get('user_data');
+                if (!userData) {
+                    toast.error("User data not found");
+                    return;
+                }
+
+                const parsedUser = JSON.parse(userData);
+                
+                // First verify the user is not already a seller
+                try {
+                    const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
+                    if (userResponse.data && userResponse.data.role === 'seller') {
+                        // User is already a seller in the database - update cookie and state
+                        const updatedUser = {
+                            ...parsedUser,
+                            role: 'seller'
+                        };
+                        Cookies.set('user_data', JSON.stringify(updatedUser));
+                        
+                        setAuthStatus({
+                            isLoggedIn: true,
+                            isSeller: true,
+                            isLoading: false
+                        });
+                        toast.info("You are already a seller!");
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error checking user status:", error);
+                }
+                
+                // Make the seller request if not already a seller
+                const response = await axios.post('http://localhost:8000/api/seller/request', {
+                    userID: parsedUser.userID
+                });
+
+                if (response.data.message) {
+                    setSellerRequestStatus('pending');
+                    toast.success(response.data.message);
+                }
+            } catch (error) {
+                console.error("Error requesting seller status:", error);
+                if (error.response?.data?.message?.includes("already a seller")) {
+                    // Backend indicates user is already a seller - update cookie and state
+                    const userData = Cookies.get('user_data');
+                    if (userData) {
+                        const parsedUser = JSON.parse(userData);
+                        const updatedUser = {
+                            ...parsedUser,
+                            role: 'seller'
+                        };
+                        Cookies.set('user_data', JSON.stringify(updatedUser));
+                        setAuthStatus({
+                            isLoggedIn: true,
+                            isSeller: true,
+                            isLoading: false
+                        });
+                        toast.info("You are already a seller!");
+                    }
+                } else {
+                    setSellerRequestStatus('error');
+                    toast.error(error.response?.data?.message || "Failed to submit seller request");
+                }
+            }
+        };
+
+        // Force refresh button - for development/recovery use
+        const forceRefresh = async () => {
+            const userData = Cookies.get('user_data');
+            if (!userData) return;
+            
+            const parsedUser = JSON.parse(userData);
+            try {
+                const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
+                if (userResponse.data) {
+                    // Update cookie with fresh data
+                    const updatedUser = {
+                        ...parsedUser,
+                        role: userResponse.data.role
+                    };
+                    Cookies.set('user_data', JSON.stringify(updatedUser));
+                    
+                    // Update state
+                    setAuthStatus({
+                        isLoggedIn: true,
+                        isSeller: userResponse.data.role === 'seller',
+                        isLoading: false
+                    });
+                    
+                    if (userResponse.data.role === 'seller') {
+                        toast.success("Status updated: You are a seller!");
+                    } else {
+                        toast.info("Status updated: You are not a seller yet");
+                    }
+                }
+            } catch (error) {
+                console.error("Error refreshing user status:", error);
+                toast.error("Failed to refresh status");
+            }
+        };
+
+        if (sellerRequestStatus === 'pending') {
+            return (
+                <div className="mt-4">
+                    <p className="text-green-600 mb-2">
+                        Your request is pending. Please wait for admin response.
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                        <FaSpinner className="animate-spin text-blue-800" />
+                        <button 
+                            onClick={forceRefresh}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        if (sellerRequestStatus === 'rejected') {
+            return (
+                <div className="mt-4">
+                    <p className="text-red-600">
+                        Your seller request was rejected. You can try again.
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                        <button
+                            onClick={handleRequestSeller}
+                            className="group relative px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
+                        >
+                            <span className="relative z-10">Request Again</span>
+                            <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
+                            <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
+                            <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
+                            <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
+                        </button>
+                        <button 
+                            onClick={forceRefresh}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="mt-4">
+                <button
+                    onClick={handleRequestSeller}
+                    className="group relative px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
+                >
+                    <span className="relative z-10">Request for Seller</span>
+                    <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
+                    <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
+                    <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
+                    <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
+                </button>
+                <button 
+                    onClick={forceRefresh}
+                    className="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                    Refresh Status
+                </button>
+            </div>
+        );
+    };
+
+    // Your existing useEffect for property data and other functions remain unchanged
     useEffect(() => {
         // Fetch property data for editing
         const fetchPropertyData = async () => {
@@ -764,6 +1315,15 @@ export default function AddProperty() {
         }
     };
 
+    // Fix the rendering condition
+    if (authStatus.isLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <FaSpinner className="animate-spin text-4xl text-blue-600" />
+            </div>
+        );
+    }
+
     if (!authStatus.isLoggedIn) {
         return (
             <div className="flex flex-col items-center justify-center h-screen text-center">
@@ -780,6 +1340,7 @@ export default function AddProperty() {
         );
     }
 
+    // This is the critical fix - we check if user is a seller either by state or by status
     if (!authStatus.isSeller) {
         return (
             <div className="flex flex-col items-center justify-center h-screen text-center">
@@ -791,6 +1352,7 @@ export default function AddProperty() {
         );
     }
 
+    // If we're here, the user is authenticated and is a seller
     if (isLoadingProperty) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -799,6 +1361,7 @@ export default function AddProperty() {
         );
     }
 
+    // Rest of your component with property form remains unchanged
     return (
         <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg border border-gray-300 mt-32 mb-6 flex">
             <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick />
@@ -926,6 +1489,3 @@ export default function AddProperty() {
         </div>
     );
 }
-
-
-

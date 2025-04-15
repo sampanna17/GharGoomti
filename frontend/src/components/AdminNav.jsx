@@ -5,10 +5,12 @@ import { UserContext } from '../context/UserContext.jsx';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import { useNotificationCount } from '../hooks/useNotificationCount';
 
 const Navbar = () => {
-  const { user, setIsLoggedIn , refreshUserData } = useContext(UserContext);
+  const { user, setIsLoggedIn, refreshUserData } = useContext(UserContext);
   const navigate = useNavigate();
+  const { count: notificationCount } = useNotificationCount(); // Destructure count
 
   if (!user) {
     return null; 
@@ -38,15 +40,18 @@ const Navbar = () => {
         Welcome, {user?.userFirstName} {user?.userLastName}
       </h2>
       <div className="flex items-center space-x-4">
-        {/* Notification Icon */}
         <button
           onClick={handleNotificationClick}
           className="relative text-gray-500 hover:text-blue-800"
         >
           <FaBell size={24} />
+          {notificationCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center transform translate-x-1/4 -translate-y-1/4">
+              {notificationCount > 9 ? '9+' : notificationCount}
+            </span>
+          )}
         </button>
 
-        {/* Logout Button */}
         <button 
           onClick={handleLogout}
           className="bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800"
@@ -59,5 +64,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-

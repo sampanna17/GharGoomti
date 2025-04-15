@@ -13,7 +13,7 @@ const UserDetails = () => {
     const [paginatedUsers, setPaginatedProperties] = useState(allUsers.slice(0, 8));
 
     const handlePageChange = (newPaginatedItems) => {
-        setPaginatedProperties(newPaginatedItems);  // Update the paginated properties in the state
+        setPaginatedProperties(newPaginatedItems); 
     };
 
 

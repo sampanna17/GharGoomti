@@ -95,6 +95,68 @@ export const getSellerRequests = async (req, res) => {
     }
 };
 
+// export const updateSellerRequest = async (req, res) => {
+//     const { userID, status } = req.body;
+
+//     if (!userID || !status) {
+//         return res.status(400).json({ 
+//             message: 'User ID and status are required.' 
+//         });
+//     }
+
+//     if (!['Accepted', 'Rejected'].includes(status)) {
+//         return res.status(400).json({ 
+//             message: 'Invalid status. Must be "Accepted" or "Rejected".' 
+//         });
+//     }
+
+//     try {
+//         // Verify the request exists and get user details
+//         const [user] = await db.query(`
+//             SELECT 
+//                 userID, 
+//                 userFirstName, 
+//                 userEmail, 
+//                 requestSeller 
+//             FROM users 
+//             WHERE userID = ? AND requestSeller = 'Pending'
+//         `, [userID]);
+
+//         if (user.length === 0) {
+//             return res.status(404).json({ 
+//                 message: 'No pending seller request found for this user.' 
+//             });
+//         }
+
+//         // Update the request status
+//         await db.query(`
+//             UPDATE users 
+//             SET 
+//                 requestSeller = ?,
+//                 ${status === 'Accepted' ? "role = 'seller'" : ''}
+//             WHERE userID = ?
+//         `, [status, userID]);
+
+//         // Send status update to user
+//         await sendSellerStatusUpdate(
+//             user[0].userEmail,
+//             user[0].userFirstName,
+//             status
+//         );
+
+//         res.status(200).json({ 
+//             message: `Seller request ${status.toLowerCase()} successfully.` 
+//         });
+//     } catch (error) {
+//         console.error('Error in updateSellerRequest:', error);
+//         res.status(500).json({ 
+//             message: 'Error updating seller request.',
+//             error: error.message 
+//         });
+//     }
+// };
+
+
 export const updateSellerRequest = async (req, res) => {
     const { userID, status } = req.body;
 
@@ -128,14 +190,31 @@ export const updateSellerRequest = async (req, res) => {
             });
         }
 
-        // Update the request status
-        await db.query(`
-            UPDATE users 
-            SET 
-                requestSeller = ?,
-                ${status === 'Accepted' ? "role = 'seller'" : ''}
-            WHERE userID = ?
-        `, [status, userID]);
+        // Build the update query based on status
+        let updateQuery = '';
+        let queryParams = [];
+
+        if (status === 'Accepted') {
+            updateQuery = `
+                UPDATE users 
+                SET 
+                    requestSeller = ?, 
+                    role = 'seller'
+                WHERE userID = ?
+            `;
+            queryParams = [status, userID];
+        } else {
+            updateQuery = `
+                UPDATE users 
+                SET 
+                    requestSeller = ?
+                WHERE userID = ?
+            `;
+            queryParams = [status, userID];
+        }
+
+        // Execute update
+        await db.query(updateQuery, queryParams);
 
         // Send status update to user
         await sendSellerStatusUpdate(
@@ -147,6 +226,7 @@ export const updateSellerRequest = async (req, res) => {
         res.status(200).json({ 
             message: `Seller request ${status.toLowerCase()} successfully.` 
         });
+
     } catch (error) {
         console.error('Error in updateSellerRequest:', error);
         res.status(500).json({ 
@@ -155,6 +235,8 @@ export const updateSellerRequest = async (req, res) => {
         });
     }
 };
+
+
 
 export const getSellerRequestStatus = async (req, res) => {
     const { userID } = req.params;
