@@ -31,7 +31,6 @@ export const getDashboardStats = async (req, res) => {
     }
 };
 
-// controllers/userController.js
 export const deleteUser = async (req, res) => {
     const { id } = req.params;
   

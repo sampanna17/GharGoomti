@@ -1,5 +1,5 @@
 import express from 'express';
-import { addProperty, addPropertyImage, deleteProperty, deletePropertyImage, getProperties, getPropertyById, getPropertyImages, getPropertyUser, updateProperty, updatePropertyImages } from '../controllers/propertyController.js';
+import { addProperty, addPropertyImage, deleteProperty, deletePropertyImage, getallProperties, getProperties, getPropertyById, getPropertyImages, getPropertyUser, updateProperty, updatePropertyImages } from '../controllers/propertyController.js';
 import { bookmarkProperty, checkBookmarkStatus, getBookmarks, removeBookmarks } from '../controllers/bookmarkController.js';
 import formidable from 'express-formidable';
 
@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/property', addProperty); 
 router.get('/properties', getProperties); 
 router.get('/property/:id', getPropertyById); 
+router.get('/allproperty', getallProperties); 
 router.delete('/property/:id', deleteProperty); 
 
 // Property image routes

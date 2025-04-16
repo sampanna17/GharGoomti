@@ -3,7 +3,6 @@ import axios from 'axios';
 import Sidebar from "../../components/AdminSideBar.jsx";
 import Navbar from "../../components/AdminNav.jsx";
 import StatsCard from "../../components/AdminStatsCard.jsx";
-import PropertyTable from "../../components/AdminPropertyTable.jsx";
 import subscribedUser from '../../assets/admin/followers.png';
 import house from '../../assets/admin/house.png';
 import users from '../../assets/admin/team.png';
@@ -67,9 +66,6 @@ const AdminDashboard = () => {
               icon={subscribedUser} 
             />
           </div>
-
-          {/* Property Table */}
-          <PropertyTable />
         </div>
       </div>
     </div>

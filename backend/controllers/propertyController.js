@@ -137,11 +137,6 @@ export const addProperty = async (req, res) => {
             notifiedUsers: subscribedUsers.length
         });
 
-        // res.status(201).json({
-        //     message: 'Property added successfully',
-        //     propertyID: result.insertId
-        // });
-
     } catch (error) {
         console.error('Error adding property:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -157,21 +152,6 @@ export const getProperties = async (req, res) => {
         res.status(500).json({ message: 'Error fetching properties.', error });
     }
 };
-
-// Get a single property by ID
-// export const getPropertyById = async (req, res) => {
-//     const { id } = req.params;
-
-//     try {
-//         const [property] = await db.query('SELECT * FROM property WHERE propertyID = ?', [id]);
-//         if (property.length === 0) {
-//             return res.status(404).json({ message: 'Property not found.' });
-//         }
-//         res.status(200).json(property[0]);
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error fetching property.', error });
-//     }
-// };
 
 export const getPropertyById = async (req, res) => {
     const { id } = req.params;
@@ -658,6 +638,68 @@ export const updatePropertyImages = async (req, res) => {
             success: false,
             message: 'Internal server error',
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+export const getallProperties = async (req, res) => {
+    try {
+        const [properties] = await db.query(`
+            SELECT p.*, 
+                   pi.imageID, 
+                   pi.imageUrl,
+                   CONCAT(u.userFirstName, ' ', u.userLastName) AS sellerName,
+                   u.userEmail,
+                   u.userContact
+            FROM property p
+            LEFT JOIN property_image pi ON p.propertyID = pi.propertyID
+            LEFT JOIN users u ON p.userID = u.userID
+            ORDER BY p.created_at DESC
+        `);
+
+        const groupedProperties = properties.reduce((acc, curr) => {
+            const existingProperty = acc.find(p => p.propertyID === curr.propertyID);
+            if (existingProperty) {
+                if (curr.imageID) {
+                    existingProperty.images.push({
+                        imageID: curr.imageID,
+                        imageUrl: curr.imageUrl
+                    });
+                }
+            } else {
+                acc.push({
+                    propertyID: curr.propertyID,
+                    title: curr.propertyTitle,
+                    price: curr.propertyPrice,
+                    location: curr.propertyAddress,
+                    seller: curr.sellerName,
+                    sellerEmail: curr.userEmail,
+                    sellerContact: curr.userContact,
+                    description: curr.description,
+                    bedrooms: curr.bedrooms,
+                    bathrooms: curr.bathrooms,
+                    Kitchens: curr.kitchens,
+                    halls: curr.bathrooms,
+                    area: curr.propertySize,
+                    status: curr.propertyFor,
+                    type: curr.propertyType,
+                    petPolicy:curr.petPolicy,
+                    createdAt: curr.created_at,
+                    images: curr.imageID ? [{
+                        imageID: curr.imageID,
+                        imageUrl: curr.imageUrl
+                    }] : []
+                });
+            }
+            return acc;
+        }, []);
+
+        res.status(200).json(groupedProperties);
+    } catch (error) {
+        console.error('Error fetching properties:', error);
+        res.status(500).json({ 
+            message: 'Error fetching properties.', 
+            error: error.message 
         });
     }
 };

@@ -22,6 +22,7 @@ import BookmarkFilled from "../../assets/bookmarkfilled.png";
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast, ToastContainer } from "react-toastify";
+import SellerImageViewer from "../../components/SellerImageViewer";
 
 function SinglePage() {
 
@@ -33,6 +34,8 @@ function SinglePage() {
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [selectedTime, setSelectedTime] = useState('');
     const [appointment, setAppointment] = useState(null);
+    const [showSellerModal, setShowSellerModal] = useState(false);
+
 
     const userData = Cookies.get('user_data') ? JSON.parse(Cookies.get('user_data')) : null;
 
@@ -236,7 +239,7 @@ function SinglePage() {
                                     <>
                                         <div className="flex flex-col items-center gap-3">
                                             {/* Avatar - shows image or initials */}
-                                            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer" onClick={() => setShowSellerModal(true)}>
                                                 {user.profile ? (
                                                     <img
                                                         src={user.profile}
@@ -440,6 +443,13 @@ function SinglePage() {
                     )}
                 </div>
             </div>
+            {showSellerModal && (
+                <SellerImageViewer
+                    imageUrl={user?.profile}
+                    fullName={user?.fullName}
+                    onClose={() => setShowSellerModal(false)}
+                />
+            )}
         </div >
     );
 }

@@ -137,7 +137,7 @@ const UserDetails = () => {
                             </div>
 
                             <div className="flex flex-col items-center mb-6">
-                                <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden mb-4 border-2 border-gray-200">
+                                <div className="w-36 h-36 rounded-full bg-gray-100 overflow-hidden mb-4 border-2 border-gray-200">
                                     {selectedUser.profile_picture ? (
                                         <img
                                             src={selectedUser.profile_picture}
