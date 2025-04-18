@@ -9,7 +9,6 @@ const SellerImageViewer = ({ imageUrl, fullName, onClose }) => {
             aria-label="Close modal"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-gray-700"
               fill="none"
               viewBox="0 0 24 24"
@@ -24,7 +23,7 @@ const SellerImageViewer = ({ imageUrl, fullName, onClose }) => {
             </svg>
           </button>
           
-          {/* Modal content */}
+          {/* Viewer content */}
           <div className="p-8 flex flex-col items-center">
             <div className="relative w-60 h-60 rounded-full overflow-hidden border-4 border-gray-100 shadow-lg mb-6">
               {imageUrl ? (

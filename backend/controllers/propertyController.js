@@ -336,6 +336,7 @@ export const getPropertyUser = async (req, res) => {
         }
 
         res.status(200).json({
+            userID: user[0].userID,
             firstName: user[0].userFirstName,
             lastName: user[0].userLastName,
             contact: user[0].userContact,

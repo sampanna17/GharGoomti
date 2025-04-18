@@ -10,6 +10,10 @@ import propertyroute from './routes/PropertyRoute.js';
 import appointmentroute from './routes/appointmentRoute.js';
 import adminroute from './routes/adminRoute.js'
 import sellerroute from './routes/sellerRoute.js'
+import chatroute from './routes/chatRoute.js'
+import messageroute from './routes/messageRoute.js'
+import { createServer } from 'http'; 
+import { Server } from 'socket.io'; 
 
 dotenv.config();
 
@@ -18,6 +22,34 @@ db
 
 const app = express();
 
+const httpServer = createServer(app);
+
+// Create Socket.IO server
+const io = new Server(httpServer, {
+    cors: {
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST","PUT"],
+      credentials: true
+    }
+  });
+
+  io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+    
+    socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.id);
+    });
+
+    socket.on('joinRoom', (chatId) => {
+      socket.join(chatId); 
+    });
+  
+    socket.on('sendMessage', (data) => {
+      io.to(data.chatId).emit('newMessage', data);  
+    });
+    
+  });
+  
 app.use(
     session({
         secret: "JWT_SECRET",
@@ -43,13 +75,16 @@ app.use('/api', propertyroute);
 app.use('/api/appointment', appointmentroute);
 app.use('/api/admin', adminroute);
 app.use('/api/seller', sellerroute);
-// app.use('/api/chats', chatRoute);
-// app.use('/api/messgaes', messgaeRoute);
+app.use('/api/chats', chatroute);
+app.use('/api/messages', messageroute);
 
 const PORT = 8000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // Serve static files from the 'public' folder
 app.use("/public", express.static("public"));
+
+
 
 

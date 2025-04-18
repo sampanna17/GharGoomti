@@ -23,6 +23,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast, ToastContainer } from "react-toastify";
 import SellerImageViewer from "../../components/SellerImageViewer";
+import { useNavigate } from 'react-router-dom';
+
 
 function SinglePage() {
 
@@ -36,6 +38,7 @@ function SinglePage() {
     const [appointment, setAppointment] = useState(null);
     const [showSellerModal, setShowSellerModal] = useState(false);
 
+    const navigate = useNavigate();
 
     const userData = Cookies.get('user_data') ? JSON.parse(Cookies.get('user_data')) : null;
 
@@ -215,6 +218,42 @@ function SinglePage() {
         return `${hours.padStart(2, '0')}:${minutes}`;
     };
 
+    const handleSendMessage = async () => {
+        if (!userData?.userID) {
+            toast.error("Please login to send messages");
+            return;
+        }
+
+        if (userData.userID === user?.userID) {
+            toast.error("You cannot message yourself");
+            return;
+        }
+
+        try {
+            // First create or get existing chat
+            const chatResponse = await axios.post('http://localhost:8000/api/chats/', {
+                userId: userData.userID,
+                receiverId: user?.userID
+            });
+
+            // Navigate to chats page with the chatId
+            navigate('/chats', {
+                state: {
+                    activeChat: chatResponse.data.id,
+                    receiver: {
+                        userID: user.userID,
+                        username: user.fullName,
+                        profile_picture: user.profile
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("Failed to start chat:", error);
+            toast.error("Failed to start chat");
+        }
+    };
+
     return (
         <div className="singlePage mt-32 mb-5 mx-auto px-4">
             <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
@@ -354,7 +393,7 @@ function SinglePage() {
                         </div>
                     </div>
                     <div className="buttons">
-                        <button>
+                        <button onClick={handleSendMessage}>
                             <img src={Chat} alt="Chat" />
                             Send a Message
                         </button>

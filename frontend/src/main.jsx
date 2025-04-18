@@ -7,13 +7,19 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/AuthProvider.jsx";
+import { SocketContextProvider } from './context/SocketContext.jsx';
+import { UserProvider } from './context/UserContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <AuthProvider>
-        <ToastContainer />
-        <App />
+        <UserProvider>
+          <SocketContextProvider>
+            <ToastContainer />
+            <App />
+          </SocketContextProvider>
+        </UserProvider>
       </AuthProvider>
     </PersistGate>
   </Provider>

@@ -54,7 +54,6 @@ const Login = () => {
       );
 
       const { user } = res.data;
-
       Cookies.set("user_data", JSON.stringify(user), { expires: 1, secure: true, sameSite: "Strict" });
       const userDataString = Cookies.get('user_data');
       const userData = JSON.parse(userDataString);
