@@ -228,6 +228,41 @@ export const refreshToken = (req, res) => {
   });
 };
 
+// export const google = async (req, res) => {
+//   const { userEmail } = req.body;
+
+//   if (!userEmail) {
+//     return res.status(400).json({ error: "Email is required!" });
+//   }
+
+//   try {
+//     const [rows] = await db.query("SELECT * FROM users WHERE userEmail = ?", [userEmail]);
+
+//     if (rows.length === 0) {
+//       return res.status(404).json({ error: "Email not Registered. Please signup!" });
+//     }
+
+//     const validUser = rows[0];
+
+//     const token = jwt.sign(
+//       { id: validUser.id, email: validUser.userEmail },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+
+//     const { password, ...userDetails } = validUser;
+
+//     res.status(200).json({
+//       message: "Google sign-in successful!",
+//       user: userDetails,
+//       token,
+//     });
+//   } catch (error) {
+//     console.error("Error during Google sign-in:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
 export const google = async (req, res) => {
   const { userEmail } = req.body;
 
@@ -239,23 +274,38 @@ export const google = async (req, res) => {
     const [rows] = await db.query("SELECT * FROM users WHERE userEmail = ?", [userEmail]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: "User not found!" });
+      return res.status(404).json({ error: "Email not Registered. Please signup!" });
     }
 
     const validUser = rows[0];
 
-    const token = jwt.sign(
-      { id: validUser.id, email: validUser.userEmail },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const accessToken = jwt.sign({ id: validUser.id }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    });
+
+    const refreshToken = jwt.sign({ id: validUser.id }, process.env.REFRESH_TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
+
+    // Set cookies like your regular login
+    res.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     const { password, ...userDetails } = validUser;
 
     res.status(200).json({
       message: "Google sign-in successful!",
       user: userDetails,
-      token,
     });
   } catch (error) {
     console.error("Error during Google sign-in:", error);

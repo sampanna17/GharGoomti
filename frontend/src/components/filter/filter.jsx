@@ -1,7 +1,8 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import "./filter.scss";
 import { useSearchParams } from "react-router-dom";
-import search from '../../assets/ListPage/search.png'
+import search from '../../assets/ListPage/search.png';
 
 function Filter() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +15,19 @@ function Filter() {
     bedroom: searchParams.get("bedroom") || "",
   });
 
+  useEffect(() => {
+    setSearchParams({});
+    setQuery({
+      type: "",
+      city: "",
+      property: "",
+      minPrice: "",
+      maxPrice: "",
+      bedroom: "",
+    });
+  }, []);
+
+
   const handleChange = (e) => {
     setQuery({
       ...query,
@@ -21,93 +35,99 @@ function Filter() {
     });
   };
 
-  const handleFilter = () => {
-    setSearchParams(query);
+  const handleFilter = (e) => {
+    e.preventDefault();
+    const cleanedQuery = Object.fromEntries(
+      Object.entries(query).filter(([, v]) => v !== "")
+    );
+    setSearchParams(cleanedQuery);
   };
 
   return (
     <div className="filter">
       <h1>
-        Search results for <b>{searchParams.get("city")}</b>
+        Search results for <b>{query.city || "all locations"}</b>
       </h1>
-      <div className="top">
-        <div className="item">
-          <label htmlFor="city">Location</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            placeholder="City Location"
-            onChange={handleChange}
-            defaultValue={query.city}
-          />
+      <form onSubmit={handleFilter}>
+        <div className="top">
+          <div className="item">
+            <label htmlFor="city">Location</label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              placeholder="City Location"
+              onChange={handleChange}
+              value={query.city}
+            />
+          </div>
         </div>
-      </div>
-      <div className="bottom">
-        <div className="item">
-          <label htmlFor="type">Type</label>
-          <select
-            name="type"
-            id="type"
-            onChange={handleChange}
-            defaultValue={query.type}
-          >
-            <option value="">any</option>
-            <option value="buy">Buy</option>
-            <option value="rent">Rent</option>
-          </select>
+        <div className="bottom">
+          <div className="item">
+            <label htmlFor="type">Type</label>
+            <select
+              name="type"
+              id="type"
+              onChange={handleChange}
+              value={query.type}
+            >
+              <option value="">any</option>
+              <option value="sale">Sale</option>
+              <option value="rent">Rent</option>
+            </select>
+          </div>
+          <div className="item">
+            <label htmlFor="property">Property</label>
+            <select
+              name="property"
+              id="property"
+              onChange={handleChange}
+              value={query.property}
+            >
+              <option value="">any</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Building">Building</option>
+              <option value="Flat">Flat</option>
+            </select>
+          </div>
+          <div className="item">
+            <label htmlFor="minPrice">Min Price</label>
+            <input
+              type="number"
+              id="minPrice"
+              name="minPrice"
+              placeholder="any"
+              onChange={handleChange}
+              value={query.minPrice}
+            />
+          </div>
+          <div className="item">
+            <label htmlFor="maxPrice">Max Price</label>
+            <input
+              type="number"
+              id="maxPrice"
+              name="maxPrice"
+              placeholder="any"
+              onChange={handleChange}
+              value={query.maxPrice}
+            />
+          </div>
+          <div className="item">
+            <label htmlFor="bedroom">Bedroom</label>
+            <input
+              type="number"
+              id="bedroom"
+              name="bedroom"
+              placeholder="any"
+              onChange={handleChange}
+              value={query.bedroom}
+            />
+          </div>
+          <button type="submit">
+            <img src={search} alt="Search" />
+          </button>
         </div>
-        <div className="item">
-          <label htmlFor="property">Property</label>
-          <select
-            name="property"
-            id="property"
-            onChange={handleChange}
-            defaultValue={query.property}
-          >
-            <option value="">any</option>
-            <option value="apartment">Apartment</option>
-            <option value="house">House</option>
-            <option value="land">Land</option>
-          </select>
-        </div>
-        <div className="item">
-          <label htmlFor="minPrice">Min Price</label>
-          <input
-            type="number"
-            id="minPrice"
-            name="minPrice"
-            placeholder="any"
-            onChange={handleChange}
-            defaultValue={query.minPrice}
-          />
-        </div>
-        <div className="item">
-          <label htmlFor="maxPrice">Max Price</label>
-          <input
-            type="text"
-            id="maxPrice"
-            name="maxPrice"
-            placeholder="any"
-            onChange={handleChange}
-            defaultValue={query.maxPrice}
-          />
-        </div>
-        <div className="item">
-          <label htmlFor="bedroom">Bedroom</label>
-          <input
-            type="text"
-            id="bedroom"
-            name="bedroom"
-            placeholder="any"
-            onChange={handleChange}
-            defaultValue={query.bedroom}
-          />
-        </div>
-        <button onClick={handleFilter}>
-          <img src={search} alt="" />
-        </button>
-      </div>
+      </form>
     </div>
   );
 }

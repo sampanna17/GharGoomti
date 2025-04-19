@@ -144,11 +144,62 @@ export const addProperty = async (req, res) => {
 };
 
 // Get all properties
+// export const getProperties = async (req, res) => {
+//     try {
+//         const [properties] = await db.query('SELECT * FROM property JOIN property_image ON property.propertyID = property_image.propertyID');
+//         res.status(200).json(properties);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching properties.', error });
+//     }
+// };
+
 export const getProperties = async (req, res) => {
     try {
-        const [properties] = await db.query('SELECT * FROM property JOIN property_image ON property.propertyID = property_image.propertyID');
+        let baseQuery = `
+            SELECT p.*, pi.imageID, pi.imageURL 
+            FROM property p
+            LEFT JOIN property_image pi ON p.propertyID = pi.propertyID
+            WHERE 1=1
+        `;
+        
+        const conditions = [];
+        const params = [];
+        
+        if (req.query.city) {
+            conditions.push('AND p.propertyCity LIKE ?');
+            params.push(`%${req.query.city}%`);
+        }
+
+        if (req.query.type) {
+            conditions.push('AND p.propertyFor = ?');
+            params.push(req.query.type === 'rent' ? 'Rent' : 'Sale');
+        }
+        
+        if (req.query.property) {
+            conditions.push('AND p.propertyType = ?');
+            params.push(req.query.property.charAt(0).toUpperCase() + req.query.property.slice(1));
+        }
+        
+        if (req.query.minPrice) {
+            conditions.push('AND p.propertyPrice >= ?');
+            params.push(parseFloat(req.query.minPrice));
+        }
+        if (req.query.maxPrice) {
+            conditions.push('AND p.propertyPrice <= ?');
+            params.push(parseFloat(req.query.maxPrice));
+        }
+        
+        if (req.query.bedroom) {
+            conditions.push('AND p.bedrooms = ?');
+            params.push(parseInt(req.query.bedroom));
+        }
+        
+        const finalQuery = baseQuery + conditions.join(' ');
+        const [properties] = await db.query(finalQuery, params);
+        
         res.status(200).json(properties);
     } catch (error) {
+        console.error('Error fetching properties:', error);
         res.status(500).json({ message: 'Error fetching properties.', error });
     }
 };

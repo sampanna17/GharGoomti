@@ -132,7 +132,7 @@ export const getUserAppointments = async (req, res) => {
             JOIN users buyer ON a.userID = buyer.userID   
             JOIN users seller ON p.userID = seller.userID 
             WHERE a.userID = ? OR p.userID = ?
-            ORDER BY a.appointmentDate DESC
+            ORDER BY a.created_at DESC
         `;
 
         const [appointments] = await db.query(query, [userID, userID, userID, userID]);
@@ -253,7 +253,6 @@ export const updateAppointmentStatus = async (req, res) => {
             [status, appointmentID]
         );
 
-        // Send email notification to buyer
         try {
             const subject = `Your Appointment for ${appointment.propertyTitle} Has Been ${status}`;
             const text = `Dear ${appointment.buyerName},\n\nYour appointment for ${appointment.propertyTitle} scheduled for ${appointment.appointmentDate} at ${appointment.appointmentTime} has been ${status}.\n\nThank you.`;
@@ -336,7 +335,6 @@ export const checkAppointment = async (req, res) => {
     }
 };
 
-// Add to your appointmentController.js
 
 // Get single appointment details
 export const getAppointmentDetails = async (req, res) => {
@@ -361,7 +359,6 @@ export const getAppointmentDetails = async (req, res) => {
 
         const appointment = appointments[0];
         
-        // Format for frontend
         const response = {
             ...appointment,
             formattedDate: new Date(appointment.appointmentDate).toISOString().split('T')[0],
@@ -400,7 +397,6 @@ export const updateAppointment = async (req, res) => {
             return res.status(404).json({ message: 'Appointment not found' });
         }
 
-        // Enhanced authorization check
         const isBuyer = appointment[0].buyerID === parseInt(userID);
         const isSeller = appointment[0].sellerID === parseInt(userID);
 
@@ -410,14 +406,12 @@ export const updateAppointment = async (req, res) => {
             });
         }
 
-        // Validate role consistency
         if ((userRole === 'buyer' && !isBuyer) || (userRole === 'seller' && !isSeller)) {
             return res.status(403).json({ 
                 message: 'Role mismatch with appointment ownership' 
             });
         }
 
-        // Check if status allows editing
         if (appointment[0].appointmentStatus !== 'pending') {
             return res.status(400).json({ 
                 message: 'Only pending appointments can be modified' 

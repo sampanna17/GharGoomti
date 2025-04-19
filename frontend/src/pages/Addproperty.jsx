@@ -183,7 +183,7 @@
 //                         parsedUser.role = 'seller';
 //                     }
 //                 }
-                
+
 //                 const isSeller = parsedUser?.role === 'seller';
 
 //                 setAuthStatus({
@@ -672,7 +672,6 @@ import ImageUploader from "../components/ImageUploader";
 import Cookies from 'js-cookie';
 import { FaSpinner } from "react-icons/fa";
 
-// Keep your constants and helper functions as they are
 const INITIAL_FORM_STATE = {
     title: "",
     price: "",
@@ -746,7 +745,6 @@ export default function AddProperty() {
 
     const [sellerRequestStatus, setSellerRequestStatus] = useState(null);
 
-    // Authentication check - Refactored for clarity and to fix issues
     useEffect(() => {
         const checkAuth = async () => {
             const userData = Cookies.get('user_data');
@@ -763,23 +761,19 @@ export default function AddProperty() {
             try {
                 let parsedUser = JSON.parse(userData);
                 let isSeller = parsedUser?.role === 'seller';
-                
-                // First, check if user data in cookie says they're a seller
+
                 if (isSeller) {
                     setAuthStatus({
                         isLoggedIn: true,
                         isSeller: true,
                         isLoading: false
                     });
-                    return; // If already a seller according to cookie, no need to check further
+                    return;
                 }
-                
-                // If not a seller according to cookie, check with the server
-                // This is critical for when the database has been updated but the cookie hasn't
+
                 try {
                     const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
-                    
-                    // If server says user is a seller, update the cookie and state
+
                     if (userResponse.data && userResponse.data.role === 'seller') {
                         // Update cookie
                         const updatedUser = {
@@ -787,8 +781,7 @@ export default function AddProperty() {
                             role: 'seller'
                         };
                         Cookies.set('user_data', JSON.stringify(updatedUser));
-                        
-                        // Update state to reflect seller status
+
                         setAuthStatus({
                             isLoggedIn: true,
                             isSeller: true,
@@ -798,17 +791,14 @@ export default function AddProperty() {
                     }
                 } catch (error) {
                     console.error("Error checking user status from server:", error);
-                    // Continue with cookie data if server check fails
                 }
 
-                // If we're here, the user is not a seller - check if they have a pending request
                 setAuthStatus({
                     isLoggedIn: true,
                     isSeller: false,
                     isLoading: false
                 });
-                
-                // Check for seller request status
+
                 try {
                     const response = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
                     if (response.data.requestStatus === 'Pending') {
@@ -816,7 +806,6 @@ export default function AddProperty() {
                     } else if (response.data.requestStatus === 'Rejected') {
                         setSellerRequestStatus('rejected');
                     } else if (response.data.requestStatus === 'Approved') {
-                        // Double-check: if the status is approved but cookie wasn't updated, fix it now
                         const updatedUser = {
                             ...parsedUser,
                             role: 'seller'
@@ -845,11 +834,9 @@ export default function AddProperty() {
         checkAuth();
     }, []);
 
-    // Real-time polling for seller request status
     useEffect(() => {
         let intervalId;
 
-        // Only set up polling if user is logged in but not a seller and has a pending request
         if (authStatus.isLoggedIn && !authStatus.isSeller && sellerRequestStatus === 'pending') {
             intervalId = setInterval(async () => {
                 try {
@@ -857,10 +844,10 @@ export default function AddProperty() {
                     if (!userData) return;
 
                     const parsedUser = JSON.parse(userData);
-                    
+
                     // First check latest user data from server
                     const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
-                    
+
                     if (userResponse.data && userResponse.data.role === 'seller') {
                         // User is now a seller in the database - update cookie and state
                         const updatedUser = {
@@ -868,7 +855,7 @@ export default function AddProperty() {
                             role: 'seller'
                         };
                         Cookies.set('user_data', JSON.stringify(updatedUser));
-                        
+
                         setAuthStatus({
                             isLoggedIn: true,
                             isSeller: true,
@@ -879,8 +866,7 @@ export default function AddProperty() {
                         toast.success("Your seller request has been approved!");
                         return;
                     }
-                    
-                    // If user wasn't found as seller in db, check request status
+
                     const response = await axios.get(`http://localhost:8000/api/seller/status/${parsedUser.userID}`);
 
                     if (response.data.requestStatus === 'Approved') {
@@ -908,7 +894,7 @@ export default function AddProperty() {
                 } catch (error) {
                     console.error("Error checking seller status:", error);
                 }
-            }, 5000); // Check every 5 seconds
+            }, 5000);
         }
 
         return () => {
@@ -918,27 +904,28 @@ export default function AddProperty() {
 
     // RequestSellerButton Component
     const RequestSellerButton = () => {
+        const [isRequesting, setIsRequesting] = useState(false);
         const handleRequestSeller = async () => {
+            setIsRequesting(true);
             try {
                 const userData = Cookies.get('user_data');
                 if (!userData) {
                     toast.error("User data not found");
+                    setIsRequesting(false);
                     return;
                 }
 
                 const parsedUser = JSON.parse(userData);
-                
-                // First verify the user is not already a seller
+
                 try {
                     const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
                     if (userResponse.data && userResponse.data.role === 'seller') {
-                        // User is already a seller in the database - update cookie and state
                         const updatedUser = {
                             ...parsedUser,
                             role: 'seller'
                         };
                         Cookies.set('user_data', JSON.stringify(updatedUser));
-                        
+
                         setAuthStatus({
                             isLoggedIn: true,
                             isSeller: true,
@@ -950,7 +937,7 @@ export default function AddProperty() {
                 } catch (error) {
                     console.error("Error checking user status:", error);
                 }
-                
+
                 // Make the seller request if not already a seller
                 const response = await axios.post('http://localhost:8000/api/seller/request', {
                     userID: parsedUser.userID
@@ -963,7 +950,6 @@ export default function AddProperty() {
             } catch (error) {
                 console.error("Error requesting seller status:", error);
                 if (error.response?.data?.message?.includes("already a seller")) {
-                    // Backend indicates user is already a seller - update cookie and state
                     const userData = Cookies.get('user_data');
                     if (userData) {
                         const parsedUser = JSON.parse(userData);
@@ -983,14 +969,15 @@ export default function AddProperty() {
                     setSellerRequestStatus('error');
                     toast.error(error.response?.data?.message || "Failed to submit seller request");
                 }
+            } finally {
+                setIsRequesting(false);
             }
         };
 
-        // Force refresh button - for development/recovery use
         const forceRefresh = async () => {
             const userData = Cookies.get('user_data');
             if (!userData) return;
-            
+
             const parsedUser = JSON.parse(userData);
             try {
                 const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
@@ -1001,14 +988,14 @@ export default function AddProperty() {
                         role: userResponse.data.role
                     };
                     Cookies.set('user_data', JSON.stringify(updatedUser));
-                    
+
                     // Update state
                     setAuthStatus({
                         isLoggedIn: true,
                         isSeller: userResponse.data.role === 'seller',
                         isLoading: false
                     });
-                    
+
                     if (userResponse.data.role === 'seller') {
                         toast.success("Status updated: You are a seller!");
                     } else {
@@ -1023,17 +1010,20 @@ export default function AddProperty() {
 
         if (sellerRequestStatus === 'pending') {
             return (
-                <div className="mt-4">
-                    <p className="text-green-600 mb-2">
+                <div className="mt-6 p-4 border border-red-300 bg-red-50 rounded-xl shadow-sm max-w-md">
+                    <p className="text-green-600 mb-2 text-center text-lg">
                         Your request is pending. Please wait for admin response.
                     </p>
-                    <div className="flex gap-2 mt-2">
-                        <FaSpinner className="animate-spin text-blue-800" />
-                        <button 
+                    <div className="flex justify-center mt-2">
+                        <button
                             onClick={forceRefresh}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            className="group relative px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
                         >
-                            Refresh Status
+                            <span className="relative z-10">Refresh Status</span>
+                            <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
+                            <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
+                            <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
+                            <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
                         </button>
                     </div>
                 </div>
@@ -1042,47 +1032,60 @@ export default function AddProperty() {
 
         if (sellerRequestStatus === 'rejected') {
             return (
-                <div className="mt-4">
-                    <p className="text-red-600">
-                        Your seller request was rejected. You can try again.
+                <div className="mt-6 p-4 border border-red-300 bg-red-50 rounded-xl shadow-sm max-w-md">
+                    <p className="text-red-700 text-xl text-center font-medium">
+                        Your seller request was rejected.
                     </p>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex justify-center mt-4">
                         <button
                             onClick={handleRequestSeller}
-                            className="group relative px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
+                            className="group relative px-5 py-2 text-black rounded-md overflow-hidden border border-transparent"
                         >
-                            <span className="relative z-10">Request Again</span>
+                            {isRequesting ? (
+                                <span className="relative z-10 flex items-center justify-center">
+                                    Requesting...
+                                </span>
+                            ) : (
+                                <span className="relative z-10">Request Again</span>
+                            )
+                            }
                             <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
                             <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
                             <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
                             <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
                         </button>
-                        <button 
-                            onClick={forceRefresh}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                            Refresh Status
-                        </button>
                     </div>
                 </div>
+
             );
         }
 
         return (
-            <div className="mt-4">
+            <div className="mt-6 p-4 border border-red-300 bg-red-50 rounded-xl shadow-sm max-w-md">
+                <p className="text-red-700 text-lg mb-2">
+                    You are not a seller. Request the admin to become a seller.
+                </p>
                 <button
                     onClick={handleRequestSeller}
                     className="group relative px-4 py-2 text-black rounded-md overflow-hidden border border-transparent"
                 >
-                    <span className="relative z-10">Request for Seller</span>
+                    {isRequesting ? (
+                        <span className="relative z-10 flex items-center justify-center">
+                            Requesting...
+                        </span>
+                    ) : (
+                        <span className="relative z-10">Request for Seller</span>
+                    )
+                    }
+                    
                     <span className="absolute left-0 top-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full rounded-t-md" />
                     <span className="absolute right-0 top-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-100 rounded-r-md" />
                     <span className="absolute bottom-0 right-0 h-[3px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full delay-200 rounded-b-md" />
                     <span className="absolute bottom-0 left-0 h-0 w-[3px] bg-blue-900 transition-all duration-300 group-hover:h-full delay-300 rounded-l-md" />
                 </button>
-                <button 
+                <button
                     onClick={forceRefresh}
-                    className="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="ml-2 px-4 py-2  [background-color:#1A2D5A] text-white rounded hover:[background-color:#2E4156]"
                 >
                     Refresh Status
                 </button>
@@ -1090,7 +1093,6 @@ export default function AddProperty() {
         );
     };
 
-    // Your existing useEffect for property data and other functions remain unchanged
     useEffect(() => {
         // Fetch property data for editing
         const fetchPropertyData = async () => {
@@ -1344,9 +1346,7 @@ export default function AddProperty() {
     if (!authStatus.isSeller) {
         return (
             <div className="flex flex-col items-center justify-center h-screen text-center">
-                <p className="text-red-600 text-lg font-semibold">
-                    You are not a seller. Request the admin to become a seller.
-                </p>
+
                 <RequestSellerButton />
             </div>
         );

@@ -76,17 +76,11 @@ export const sendSellerStatusUpdate = async (userEmail, userFirstName, status) =
                             </a>
                            </div>`
                         : `<div style="background: #ffebee; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                            <p>If you believe this was a mistake or would like more information, please contact our support team.</p>
-                            <a href="${process.env.FRONTEND_URL}/contact"
-                               style="background-color: #f44336; color: white; padding: 10px 20px; 
-                                      text-decoration: none; border-radius: 5px; display: inline-block;">
-                                Contact Support
-                            </a>
+                            <p>Please provide valid user data to make user you want to sell proprety in Ghar Goomti.</p>
                            </div>`
                     }
-                    
                     <p>Best regards,</p>
-                    <p>Property Management Team</p>
+                    <p>Ghar Goomti Admin</p>
                 </div>
             `
         };
