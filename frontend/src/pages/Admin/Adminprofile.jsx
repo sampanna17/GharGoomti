@@ -159,7 +159,7 @@ const AdminProfile = () => {
                 />
                 <div className="p-6 bg-gray-100 ">
                     {/* Admin Profile Section */}
-                    <div className="bg-white rounded-lg shadow-lg p-6 ">
+                    <div className="bg-white rounded-lg shadow-lg p-4 ">
                         <h1 className="text-2xl font-bold text-center mb-6">Admin Profile</h1>
 
                         <div className="flex justify-center mb-4">

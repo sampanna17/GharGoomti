@@ -17,28 +17,24 @@ export default function OAuth() {
       // Sign in with Google popup
       const result = await signInWithPopup(auth, provider);
 
-      // Send the user email to the backend for validation and token generation
       const res = await fetch("http://localhost:8000/api/auth/google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userEmail: result.user.email, // Pass the user's email from Google Auth
+          userEmail: result.user.email, 
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        // Update localStorage with the token
         localStorage.setItem("access_token", data.token);
-        localStorage.setItem("user", JSON.stringify(data)); // Save user details locally
+        localStorage.setItem("user", JSON.stringify(data));
 
-        // Dispatch the action to update the Redux store
         dispatch(signInSuccess(data));
 
-        // Navigate to the homepage
         navigate("/home");
       } else {
         console.error("Google Login Error:", data.error);

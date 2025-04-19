@@ -31,7 +31,7 @@ const PropertyDetails = () => {
                 console.log("Grouped properties with images:", groupedProperties);
 
                 setProperties(groupedProperties);
-                setPaginatedProperties(groupedProperties.slice(0, 8));
+                setPaginatedProperties(groupedProperties.slice(0, 4));
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -169,7 +169,7 @@ const PropertyDetails = () => {
                                                     onClick={() => handleRowClick(property)}
                                                 >
                                                     <td className="p-3">
-                                                        <div className="w-32 h-16 flex-shrink-0">
+                                                        <div className="w-32 h-20 flex-shrink-0">
                                                             {property.images.length > 0 ? (
                                                                 <img
                                                                     src={property.images[0].imageUrl}
@@ -233,10 +233,10 @@ const PropertyDetails = () => {
                                     </table>
                                 </div>
 
-                                <div className="mt-6">
+                                <div className="">
                                     <PaginationComponent
                                         allItems={properties}
-                                        itemsPerPage={8}
+                                        itemsPerPage={4}
                                         onPageChange={handlePageChange}
                                     />
                                 </div>

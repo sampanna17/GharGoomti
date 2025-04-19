@@ -11,7 +11,6 @@ import OAuth from "../components/OAuth";
 import "../css/Login.css";
 import { UserContext } from '../context/UserContext.jsx';
 
-
 const Login = () => {
   const { refreshUserData } = useContext(UserContext);
   const [email, setEmail] = useState("");

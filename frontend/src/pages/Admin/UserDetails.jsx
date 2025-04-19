@@ -80,7 +80,12 @@ const UserDetails = () => {
                         <div className="text-center py-8">Loading users...</div>
                     ) : !selectedUser ? (
                         <div className="bg-white rounded-lg shadow-lg p-6">
-                            <h1 className="text-2xl font-bold mb-6">User Management</h1>
+                            <div className="flex justify-between items-center mb-6">
+                                <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+                                <div className="text-sm text-gray-500">
+                                    {allUsers.length} {allUsers.length === 1 ? 'user' : 'users'} found
+                                </div>
+                            </div>
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="bg-gray-200">

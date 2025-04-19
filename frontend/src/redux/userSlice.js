@@ -4,8 +4,8 @@ const initialState = {
   currentUser: null,
   error: null,
   loading: false,
-  token: null, // Store the JWT token here
-  isAuthenticated: false, // Flag to track user authentication status
+  token: null,
+  isAuthenticated: false, 
 };
 
 const userSlice = createSlice({
@@ -17,8 +17,8 @@ const userSlice = createSlice({
     },
     signInSuccess: (state, action) => {
       state.currentUser = action.payload.user;
-      state.token = action.payload.token; // Store the token
-      state.isAuthenticated = true; // Mark the user as authenticated
+      state.token = action.payload.token; 
+      state.isAuthenticated = true;
       state.loading = false;
       state.error = null;
     },
@@ -43,8 +43,8 @@ const userSlice = createSlice({
     },
     deleteUserSuccess: (state) => {
       state.currentUser = null;
-      state.token = null; // Remove token when user is deleted
-      state.isAuthenticated = false; // Mark the user as logged out
+      state.token = null;
+      state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
     },
@@ -57,8 +57,8 @@ const userSlice = createSlice({
     },
     signOutUserSuccess: (state) => {
       state.currentUser = null;
-      state.token = null; // Remove token on sign out
-      state.isAuthenticated = false; // Mark the user as logged out
+      state.token = null; 
+      state.isAuthenticated = false; 
       state.loading = false;
       state.error = null;
     },

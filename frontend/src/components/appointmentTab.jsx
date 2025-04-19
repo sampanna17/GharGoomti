@@ -3,9 +3,9 @@ import axios from 'axios';
 import { toast, ToastContainer} from 'react-toastify';
 import { FaCalendarAlt, FaClock, FaCheck, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 import Calendar from "../assets/SinglePage/calendar.png";
-import Card from "./Card/card.jsx";
+import Card from "./card/card.jsx";
 
-const AppointmentsTab = ({ userID, role }) => {
+const AppointmentsTab = ({ userID }) => {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingAppointment, setEditingAppointment] = useState(null);
@@ -26,8 +26,6 @@ const AppointmentsTab = ({ userID, role }) => {
                 );
                 console.log('API Response:', response.data);
                 setAppointments(response.data.appointments);
-
-               
 
                 const propertyIds = [
                     ...new Set(response.data.appointments.map(a => a.propertyID))

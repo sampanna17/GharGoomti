@@ -440,7 +440,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Card from "../components/card/card";
 import { FaEdit, FaTrash, FaCamera, FaTimes, FaUser } from "react-icons/fa";
-import AppointmentsTab from "../components/appointmentTab";
+import AppointmentsTab from "../components/AppointmentTab";
 import DeleteConfirmationModal from '../components/DeleteConfirmation';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

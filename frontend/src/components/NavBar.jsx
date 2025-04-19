@@ -1,13 +1,16 @@
 import { Heart, ChevronDown, MessageSquareMore, CircleUser } from "lucide-react";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/LOGO.png";
 import HoverArrowText from '../components/HoverArrowText';
+import { toast, ToastContainer } from 'react-toastify';
+import { UserContext } from '../context/UserContext';
 
 export const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const { isLoggedIn } = useContext(UserContext);
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -22,14 +25,25 @@ export const Navbar = () => {
   };
 
   const navigateToBookmarks = () => navigate('/bookmarks');
-  const navigateToChats = () => navigate('/chats');
+  // const navigateToChats = () => navigate('/chats');
   const navigateToHome = () => navigate('/');
   const navigateToProperties = () => navigate('/properties');
   const navigateToAddProperty = () => navigate('/add-property');
 
+  const handleChatClick = () => {
+    if (!isLoggedIn) {
+      toast.error('You are not logged in. Please login to access chat.'
+      );
+    } else {
+      navigate('/chats');
+    }
+  };
+
   return (
     <>
+       <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
       <nav className="w-full px-20 py-6 border-b flex items-center justify-between bg-white fixed top-0 left-0 right-0 z-50">
+       
         <div className="flex items-center gap-2">
           <img src={Logo} alt="logo" className="w-14 h-12 text-blue-600" />
           <span className="text-lg font-semibold pt-4">Ghar Goomti</span>
@@ -100,7 +114,7 @@ export const Navbar = () => {
           </div>
           <MessageSquareMore
             className="w-5 h-5 text-gray-600 cursor-pointer"
-            onClick={navigateToChats} // Navigate to /chats on click
+            onClick={handleChatClick}
           />
 
           <div className="relative">

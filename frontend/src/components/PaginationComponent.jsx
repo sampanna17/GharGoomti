@@ -12,13 +12,10 @@ const PaginationComponent = ({ allItems, itemsPerPage, onPageChange, initialPage
 
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
-
-        // Calculate the paginated items 
         const startIndex = (value - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const paginatedItems = allItems.slice(startIndex, endIndex);
 
-        // Pass the paginated items to the parent component
         onPageChange(paginatedItems);
     };
 
@@ -27,7 +24,7 @@ const PaginationComponent = ({ allItems, itemsPerPage, onPageChange, initialPage
     return (
         <div>
             {totalPages > 1 && (
-                <div className="flex justify-center mt-6">
+                <div className="flex justify-center mt-2">
                     <Stack spacing={2}>
                         <Pagination
                             count={totalPages}
