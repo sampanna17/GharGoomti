@@ -187,7 +187,7 @@ function ListPage() {
 
     const handleBookmark = async (propertyID) => {
         if (!userData?.userID) {
-            alert('Please login to bookmark properties');
+            toast.error('Please login to bookmark properties');
             return;
         }
 

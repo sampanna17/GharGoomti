@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../../authStore";
-import toast from "react-hot-toast";
+import { toast, ToastContainer } from "react-toastify";
 
 const EmailVerificationPage = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -23,19 +23,21 @@ const EmailVerificationPage = () => {
         },
         body: JSON.stringify({ email, otp }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
-        throw new Error(data.error || "Failed to verify email");
+        // Return the error message from backend
+        return { error: data.error || "Failed to verify email" };
       }
-
+  
       return data;
     } catch (error) {
       console.error("Error verifying email:", error);
-      throw error;
+      return { error: "An error occurred while verifying your email." };
     }
   };
+  
 
   const handleChange = (index, value) => {
     const newCode = [...code];
@@ -56,7 +58,6 @@ const EmailVerificationPage = () => {
       newCode[index] = value;
       setCode(newCode);
 
-      // Move focus to the next input field if value is entered
       if (value && index < 5) {
         inputRefs.current[index + 1].focus();
       }
@@ -69,28 +70,31 @@ const EmailVerificationPage = () => {
     }
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const otp = code.join("");
-
+  
     if (!userEmail || !otp) {
       toast.error("Email and OTP are required");
       return;
     }
-
-    try {
-      const response = await verifyEmail({ email: userEmail, otp });
-
-      if (response.error) {
-        toast.error(response.error);
+  
+    const { error } = await verifyEmail({ email: userEmail, otp });
+  
+    if (error) {
+      // Show specific error messages based on backend response
+      if (error === "Invalid OTP") {
+        toast.error("Incorrect OTP. Please try again.");
+      } else if (error === "User not found") {
+        toast.error("User not found. Please register first.");
       } else {
-        toast.success("Email verified successfully!");
-        navigate("/login");
+        toast.error(error);
       }
-    } catch (error) {
-      console.error("Error verifying email:", error);
-      toast.error("An error occurred while verifying your email.");
+    } else {
+      toast.success("Email verified successfully!");
+      navigate("/login");
     }
   };
 
@@ -103,6 +107,15 @@ const EmailVerificationPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#1A2D42]">
+       <ToastContainer position="top-right" autoClose={3000} limit={1}
+        newestOnTop={false}
+        closeOnClick 
+        style={{
+          fontSize: "0.9rem",
+          width: "auto",
+          minWidth: "300px"
+        }}
+         />
       <div className="bg-[#2E4156] bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
           Verify Your Email

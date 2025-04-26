@@ -27,7 +27,12 @@ const Navbar = () => {
       localStorage.removeItem('user');
       refreshUserData();
       setIsLoggedIn(false);
-      navigate("/login");
+      // navigate("/login");
+      // navigate("/", { state: { fromLogout: true } });
+      window.location.href = "/login";
+      
+      
+
     } catch (err) {
       console.error("Logout error:", err);
       toast.error("Failed to logout");

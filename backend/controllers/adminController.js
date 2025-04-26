@@ -5,7 +5,7 @@ export const getDashboardStats = async (req, res) => {
     const [propertiesResult] = await db.query('SELECT COUNT(*) as count FROM property');
     const totalProperties = propertiesResult[0].count;
 
-    const [usersResult] = await db.query('SELECT COUNT(*) as count FROM users');
+    const [usersResult] = await db.query('SELECT COUNT(*) as count FROM users WHERE role != "admin"');
     const totalUsers = usersResult[0].count;
 
     const [subscribedResult] = await db.query('SELECT COUNT(*) as count FROM users WHERE hasSubscribed = TRUE');

@@ -845,11 +845,9 @@ export default function AddProperty() {
 
                     const parsedUser = JSON.parse(userData);
 
-                    // First check latest user data from server
                     const userResponse = await axios.get(`http://localhost:8000/api/user/${parsedUser.userID}`);
 
                     if (userResponse.data && userResponse.data.role === 'seller') {
-                        // User is now a seller in the database - update cookie and state
                         const updatedUser = {
                             ...parsedUser,
                             role: 'seller'
@@ -938,7 +936,6 @@ export default function AddProperty() {
                     console.error("Error checking user status:", error);
                 }
 
-                // Make the seller request if not already a seller
                 const response = await axios.post('http://localhost:8000/api/seller/request', {
                     userID: parsedUser.userID
                 });
@@ -1334,7 +1331,7 @@ export default function AddProperty() {
                 </p>
                 <button
                     onClick={() => navigate('/login')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-2 bg-[#2E4156] text-white rounded-lg font-semibold hover:bg-[#1A2D42] transition duration-300"
                 >
                     Login Now
                 </button>

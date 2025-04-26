@@ -2,8 +2,10 @@ import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import Loan from "../assets/loan.png";
 
+
 const HomeLoanEMICalculator = () => {
     const [loanAmount, setLoanAmount] = useState("");
+    const [displayLoanAmount, setDisplayLoanAmount] = useState("");
     const [interestRate, setInterestRate] = useState("");
     const [loanTenure, setLoanTenure] = useState("");
     const [emi, setEmi] = useState(null);
@@ -31,13 +33,21 @@ const HomeLoanEMICalculator = () => {
             });
             return;
         }
-        if (parseFloat(interestRate) <= 1) {
-            toast.error("Interest rate must be greater than 1%.", {
+        if (parseFloat(interestRate) <= 6) {
+            toast.error("Interest rate must be greater than 6%.", {
                 autoClose: 2000,
                 position: "top-right",
             });
             return;
         }
+        if (parseFloat(loanTenure) <= 0) {
+            toast.error("Please enter a valid Tenure!", {
+                autoClose: 2000,
+                position: "top-right",
+            });
+            return;
+        }
+
         if (parseFloat(loanTenure) >= 30) {
             toast.error("Tenure must be less than 30 Years", {
                 autoClose: 2000,
@@ -83,6 +93,18 @@ const HomeLoanEMICalculator = () => {
         });
     };
 
+    const formatNumber = (value) => {
+        if (!value) return "";
+        const num = value.replace(/\D/g, "");
+        return new Intl.NumberFormat("en-IN").format(num);
+    };
+
+    const handleLoanAmountChange = (e) => {
+        const rawValue = e.target.value.replace(/\D/g, "");
+        setLoanAmount(rawValue);
+        setDisplayLoanAmount(formatNumber(rawValue));
+    };
+
     return (
         <div className="flex justify-center items-center min-h-screen bg-white px-4 sm:px-6 lg:px-8 mt-12">
             <ToastContainer position="top-right" autoClose={2000} limit={1} newestOnTop={false} closeOnClick />
@@ -104,15 +126,15 @@ const HomeLoanEMICalculator = () => {
                             >
                                 Loan Amount
                             </label>
+
                             <input
-                                type="number"
+                                type="text" // Changed from number to text
                                 id="loanAmount"
-                                value={loanAmount}
-                                onChange={(e) => setLoanAmount(e.target.value)}
+                                value={displayLoanAmount}
+                                onChange={handleLoanAmountChange}
                                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none"
                                 placeholder="Enter loan amount"
-
-                            />
+                            />  
                         </div>
 
                         {/* Form for Interest Rate */}
@@ -233,12 +255,12 @@ const HomeLoanEMICalculator = () => {
                                 <span className="text-sm text-gray-500">NRS</span> {emi && emi}
                             </p>
                         </div> */}
-            
+
                         <div className="flex flex-col">
                             <h3 className="block text-gray-700 font-semibold mb-2">Loan EMI</h3>
                             <p className="text-2xl font-semibold">
                                 <span className="text-sm text-gray-500">NRS</span> {emi && emi}
-                                {emi && ( 
+                                {emi && (
                                     <span className="text-sm text-gray-500">
                                         {isMonthly ? " /month" : " /year"}
                                     </span>

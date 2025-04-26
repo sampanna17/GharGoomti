@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash, FaRegUser } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "../css/SignUp.css";
+import axios from 'axios';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -36,7 +38,6 @@ const Signup = () => {
       };
       reader.readAsDataURL(file);
     } else {
-      // Handle case where file selection was cancelled
       removeImage();
     }
   };
@@ -51,7 +52,7 @@ const Signup = () => {
       ...formData,
       profileImage: null
     });
-    // Proper way to clear file input
+    // To clear file input
     if (fileInputRef.current) {
       fileInputRef.current.value = null;
     }
@@ -108,8 +109,8 @@ const Signup = () => {
       return "Please enter a valid email address.";
     }
 
-    if (!/^[0-9]{1,3}$/.test(userAge) || userAge < 1 || userAge > 100) {
-      return "Age must be a valid number between 1 and 100.";
+    if (!/^[0-9]{1,3}$/.test(userAge) || userAge < 18 || userAge > 80) {
+      return "Age must be a valid number between 18 and 80.";
     }
 
     if (password.length < 8) {
@@ -135,7 +136,8 @@ const Signup = () => {
       toast.error(errorMessage);
       return;
     }
-
+    setIsSubmitting(true);
+  
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('userFirstName', formData.userFirstName);
@@ -145,26 +147,42 @@ const Signup = () => {
       formDataToSend.append('userAge', formData.userAge);
       formDataToSend.append('password', formData.password);
       formDataToSend.append('role', 'Buyer');
-
+  
       if (formData.profileImage) {
         formDataToSend.append('image', formData.profileImage);
       }
-
-      const response = await fetch("http://localhost:8000/api/auth/register", {
-        method: "POST",
-        body: formDataToSend,
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        toast.success("Signup successful! Redirecting...");
-        setTimeout(() => navigate("/verify-email", { state: { userEmail: formData.userEmail } }), 1000);
+  
+      const response = await axios.post(
+        "http://localhost:8000/api/auth/register",
+        formDataToSend,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+  
+      if (response.status >= 200 && response.status < 300) {
+        toast.success(response.data.message || "Signup successful! Redirecting...");
+        setTimeout(() => navigate("/verify-email", { 
+          state: { userEmail: formData.userEmail } 
+        }), 1000);
       } else {
-        toast.error(data.message || "Signup failed. Please try again.");
+        toast.error(response.data.message || "Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("An error occurred. Please try again.");
+      if (error.response) {
+        toast.error(error.response.data?.message || 
+                   error.response.data?.error || 
+                   "Signup failed. Please try again.");
+      } else if (error.request) {
+        toast.error("No response from server. Please try again.");
+      } else {
+        toast.error("Request error. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -172,7 +190,13 @@ const Signup = () => {
     <div className="signup-main">
       <ToastContainer position="bottom-center" autoClose={3000} limit={1}
         newestOnTop={false}
-        closeOnClick />
+        closeOnClick
+        style={{
+          fontSize: "0.9rem",
+          width: "auto",
+          minWidth: "300px"
+        }}
+      />
       <div className="signup-left">
         <div className="signup-logo">
           <img src={Logo} alt="logo" className="signup-logo-image" />
@@ -315,8 +339,20 @@ const Signup = () => {
                   </label>
                 </div>
               </div>
-              <div className="signup-center-buttons">
+              {/* <div className="signup-center-buttons">
                 <button type="submit">Sign Up</button>
+              </div> */}
+              <div className="signup-center-buttons">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${isSubmitting
+                      ? 'bg-blue-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                    } text-white`}
+                >
+                  {isSubmitting ? "Signing up..." : "Sign Up"}
+                </button>
               </div>
             </form>
           </div>
@@ -331,3 +367,4 @@ const Signup = () => {
 };
 
 export default Signup;
+

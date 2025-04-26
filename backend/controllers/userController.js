@@ -14,7 +14,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// **Get User Profile**
+// Get User Profile
 export const getUser = async (req, res) => {
   const { id } = req.params;
 
