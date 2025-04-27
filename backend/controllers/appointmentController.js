@@ -11,7 +11,7 @@ export const addAppointment = async (req, res) => {
     }
 
     try {
-        // Check for existing appointment by same user for same property and time
+        // Checking for existing appointment by same user for same property and time
         const [existingAppointments] = await db.query(`
             SELECT * FROM appointment 
             WHERE userID = ? 
@@ -109,7 +109,6 @@ export const getUserAppointments = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        // Unified query that works for both roles and handles sellers-as-buyers
         const query = `
             SELECT 
                 a.*,

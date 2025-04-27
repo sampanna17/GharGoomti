@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import cloudinary from '../config/cloudinary.js';
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -28,23 +29,55 @@ export const getDashboardStats = async (req, res) => {
   }
 };
 
+// export const deleteUser = async (req, res) => {
+//   const { id } = req.params;
+
+//   try {
+//     const [user] = await db.query('SELECT userID FROM users WHERE userID = ?', [id]);
+
+//     if (user.length === 0) {
+//       return res.status(404).json({ message: 'User not found.' });
+//     }
+
+//     // Delete the user
+//     await db.query('DELETE FROM users WHERE userID = ?', [id]);
+//     res.status(200).json({ message: 'User deleted successfully.' });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error deleting user.', error });
+//   }
+// };
+
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [user] = await db.query('SELECT userID FROM users WHERE userID = ?', [id]);
+    const [userResult] = await db.query(
+      'SELECT profile_picture FROM users WHERE userID = ?', 
+      [id]
+    );
 
-    if (user.length === 0) {
+    if (userResult.length === 0) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Delete the user
+    const user = userResult[0];
+
+    if (user.profile_picture) {
+      const imageURL = user.profile_picture;
+      const publicId = imageURL.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`user_profile_images/${publicId}`);
+    }
+
+    // Delete user from database
     await db.query('DELETE FROM users WHERE userID = ?', [id]);
-    res.status(200).json({ message: 'User deleted successfully.' });
+
+    res.status(200).json({ message: 'User and associated profile picture deleted successfully.' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Error deleting user.', error });
   }
 };
+
 
 export const countPropertyByTypes = async (req, res) => {
   try {

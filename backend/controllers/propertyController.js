@@ -160,6 +160,7 @@ export const getProperties = async (req, res) => {
             FROM property p
             LEFT JOIN property_image pi ON p.propertyID = pi.propertyID
             WHERE 1=1
+            ORDER BY p.created_at DESC
         `;
         
         const conditions = [];
@@ -238,9 +239,23 @@ export const deleteProperty = async (req, res) => {
     const { id } = req.params;
 
     try {
+        const [images] = await db.query(
+            'SELECT imageURL FROM property_image WHERE propertyID = ?', 
+            [id]
+        );
+
+        for (const img of images) {
+            const imageURL = img.imageURL;
+            const publicId = imageURL.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(`property_files/${publicId}`);
+        }
+  
+        await db.query('DELETE FROM property_image WHERE propertyID = ?', [id]);
         await db.query('DELETE FROM property WHERE propertyID = ?', [id]);
-        res.status(200).json({ message: 'Property deleted successfully.' });
+
+        res.status(200).json({ message: 'Property and associated images deleted successfully.' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Error deleting property.', error });
     }
 };
@@ -488,22 +503,7 @@ export const getPropertyByUser = async (req, res) => {
 // Update property details
 export const updateProperty = async (req, res) => {
     const { id } = req.params;
-    const {
-        propertyTitle,
-        propertyPrice,
-        propertyAddress,
-        propertyCity,
-        bedrooms,
-        bathrooms,
-        kitchens,
-        halls,
-        propertyType,
-        propertyFor,
-        propertySize,
-        petPolicy,
-        latitude,
-        longitude,
-        description
+    const {propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType,  propertyFor, propertySize, petPolicy, latitude, longitude, description
     } = req.body;
 
     try {

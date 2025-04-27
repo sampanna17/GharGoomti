@@ -37,6 +37,7 @@ function SinglePage() {
     const [selectedTime, setSelectedTime] = useState('');
     const [appointment, setAppointment] = useState(null);
     const [showSellerModal, setShowSellerModal] = useState(false);
+    const [isBooking, setIsBooking] = useState(false);
 
     const navigate = useNavigate();
 
@@ -163,6 +164,7 @@ function SinglePage() {
     };
 
     const handleBookVisit = async () => {
+
         if (!visitDate || !selectedTime) {
             toast.error("Please select both date and time");
             return;
@@ -172,12 +174,12 @@ function SinglePage() {
             toast.error("Please login to book an appointment");
             return;
         }
+        setIsBooking(true);
 
         try {
             // Convert AM/PM time to 24-hour format for backend
             const time24hr = convertTo24Hour(selectedTime);
 
-            // Remove the unused response variable and just await the axios call
             await axios.post('http://localhost:8000/api/appointment/add', {
                 userID: userData.userID,
                 propertyID: id,
@@ -195,9 +197,10 @@ function SinglePage() {
             setSelectedTime("");
 
         } catch (error) {
-            // console.error("Error booking appointment:", error);
             const errorMessage = error.response?.data?.message || "Failed to book appointment";
             toast.error(errorMessage);
+        } finally {
+            setIsBooking(false);
         }
     };
 
@@ -412,7 +415,8 @@ function SinglePage() {
                         </button>
                     </div>
 
-                    {appointment ? (
+
+                    {appointment && appointment.status === 'Pending' ? (
                         <div className="flex items-center justify-between gap-4 border border-gray-300 rounded-lg p-3 bg-white">
                             <div className="flex flex-col">
                                 <p className="font-medium">You have booked an appointment on:</p>
@@ -471,12 +475,12 @@ function SinglePage() {
                                 </div>
                             </div>
 
-                            {/* Right side - Book Button */}
                             <button
                                 onClick={handleBookVisit}
-                                className="p-2 bg-white text-gray-700 border-l border-gray-300 pl-5 pr-3 rounded-r-lg"
+                                disabled={isBooking}
+                                className={`p-2 bg-white text-gray-700 border-l border-gray-300 pl-5 pr-3 rounded-r-lg ${isBooking ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                Book a Visit
+                                {isBooking ? 'Booking...' : 'Book a Visit'}
                             </button>
                         </div>
                     )}

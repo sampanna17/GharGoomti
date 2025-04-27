@@ -228,41 +228,6 @@ export const refreshToken = (req, res) => {
   });
 };
 
-// export const google = async (req, res) => {
-//   const { userEmail } = req.body;
-
-//   if (!userEmail) {
-//     return res.status(400).json({ error: "Email is required!" });
-//   }
-
-//   try {
-//     const [rows] = await db.query("SELECT * FROM users WHERE userEmail = ?", [userEmail]);
-
-//     if (rows.length === 0) {
-//       return res.status(404).json({ error: "Email not Registered. Please signup!" });
-//     }
-
-//     const validUser = rows[0];
-
-//     const token = jwt.sign(
-//       { id: validUser.id, email: validUser.userEmail },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1d" }
-//     );
-
-//     const { password, ...userDetails } = validUser;
-
-//     res.status(200).json({
-//       message: "Google sign-in successful!",
-//       user: userDetails,
-//       token,
-//     });
-//   } catch (error) {
-//     console.error("Error during Google sign-in:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
 export const google = async (req, res) => {
   const { userEmail } = req.body;
 

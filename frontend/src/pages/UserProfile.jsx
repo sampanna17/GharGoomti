@@ -538,8 +538,6 @@ const UserProfile = () => {
     else if (queryTab) setActiveTab(queryTab);
   }, [location]);
 
-  
-
   // Initial data fetch
   useEffect(() => {
     fetchUserProfile();
@@ -761,7 +759,7 @@ const UserProfile = () => {
                   {!isEditing ? (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="px-6 py-2 bg-[#2E4156] text-white rounded-lg hover:bg-[#1A2D42] transition-colors flex items-center gap-2"
                     >
                       <FaEdit /> Edit Profile
                     </button>
@@ -770,7 +768,7 @@ const UserProfile = () => {
                       <button
                         onClick={handleSave}
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-70 flex-1 max-w-xs"
+                        className="px-4 py-2 bg-[#2E4156] text-white rounded-lg hover:bg-[#1A2D42] transition-colors disabled:opacity-70 flex-1 max-w-xs"
                       >
                         {isSubmitting ? 'Saving...' : 'Save Changes'}
                       </button>

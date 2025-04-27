@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaMapMarkerAlt, FaCamera, FaTimes, FaEdit } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaCamera, FaTimes, FaEdit, FaUserTie } from "react-icons/fa";
 import { MdSave } from "react-icons/md";
 import Sidebar from "../../components/AdminSideBar";
 import Navbar from "../../components/AdminNav";
@@ -165,7 +165,8 @@ const AdminProfile = () => {
                         <div className="flex justify-center mb-4">
                             {/* Profile Picture */}
                             <div className="relative group">
-                                <div className="w-32 h-32 rounded-full flex items-centerjustify-center overflow-hidden">
+
+                                <div className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden bg-gray-100">
                                     {imagePreview ? (
                                         <img
                                             src={imagePreview}
@@ -173,7 +174,7 @@ const AdminProfile = () => {
                                             className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <FaUser className="text-4xl" />
+                                        <FaUser className="text-4xl text-gray-400" />
                                     )}
                                 </div>
 
@@ -303,7 +304,7 @@ const AdminProfile = () => {
                                     Role
                                 </label>
                                 <div className="flex items-center border-b border-gray-300 mb-4">
-                                    <FaMapMarkerAlt className="text-gray-500 mr-2" />
+                                    <FaUserTie MarkerAlt className="text-gray-500 mr-2" />
                                     <input
                                         type="text"
                                         id="role"
@@ -322,7 +323,7 @@ const AdminProfile = () => {
                             {!isEditing ? (
                                 <button
                                     onClick={() => setIsEditing(true)}
-                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-blue-600 transition"
+                                    className="w-full bg-[#2E4156] text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-[#1A2D42] transition"
                                 >
                                     <FaEdit className="mr-2" /> Edit Profile
                                 </button>
@@ -331,7 +332,7 @@ const AdminProfile = () => {
                                     <button
                                         onClick={handleSave}
                                         disabled={isSubmitting}
-                                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-blue-600 transition disabled:opacity-70"
+                                        className="flex-1 bg-[#2E4156] text-white py-2 px-4 rounded-lg flex items-center justify-center hover:bg-[#1A2D42] transition disabled:opacity-70"
                                     >
                                         <MdSave className="mr-2" /> {isSubmitting ? 'Saving...' : 'Save Changes'}
                                     </button>

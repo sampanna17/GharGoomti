@@ -197,7 +197,6 @@ function Slider({ images = [] }) {
     });
   };
 
-  // Don't render if no images
   if (!images || images.length === 0) return null;
 
   const isFiveImages = images.length === 5;
@@ -233,14 +232,14 @@ function Slider({ images = [] }) {
         <div className={`${images.length === 4 ? 'flex-3 sm:flex-2 w-[550px]' : (isFiveImages ? 'grid grid-cols-2 gap-4' : (isSixImages ? 'grid grid-cols-3 gap-2' : 'flex-3 sm:flex-2'))} cursor-pointer`}>
           {isSixImages ? (
             <>
-              <img src={images[0].imageURL} alt="" className="w-full h-full object-cover rounded-lg" onClick={() => setImageIndex(0)} />
-              <img src={images[1].imageURL} alt="" className="w-full h-full object-cover rounded-lg" onClick={() => setImageIndex(1)} />
-              <img src={images[2].imageURL} alt="" className="w-full h-full object-cover rounded-lg" onClick={() => setImageIndex(2)} />
+              <img src={images[0].imageURL} alt="" className="w-full h-[200px] object-cover rounded-lg" onClick={() => setImageIndex(0)} />
+              <img src={images[1].imageURL} alt="" className="w-full h-[200px] object-cover rounded-lg" onClick={() => setImageIndex(1)} />
+              <img src={images[2].imageURL} alt="" className="w-full h-[200px] object-cover rounded-lg" onClick={() => setImageIndex(2)} />
             </>
           ) : isFiveImages ? (
             <>
-              <img src={images[0].imageURL} alt="" className="w-full h-full object-cover rounded-lg" onClick={() => setImageIndex(0)} />
-              <img src={images[1].imageURL} alt="" className="w-full h-full object-cover rounded-lg" onClick={() => setImageIndex(1)} />
+              <img src={images[0].imageURL} alt="" className="w-[400px] h-[280px] object-cover rounded-lg" onClick={() => setImageIndex(0)} />
+              <img src={images[1].imageURL} alt="" className="w-[380px] h-[280px] object-cover rounded-lg" onClick={() => setImageIndex(1)} />
             </>
           ) : (
             <img src={images[0].imageURL} alt="" className="w-full h-full object-cover rounded-lg" onClick={() => setImageIndex(0)} />

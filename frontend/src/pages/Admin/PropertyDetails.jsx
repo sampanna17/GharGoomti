@@ -8,6 +8,7 @@ import PaginationComponent from "../../components/PaginationComponent";
 import axios from "axios";
 import { toast } from "react-toastify";
 import NumberFormat from "../../components/FormatNumber";
+import DeleteConfirmationModal from "../../components/DeleteConfirmation";
 
 const PropertyDetails = () => {
     const [properties, setProperties] = useState([]);
@@ -18,6 +19,12 @@ const PropertyDetails = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [paginatedProperties, setPaginatedProperties] = useState([]);
+
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        propertyId: null,
+        propertyName: ""
+    });
 
     useEffect(() => {
         const fetchProperties = async () => {
@@ -43,6 +50,9 @@ const PropertyDetails = () => {
         fetchProperties();
     }, []);
 
+    useEffect(() => {
+        setPaginatedProperties(properties.slice(0, 4));
+      }, [properties]);
 
     const handlePageChange = (newPaginatedItems) => {
         setPaginatedProperties(newPaginatedItems);
@@ -82,14 +92,37 @@ const PropertyDetails = () => {
         );
     };
 
-    const handleDeleteProperty = async (propertyId, e) => {
+    const handleDeleteClick = (propertyId, propertyName, e) => {
         e.stopPropagation();
+        setDeleteModal({
+            isOpen: true,
+            propertyId,
+            propertyName
+        });
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModal({
+            isOpen: false,
+            propertyId: null,
+            propertyName: ""
+        });
+    };
+
+    const handleDeleteConfirm = async () => {
         try {
-            await axios.delete(`http://localhost:8000/api/property/${propertyId}`);
-            setProperties(properties.filter(p => p.propertyID !== propertyId));
+            await axios.delete(`http://localhost:8000/api/property/${deleteModal.propertyId}`);
+            setProperties(properties.filter(p => p.propertyID !== deleteModal.propertyId));
             toast.success("Property deleted successfully");
-        } catch {
+
+            // Also check if we're viewing the deleted property in the modal
+            if (selectedProperty && selectedProperty.propertyID === deleteModal.propertyId) {
+                handleCloseModal();
+            }
+        } catch{
             toast.error("Failed to delete property");
+        } finally {
+            handleDeleteCancel();
         }
     };
 
@@ -219,9 +252,19 @@ const PropertyDetails = () => {
                                                     <td className="p-3">
                                                         <div className="flex space-x-2">
 
-                                                            <button
+                                                            {/* <button
                                                                 className="text-red-500 hover:text-red-700 flex items-center text-sm p-2 hover:bg-red-50 rounded"
                                                                 onClick={(e) => handleDeleteProperty(property.propertyID, e)}
+                                                            >
+                                                                <FaTrash className="mr-1" /> Delete
+                                                            </button> */}
+                                                            <button
+                                                                className="text-red-500 hover:text-red-700 flex items-center text-sm p-2 hover:bg-red-50 rounded"
+                                                                onClick={(e) => handleDeleteClick(
+                                                                    property.propertyID,
+                                                                    property.title,
+                                                                    e
+                                                                )}
                                                             >
                                                                 <FaTrash className="mr-1" /> Delete
                                                             </button>
@@ -408,6 +451,12 @@ const PropertyDetails = () => {
                     </div>
                 </div>
             )}
+            <DeleteConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                propertyName={deleteModal.propertyName}
+            />
         </div>
     );
 };

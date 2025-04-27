@@ -16,7 +16,8 @@ import {
   LinearScale,
   PointElement,
   LineElement,
-  Title
+  Title,
+  Filler
 } from 'chart.js';
 
 ChartJS.register(
@@ -27,7 +28,8 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Title
+  Title,
+  Filler
 );
 
 const AdminDashboard = () => {

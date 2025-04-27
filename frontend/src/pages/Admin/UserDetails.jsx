@@ -5,12 +5,19 @@ import Navbar from "../../components/AdminNav";
 import PaginationComponent from "../../components/PaginationComponent";
 import axios from "axios";
 import { toast } from "react-toastify";
+import DeleteConfirmationModal from "../../components/DeleteConfirmation";
 
 const UserDetails = () => {
     const [allUsers, setAllUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [paginatedUsers, setPaginatedUsers] = useState([]);
+
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        userId: null,
+        userName: ""
+    });
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -56,17 +63,37 @@ const UserDetails = () => {
         setSelectedUser(null);
     };
 
-    const handleDeleteUser = async (userId) => {
-        if (window.confirm("Are you sure you want to delete this user?")) {
-            try {
-                await axios.delete(`http://localhost:8000/api/admin/${userId}`);
-                toast.success("User deleted successfully");
-                setAllUsers(prev => prev.filter(user => user.userID !== userId));
-                setSelectedUser(null);
-            } catch (error) {
-                console.error("Error deleting user:", error);
-                toast.error("Failed to delete user");
-            }
+    const handleDeleteClick = (userId, userName) => {
+        setDeleteModal({
+            isOpen: true,
+            userId,
+            userName: `${userName}'s account`
+        });
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteModal({
+            isOpen: false,
+            userId: null,
+            userName: ""
+        });
+    };
+
+    const handleDeleteConfirm = async () => {
+        try {
+            await axios.delete(`http://localhost:8000/api/admin/${deleteModal.userId}`);
+            toast.success("User deleted successfully");
+            setAllUsers(prev => prev.filter(user => user.userID !== deleteModal.userId));
+            setSelectedUser(null);
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            toast.error("Failed to delete user");
+        } finally {
+            setDeleteModal({
+                isOpen: false,
+                userId: null,
+                userName: ""
+            });
         }
     };
 
@@ -101,6 +128,7 @@ const UserDetails = () => {
                                         <tr
                                             key={user.userID}
                                             className="border-b hover:bg-gray-50 cursor-pointer"
+                                            // onClick={() => handleRowClick(user.userID)}
                                             onClick={() => handleRowClick(user.userID)}
                                         >
                                             <td className="p-3">{user.userFirstName} {user.userLastName}</td>
@@ -110,10 +138,13 @@ const UserDetails = () => {
                                             <td
                                                 className="p-3"
                                                 onClick={(e) => e.stopPropagation()}
-                                            >
+                                            >                                              
                                                 <button
                                                     className="text-red-500 hover:text-red-700 flex items-center"
-                                                    onClick={() => handleDeleteUser(user.userID)}
+                                                    onClick={() => handleDeleteClick(
+                                                        user.userID,
+                                                        `${user.userFirstName} ${user.userLastName}`
+                                                    )}
                                                 >
                                                     <FaTrash className="mr-1" /> Delete
                                                 </button>
@@ -207,10 +238,13 @@ const UserDetails = () => {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end">
+                            <div className="flex justify-end">                              
                                 <button
                                     className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center"
-                                    onClick={() => handleDeleteUser(selectedUser.userID)}
+                                    onClick={() => handleDeleteClick(
+                                        selectedUser.userID,
+                                        `${selectedUser.userFirstName} ${selectedUser.userLastName}`
+                                    )}
                                 >
                                     <FaTrash className="mr-2" />
                                     Delete User
@@ -220,6 +254,12 @@ const UserDetails = () => {
                     )}
                 </div>
             </div>
+            <DeleteConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                propertyName={deleteModal.userName}
+            />
         </div>
     );
 };

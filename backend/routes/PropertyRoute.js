@@ -26,7 +26,7 @@ router.get('/bookmark/check/:userID/:propertyID', checkBookmarkStatus);
 // Routes for user proerty
 router.get('/property/:id/user', getPropertyUser);
 
-// New update routes
+// Property update routes
 router.put('/property/:id', updateProperty);
 router.put('/property/:id/images', formidable(), updatePropertyImages);
 

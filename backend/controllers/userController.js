@@ -34,7 +34,6 @@ export const getUser = async (req, res) => {
   }
 };
 
-
 export const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -62,7 +61,6 @@ export const updateUser = async (req, res) => {
         profileImageUrl = null;
       } catch (uploadError) {
         console.error('Cloudinary deletion error:', uploadError);
-        // Continue with update even if deletion fails
         profileImageUrl = null;
       }
     }

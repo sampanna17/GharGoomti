@@ -1,10 +1,9 @@
 import axios from "axios";
-import { toast , ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { LockClosedIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-
 
     const navigate = useNavigate();
 
@@ -39,24 +38,22 @@ const ForgotPassword = () => {
             if (!res.data.success) {
                 toast.error(res.data.message, toastOptions);
             } else {
-                // toast.success(res.data.message, toastOptions);
                 toast.success(
                     <>
-                      <div className="mr-2">A password reset link has been sent to your email.</div>
-                      <div className="mr-5">
-                        <a 
-                          href="https://mail.google.com/mail/u/0/#inbox" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className=" w-auto hover:underline"
-                        >
-                          <span className="w-auto">Click Here</span>
-                        </a>
-                      </div>
+                        <div className="mr-2">A password reset link has been sent to your email.</div>
+                        <div className="mr-5">
+                            <a
+                                href="https://mail.google.com/mail/u/0/#inbox"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className=" w-auto hover:underline"
+                            >
+                                <span className="w-auto">Click Here</span>
+                            </a>
+                        </div>
                     </>,
                     toastOptions
-                  );
-                                  
+                );
             }
         } catch (error) {
             if (error.response) {
@@ -80,8 +77,6 @@ const ForgotPassword = () => {
     const handleBackToSignup = () => {
         navigate("/signup");
     };
-    
-
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">

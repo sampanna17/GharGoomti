@@ -659,8 +659,6 @@
 // }
 
 
-
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -1176,7 +1174,7 @@ export default function AddProperty() {
             { field: 'bathroom', min: 0, max: 20, message: validateNumber(inputs.bathroom, 0, 20, "bathrooms") },
             { field: 'kitchen', min: 0, max: 5, message: validateNumber(inputs.kitchen, 0, 5, "kitchens") },
             { field: 'hall', min: 0, max: 10, message: validateNumber(inputs.hall, 0, 10, "halls") },
-            { field: 'size', min: 0, max: 100, message: "Size must be a valid positive number." }
+            { field: 'size', min: 100, max: 2000, message: "Size must be a valid positive number." }
         ];
 
         for (const validation of numberValidations) {
