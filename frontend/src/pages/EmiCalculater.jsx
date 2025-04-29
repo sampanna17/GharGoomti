@@ -75,18 +75,18 @@ const HomeLoanEMICalculator = () => {
             setEmi(Math.round(emiAmount));
         } else {
             // For Yearly EMI
-            const yearlyRate = parseFloat(interestRate) / 100; // Yearly Interest Rate
+            const yearlyRate = parseFloat(interestRate) / 100;
             const tenureInYears = parseInt(loanTenure);
             emiAmount =
                 (principal * yearlyRate) /
-                (1 - Math.pow(1 + yearlyRate, -tenureInYears)); // Formula for Yearly EMI
+                (1 - Math.pow(1 + yearlyRate, -tenureInYears)); 
             totalInterestAmount = emiAmount * tenureInYears - principal;
             totalAmountToPay = emiAmount * tenureInYears;
-            setEmi(Math.round(emiAmount)); // Yearly EMI (rounded)
+            setEmi(Math.round(emiAmount)); 
         }
 
-        setTotalInterest(Math.round(totalInterestAmount)); // Total Interest Payable (rounded)
-        setTotalAmount(Math.round(totalAmountToPay)); // Total Amount to Pay (rounded)
+        setTotalInterest(Math.round(totalInterestAmount)); 
+        setTotalAmount(Math.round(totalAmountToPay));
         toast.success("EMI calculated successfully!", {
             autoClose: 2000,
             position: "top-right",
@@ -249,12 +249,6 @@ const HomeLoanEMICalculator = () => {
                     </div>
                     <div className="space-y-10 -mt-2 flex-1">
                         {/* Loan EMI */}
-                        {/* <div className="flex flex-col">
-                            <h3 className="block text-gray-700 font-semibold mb-2">Loan EMI</h3>
-                            <p className="text-2xl font-semibold">
-                                <span className="text-sm text-gray-500">NRS</span> {emi && emi}
-                            </p>
-                        </div> */}
 
                         <div className="flex flex-col">
                             <h3 className="block text-gray-700 font-semibold mb-2">Loan EMI</h3>

@@ -4,7 +4,7 @@ import Sidebar from "../../components/AdminSideBar";
 import Navbar from "../../components/AdminNav";
 import PaginationComponent from "../../components/PaginationComponent";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast , ToastContainer} from "react-toastify";
 import DeleteConfirmationModal from "../../components/DeleteConfirmation";
 
 const UserDetails = () => {
@@ -100,6 +100,7 @@ const UserDetails = () => {
     return (
         <div className="flex">
             <Sidebar />
+            <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick pauseOnHover />
             <div className="flex-1">
                 <Navbar />
                 <div className="p-6">

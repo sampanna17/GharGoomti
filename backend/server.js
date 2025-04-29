@@ -79,10 +79,8 @@ app.use('/api/chats', chatroute);
 app.use('/api/messages', messageroute);
 
 const PORT = 8000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// Serve static files from the 'public' folder
 app.use("/public", express.static("public"));
 
 

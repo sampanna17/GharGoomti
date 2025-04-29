@@ -1,4 +1,4 @@
-import { useState,useContext } from "react";
+import { useState,useContext,useEffect } from "react";
 import axios from "axios";
 import Cookies from 'js-cookie';
 import Image from "../assets/image.png";
@@ -10,6 +10,7 @@ import { toast, ToastContainer } from "react-toastify";
 import OAuth from "../components/OAuth";
 import "../css/Login.css";
 import { UserContext } from '../context/UserContext.jsx';
+import { useLocation } from 'react-router-dom';
 
 const Login = () => {
   const { refreshUserData } = useContext(UserContext);
@@ -18,30 +19,31 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const toastOptions = {
-    autoClose: 1000,
-    position: "top-right",
-    limit: 1,
-    newestOnTop: false,
-  };
+  useEffect(() => {
+    if (location.state?.logoutSuccess) {
+      toast.success("Logged out successfully!");
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     toast.dismiss();
 
     if (!email && !password) {
-      toast.error("Email and Password are required!", toastOptions);
+      toast.error("Email and Password are required!");
       return;
     }
 
     if (!password) {
-      toast.error(" Password is required!", toastOptions);
+      toast.error(" Password is required!");
       return;
     }
 
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      toast.error("Please enter a valid email address.", toastOptions);
+      toast.error("Please enter a valid email address.");
       return;
     }
 
@@ -72,13 +74,13 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      toast.error(err.response?.data?.error || "Unable to log in. Please try again.", toastOptions);
+      toast.error(err.response?.data?.error || "Unable to log in. Please try again.");
     }
   };
 
   return (
     <div className="login-main">
-      <ToastContainer position="top-right" autoClose={1000} limit={1} newestOnTop={false} closeOnClick />
+      <ToastContainer position="top-right" autoClose={2000} limit={1} newestOnTop={false} closeOnClick />
       <div className="login-left">
         <img src={Image} alt="image" className="center-image" />
         <img src={ImageUP} alt="image" className="corner-image" />

@@ -9,7 +9,7 @@ export const bookmarkProperty = async (req, res) => {
     }
 
     try {
-        // First check if bookmark already exists
+        //checking if bookmark already exists
         const [existing] = await db.query(
             'SELECT 1 FROM bookmark WHERE userID = ? AND propertyID = ? LIMIT 1',
             [userID, propertyID]
@@ -63,7 +63,7 @@ export const getBookmarks = async (req, res) => {
     }
 
     try {
-        // First get all bookmarked properties
+        // get all bookmarked properties
         const [bookmarks] = await db.query(
             `SELECT 
                 b.propertyID, 
@@ -86,7 +86,7 @@ export const getBookmarks = async (req, res) => {
             [userID]
         );
 
-        // Then get all images for each property
+        // get all images for each property
         const bookmarksWithImages = await Promise.all(
             bookmarks.map(async (property) => {
                 const [images] = await db.query(
@@ -109,8 +109,7 @@ export const getBookmarks = async (req, res) => {
     }
 };
 
-
-// Add this to your bookmark controller file
+//check bookmark status
 export const checkBookmarkStatus = async (req, res) => {
     const { userID, propertyID } = req.params;
 

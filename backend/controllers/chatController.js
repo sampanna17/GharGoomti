@@ -4,7 +4,7 @@ export const getChats = async (req, res) => {
     const userId = req.body.userId;
 
     try {
-        // Get all chats where the user is a participant
+        // Get all chats 
         const [chats] = await db.query(`
       SELECT c.* 
       FROM chats c
@@ -12,7 +12,7 @@ export const getChats = async (req, res) => {
       WHERE cu.userID = ?
     `, [userId]);
 
-        // For each chat, get the receiver info
+        // get the receiver info
         for (const chat of chats) {
             // Get receiver ID (the other participant)
             const [participants] = await db.query(`

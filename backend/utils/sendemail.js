@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
 
-// Refactor `sendemail` to return a promise
 export const sendemail = async (to, subject, otp) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',

@@ -27,7 +27,6 @@ const EmailVerificationPage = () => {
       const data = await response.json();
   
       if (!response.ok) {
-        // Return the error message from backend
         return { error: data.error || "Failed to verify email" };
       }
   
@@ -50,7 +49,6 @@ const EmailVerificationPage = () => {
       }
       setCode(newCode);
 
-      // Focus on the last non-empty input or the first empty one
       const lastFilledIndex = newCode.findLastIndex((digit) => digit !== "");
       const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
       inputRefs.current[focusIndex].focus();

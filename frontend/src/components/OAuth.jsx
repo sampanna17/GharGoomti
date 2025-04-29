@@ -28,13 +28,12 @@ export default function OAuth() {
         body: JSON.stringify({
           userEmail: result.user.email, 
         }),
-        credentials: 'include' // Important for cookies
+        credentials: 'include' 
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        // Store user details similar to your regular login
         Cookies.set("user_data", JSON.stringify(data.user), { 
           expires: 1, 
           secure: true, 

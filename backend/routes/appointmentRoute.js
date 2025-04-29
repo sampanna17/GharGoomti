@@ -8,7 +8,7 @@ router.post('/add', addAppointment);
 router.get('/user/:userID', getUserAppointments);  
 router.put('/seller/:appointmentID/status', updateAppointmentStatus);
 router.delete('/:appointmentID', removeAppointment);
-router.get('/seller/:userID', getSellerPendingAppointments);  
+router.get('/seller/:sellerID', getSellerPendingAppointments);  
 router.get('/check/:userID/:propertyID', checkAppointment);
 
 router.put('/:appointmentID', updateAppointment); 

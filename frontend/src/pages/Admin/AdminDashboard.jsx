@@ -7,30 +7,9 @@ import subscribedUser from '../../assets/admin/followers.png';
 import house from '../../assets/admin/house.png';
 import users from '../../assets/admin/team.png';
 import { Pie, Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Filler
-} from 'chart.js';
+import {Chart as ChartJS,ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement,Title, Filler} from 'chart.js';
 
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Filler
-);
+ChartJS.register(ArcElement,Tooltip,Legend,CategoryScale,LinearScale,PointElement,LineElement,Title,Filler);
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({

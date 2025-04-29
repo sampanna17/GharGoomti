@@ -143,16 +143,6 @@ export const addProperty = async (req, res) => {
     }
 };
 
-// Get all properties
-// export const getProperties = async (req, res) => {
-//     try {
-//         const [properties] = await db.query('SELECT * FROM property JOIN property_image ON property.propertyID = property_image.propertyID');
-//         res.status(200).json(properties);
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error fetching properties.', error });
-//     }
-// };
-
 export const getProperties = async (req, res) => {
     try {
         let baseQuery = `
@@ -160,27 +150,26 @@ export const getProperties = async (req, res) => {
             FROM property p
             LEFT JOIN property_image pi ON p.propertyID = pi.propertyID
             WHERE 1=1
-            ORDER BY p.created_at DESC
         `;
-        
+
         const conditions = [];
         const params = [];
-        
-        if (req.query.city) {
-            conditions.push('AND p.propertyCity LIKE ?');
-            params.push(`%${req.query.city}%`);
+
+        if (req.query.address) {
+            conditions.push('AND p.propertyAddress LIKE ?');
+            params.push(`%${req.query.address}%`);
         }
 
         if (req.query.type) {
             conditions.push('AND p.propertyFor = ?');
             params.push(req.query.type === 'rent' ? 'Rent' : 'Sale');
         }
-        
+
         if (req.query.property) {
             conditions.push('AND p.propertyType = ?');
             params.push(req.query.property.charAt(0).toUpperCase() + req.query.property.slice(1));
         }
-        
+
         if (req.query.minPrice) {
             conditions.push('AND p.propertyPrice >= ?');
             params.push(parseFloat(req.query.minPrice));
@@ -189,15 +178,17 @@ export const getProperties = async (req, res) => {
             conditions.push('AND p.propertyPrice <= ?');
             params.push(parseFloat(req.query.maxPrice));
         }
-        
+
         if (req.query.bedroom) {
             conditions.push('AND p.bedrooms = ?');
             params.push(parseInt(req.query.bedroom));
         }
+
+        const orderByClause = ' ORDER BY p.created_at DESC';
         
-        const finalQuery = baseQuery + conditions.join(' ');
+        const finalQuery = baseQuery + conditions.join(' ') + orderByClause;
         const [properties] = await db.query(finalQuery, params);
-        
+
         res.status(200).json(properties);
     } catch (error) {
         console.error('Error fetching properties:', error);
@@ -211,14 +202,14 @@ export const getPropertyById = async (req, res) => {
     try {
         // Fetch property details
         const [property] = await db.query('SELECT * FROM property WHERE propertyID = ?', [id]);
-        
+
         if (property.length === 0) {
             return res.status(404).json({ message: 'Property not found.' });
         }
 
         // Fetch property images
         const [images] = await db.query(
-            'SELECT imageURL FROM property_image WHERE propertyID = ?', 
+            'SELECT imageURL FROM property_image WHERE propertyID = ?',
             [id]
         );
 
@@ -240,7 +231,7 @@ export const deleteProperty = async (req, res) => {
 
     try {
         const [images] = await db.query(
-            'SELECT imageURL FROM property_image WHERE propertyID = ?', 
+            'SELECT imageURL FROM property_image WHERE propertyID = ?',
             [id]
         );
 
@@ -249,7 +240,7 @@ export const deleteProperty = async (req, res) => {
             const publicId = imageURL.split('/').pop().split('.')[0];
             await cloudinary.uploader.destroy(`property_files/${publicId}`);
         }
-  
+
         await db.query('DELETE FROM property_image WHERE propertyID = ?', [id]);
         await db.query('DELETE FROM property WHERE propertyID = ?', [id]);
 
@@ -262,23 +253,23 @@ export const deleteProperty = async (req, res) => {
 
 // Add image to property 
 export const addPropertyImage = async (req, res) => {
-    const { id } = req.params; 
-    
+    const { id } = req.params;
+
     try {
 
         const [property] = await db.query('SELECT propertyID FROM property WHERE propertyID = ?', [id]);
         if (!property) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Property not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Property not found'
             });
         }
 
         const [imageCount] = await db.query(
-            'SELECT COUNT(*) AS count FROM property_image WHERE propertyID = ?', 
+            'SELECT COUNT(*) AS count FROM property_image WHERE propertyID = ?',
             [id]
         );
-        
+
         if (imageCount[0].count >= 6) {
             return res.status(400).json({
                 success: false,
@@ -287,9 +278,9 @@ export const addPropertyImage = async (req, res) => {
         }
 
         if (!req.files || !req.files.image) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No file was uploaded' 
+            return res.status(400).json({
+                success: false,
+                message: 'No file was uploaded'
             });
         }
 
@@ -303,7 +294,7 @@ export const addPropertyImage = async (req, res) => {
         const query = 'INSERT INTO property_image (propertyID, imageURL) VALUES (?, ?)';
         const [dbResult] = await db.query(query, [id, result.secure_url]);
 
-        res.status(201).json({ 
+        res.status(201).json({
             success: true,
             message: 'File uploaded successfully',
             data: {
@@ -317,7 +308,7 @@ export const addPropertyImage = async (req, res) => {
 
     } catch (error) {
         console.error('File upload error:', error);
-        
+
         if (error.http_code) {
             return res.status(error.http_code).json({
                 success: false,
@@ -353,7 +344,7 @@ export const deletePropertyImage = async (req, res) => {
 
     try {
         const [result] = await db.query(
-            'SELECT imageURL FROM property_image WHERE imageID = ? AND propertyID = ?', 
+            'SELECT imageURL FROM property_image WHERE imageID = ? AND propertyID = ?',
             [imageID, propertyID]
         );;
 
@@ -362,14 +353,14 @@ export const deletePropertyImage = async (req, res) => {
         }
 
         const imageURL = result[0].imageURL;
-        const publicId = imageURL.split('/').pop().split('.')[0]; 
+        const publicId = imageURL.split('/').pop().split('.')[0];
 
         // Delete from Cloudinary
         await cloudinary.uploader.destroy(`property_images/${publicId}`);
 
         // Delete from Database
         await db.query(
-            'DELETE FROM property_image WHERE imageID = ? AND propertyID = ?', 
+            'DELETE FROM property_image WHERE imageID = ? AND propertyID = ?',
             [imageID, propertyID]
         );
 
@@ -396,7 +387,7 @@ export const getPropertyUser = async (req, res) => {
         `;
 
         const [user] = await db.query(query, [id]);
-        
+
         if (user.length === 0) {
             return res.status(404).json({ message: 'User not found for this property.' });
         }
@@ -420,62 +411,46 @@ export const getPropertyByUser = async (req, res) => {
     const { userId } = req.params;
 
     if (!userId) {
-        return res.status(400).json({ 
+        return res.status(400).json({
             success: false,
-            message: 'User ID is required.' 
+            message: 'User ID is required.'
         });
     }
 
+
     try {
-        // First get all properties for the user
-        const query = `
-            SELECT 
-                p.propertyID,
-                p.userID,
-                p.propertyTitle,
-                p.propertyPrice,
-                p.propertyAddress,
-                p.propertyCity,
-                p.bedrooms,
-                p.bathrooms,
-                p.kitchens,
-                p.halls,
-                p.propertyType,
-                p.propertyFor,
-                p.propertySize,
-                p.petPolicy,
-                p.latitude,
-                p.longitude,
-                p.description,
-                p.created_at
-            FROM property p
-            WHERE p.userID = ?
-            ORDER BY p.created_at DESC
+        const query = `  
+        SELECT p.propertyID, p.userID, p.propertyTitle, p.propertyPrice, p.propertyAddress, p.propertyCity, p.bedrooms,p.bathrooms,
+        p.kitchens, p.halls, p.propertyType, p.propertyFor, p.propertySize, p.petPolicy, p.latitude,p.longitude, p.description,
+        p.created_at
+        FROM property p
+        WHERE p.userID = ?
+        ORDER BY p.created_at DESC
         `;
 
         const [properties] = await db.query(query, [userId]);
 
         if (properties.length === 0) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 success: true,
                 message: 'No properties found for this user.',
-                properties: [] 
+                properties: []
             });
         }
 
-        // Then get all images for each property
+        // get all images for each property
         const propertiesWithImages = await Promise.all(
             properties.map(async (property) => {
                 const [images] = await db.query(
                     'SELECT imageURL FROM property_image WHERE propertyID = ?',
                     [property.propertyID]
                 );
-                
-                // Convert created_at to JavaScript Date if needed
-                const createdAt = property.created_at 
-                    ? new Date(property.created_at) 
+
+                // Convert created_at
+                const createdAt = property.created_at
+                    ? new Date(property.created_at)
                     : null;
-                
+
                 return {
                     ...property,
                     images: images.map(img => img.imageURL),
@@ -483,7 +458,7 @@ export const getPropertyByUser = async (req, res) => {
             })
         );
 
-        res.status(200).json({ 
+        res.status(200).json({
             success: true,
             count: propertiesWithImages.length,
             properties: propertiesWithImages
@@ -491,7 +466,7 @@ export const getPropertyByUser = async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching properties by user:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             message: 'Server error while fetching properties.',
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -503,7 +478,7 @@ export const getPropertyByUser = async (req, res) => {
 // Update property details
 export const updateProperty = async (req, res) => {
     const { id } = req.params;
-    const {propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType,  propertyFor, propertySize, petPolicy, latitude, longitude, description
+    const { propertyTitle, propertyPrice, propertyAddress, propertyCity, bedrooms, bathrooms, kitchens, halls, propertyType, propertyFor, propertySize, petPolicy, latitude, longitude, description
     } = req.body;
 
     try {
@@ -600,7 +575,7 @@ export const updateProperty = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating property:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             message: 'Internal server error',
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -610,32 +585,32 @@ export const updateProperty = async (req, res) => {
 
 export const updatePropertyImages = async (req, res) => {
     const { id } = req.params;
-    
+
     try {
         // Check if property exists
         const [property] = await db.query('SELECT propertyID FROM property WHERE propertyID = ?', [id]);
         if (property.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Property not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Property not found'
             });
         }
 
         // Check if files were uploaded
         if (!req.files || Object.keys(req.files).length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No files were uploaded' 
+            return res.status(400).json({
+                success: false,
+                message: 'No files were uploaded'
             });
         }
 
-        // Get the uploaded files from formidable
+        // Get the uploaded files
         const files = req.files.images;
         const filesArray = Array.isArray(files) ? files : [files];
 
         // Get existing images to delete from Cloudinary
         const [existingImages] = await db.query('SELECT imageURL FROM property_image WHERE propertyID = ?', [id]);
-        
+
         // Delete existing images from Cloudinary
         await Promise.all(existingImages.map(async (image) => {
             const publicId = image.imageURL.split('/').pop().split('.')[0];
@@ -666,7 +641,7 @@ export const updatePropertyImages = async (req, res) => {
             });
         }
 
-        res.status(200).json({ 
+        res.status(200).json({
             success: true,
             message: 'Property images updated successfully',
             data: {
@@ -677,7 +652,7 @@ export const updatePropertyImages = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating property images:', error);
-        
+
         if (error.http_code) {
             return res.status(error.http_code).json({
                 success: false,
@@ -735,7 +710,7 @@ export const getallProperties = async (req, res) => {
                     area: curr.propertySize,
                     status: curr.propertyFor,
                     type: curr.propertyType,
-                    petPolicy:curr.petPolicy,
+                    petPolicy: curr.petPolicy,
                     createdAt: curr.created_at,
                     images: curr.imageID ? [{
                         imageID: curr.imageID,
@@ -749,9 +724,9 @@ export const getallProperties = async (req, res) => {
         res.status(200).json(groupedProperties);
     } catch (error) {
         console.error('Error fetching properties:', error);
-        res.status(500).json({ 
-            message: 'Error fetching properties.', 
-            error: error.message 
+        res.status(500).json({
+            message: 'Error fetching properties.',
+            error: error.message
         });
     }
 };

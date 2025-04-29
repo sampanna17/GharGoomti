@@ -6,7 +6,7 @@ import Navbar from "../../components/AdminNav";
 import Sidebar from "../../components/AdminSideBar";
 import PaginationComponent from "../../components/PaginationComponent";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import NumberFormat from "../../components/FormatNumber";
 import DeleteConfirmationModal from "../../components/DeleteConfirmation";
 
@@ -146,6 +146,7 @@ const PropertyDetails = () => {
     if (error) {
         return (
             <div className="flex min-h-screen bg-gray-50">
+                 <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick pauseOnHover />
                 <Sidebar />
                 <div className="flex-1 flex flex-col">
                     <Navbar />
@@ -252,12 +253,7 @@ const PropertyDetails = () => {
                                                     <td className="p-3">
                                                         <div className="flex space-x-2">
 
-                                                            {/* <button
-                                                                className="text-red-500 hover:text-red-700 flex items-center text-sm p-2 hover:bg-red-50 rounded"
-                                                                onClick={(e) => handleDeleteProperty(property.propertyID, e)}
-                                                            >
-                                                                <FaTrash className="mr-1" /> Delete
-                                                            </button> */}
+                                                        
                                                             <button
                                                                 className="text-red-500 hover:text-red-700 flex items-center text-sm p-2 hover:bg-red-50 rounded"
                                                                 onClick={(e) => handleDeleteClick(

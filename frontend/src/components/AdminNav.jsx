@@ -10,7 +10,7 @@ import { useNotificationCount } from '../hooks/useNotificationCount';
 const Navbar = () => {
   const { user, setIsLoggedIn, refreshUserData } = useContext(UserContext);
   const navigate = useNavigate();
-  const { count: notificationCount } = useNotificationCount(); // Destructure count
+  const { count: notificationCount } = useNotificationCount(); 
 
   if (!user) {
     return null; 
@@ -27,12 +27,7 @@ const Navbar = () => {
       localStorage.removeItem('user');
       refreshUserData();
       setIsLoggedIn(false);
-      // navigate("/login");
-      // navigate("/", { state: { fromLogout: true } });
       window.location.href = "/login";
-      
-      
-
     } catch (err) {
       console.error("Logout error:", err);
       toast.error("Failed to logout");

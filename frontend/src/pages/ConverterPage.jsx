@@ -23,7 +23,6 @@ const AreaConverter = () => {
             value = 0;
         }
 
-        // Create a new state object but only update the field being changed
         const updatedValues = { ...areaValues, [key]: value };
 
         // Perform calculations 
@@ -109,7 +108,6 @@ const AreaConverter = () => {
             updatedValues.kattha = updatedValues.bigha * 20;
             updatedValues.dhur = updatedValues.kattha * 20;
         }
-
         setAreaValues(updatedValues);
     };
 

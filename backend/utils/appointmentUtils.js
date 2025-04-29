@@ -11,13 +11,12 @@ export const isTimeSlotAvailable = async (propertyID, date, time) => {
             AND appointmentStatus = 'confirmed'
         `, [propertyID, date]);
 
-        // Convert time to minutes for easier comparison
+        // Convert time to minutes 
         const requestedTime = convertTimeToMinutes(time);
         
         for (const appointment of existingAppointments) {
             const bookedTime = convertTimeToMinutes(appointment.appointmentTime);
             
-            // Assuming each appointment lasts 1 hour (60 minutes)
             if (Math.abs(requestedTime - bookedTime) < 60) {
                 return false; 
             }

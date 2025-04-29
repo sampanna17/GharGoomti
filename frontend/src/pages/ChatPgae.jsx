@@ -30,7 +30,6 @@ const Chats = () => {
     }
   }, []);
 
-  // Scroll to bottom only when new messages are received
   useEffect(() => {
     if (messages.length > prevMessagesLength.current) {
       scrollToBottom();
@@ -38,7 +37,6 @@ const Chats = () => {
     prevMessagesLength.current = messages.length;
   }, [messages, scrollToBottom]);
 
-  // Disable body scrolling when component mounts
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -100,7 +98,6 @@ const Chats = () => {
             setChats(prev => [...prev, newChat]);
           }
         } else if (fetchedChats.length > 0) {
-          // Activate the first chat by default if none is selected
           setActiveChat(fetchedChats[0]);
         }
       } catch (error) {
@@ -146,7 +143,7 @@ const Chats = () => {
         if (response.data) {
           setMessages(response.data.messages);
 
-          // Update receiver info if available
+          // Update receiver info
           if (response.data?.receiver) {
             const receiverData = response.data.receiver;
             setActiveChat(prev => ({
@@ -167,7 +164,6 @@ const Chats = () => {
       }
     };
 
-    // Only fetch if activeChat exists and has a chatID
     if (activeChat?.chatID) {
       fetchMessages(activeChat.chatID);
     }

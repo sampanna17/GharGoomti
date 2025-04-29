@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import GotoTop from "../components/GoToTop";
 import iconBuySell from "../assets/iconBuySell.png";
 import iconRent from "../assets/iconRent.png";
@@ -11,7 +10,6 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
   ); 
-  const navigate = useNavigate();
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";

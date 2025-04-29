@@ -208,16 +208,13 @@ const AppointmentsTab = ({ userID }) => {
                                     <div className="pt-2 mt-2 border-t text-sm text-gray-600 space-y-2">
                                         <p><strong>Address:</strong> {appointment.propertyAddress}, {appointment.propertyCity}</p>
 
-                                        {/* Dynamic display based on user's role in this appointment */}
                                         {appointment.userRoleInAppointment === 'buyer' ? (
-                                            /* When user is the buyer (even if they're normally a seller) */
                                             <>
                                                 <p><strong>Property Owner:</strong> {appointment.sellerName}</p>
                                                 <p><strong>Owner Contact:</strong> {appointment.sellerContact}</p>
                                                 <p><strong>Owner Email:</strong> {appointment.sellerEmail}</p>
                                             </>
                                         ) : (
-                                            /* When user is the seller */
                                             <>
                                                 <p><strong>Visitor:</strong> {appointment.buyerName}</p>
                                                 <p><strong>Visitor Contact:</strong> {appointment.buyerContact}</p>

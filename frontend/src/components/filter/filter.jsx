@@ -8,7 +8,7 @@ function Filter() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState({
     type: searchParams.get("type") || "",
-    city: searchParams.get("city") || "",
+    address: searchParams.get("address") || "",
     property: searchParams.get("property") || "",
     minPrice: searchParams.get("minPrice") || "",
     maxPrice: searchParams.get("maxPrice") || "",
@@ -19,7 +19,7 @@ function Filter() {
     setSearchParams({});
     setQuery({
       type: "",
-      city: "",
+      address: "",
       property: "",
       minPrice: "",
       maxPrice: "",
@@ -46,17 +46,17 @@ function Filter() {
   return (
     <div className="filter">
       <h1>
-        Search results for <b>{query.city || "all locations"}</b>
+        Search results for <b>{query.address || "all locations"}</b>
       </h1>
       <form onSubmit={handleFilter}>
         <div className="top">
           <div className="item">
-            <label htmlFor="city">Location</label>
+            <label htmlFor="address">Location</label>
             <input
               type="text"
-              id="city"
-              name="city"
-              placeholder="City Location"
+              id="address"
+              name="address"
+              placeholder="Address"
               onChange={handleChange}
               value={query.city}
             />

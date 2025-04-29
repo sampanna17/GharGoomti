@@ -5,7 +5,7 @@ import Sidebar from "../../components/AdminSideBar";
 import Navbar from "../../components/AdminNav";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { toast } from "react-toastify";
+import { toast,ToastContainer } from "react-toastify";
 
 const AdminProfile = () => {
     const [formData, setFormData] = useState({
@@ -92,7 +92,6 @@ const AdminProfile = () => {
         try {
             const formDataToSend = new FormData();
 
-            // Append all form data
             formDataToSend.append('userFirstName', formData.firstName);
             formDataToSend.append('userLastName', formData.lastName);
             formDataToSend.append('userContact', formData.phone);
@@ -102,7 +101,7 @@ const AdminProfile = () => {
             if (selectedImage) {
                 formDataToSend.append('image', selectedImage);
             } else if (!imagePreview) {
-                // If no preview and no selected image, we're removing the image
+                // removing the image
                 formDataToSend.append('deleteProfileImage', 'true');
             }
 
@@ -118,9 +117,8 @@ const AdminProfile = () => {
 
             if (response.status === 200) {
                 toast.success("Profile updated successfully");
-                // Update the initial data with new data
                 setInitialData(response.data);
-                // If there's a new profile picture, update it
+                // new profile picture
                 if (response.data.profile_picture) {
                     setImagePreview(response.data.profile_picture);
                 }
@@ -151,6 +149,7 @@ const AdminProfile = () => {
     };
     return (
         <div className="flex">
+            <ToastContainer position="top-right" autoClose={3000} limit={1} newestOnTop={false} closeOnClick pauseOnHover />
             <Sidebar />
             <div className="flex-1">
                 <Navbar
@@ -304,7 +303,7 @@ const AdminProfile = () => {
                                     Role
                                 </label>
                                 <div className="flex items-center border-b border-gray-300 mb-4">
-                                    <FaUserTie MarkerAlt className="text-gray-500 mr-2" />
+                                    <FaUserTie className="text-gray-500 mr-2" />
                                     <input
                                         type="text"
                                         id="role"

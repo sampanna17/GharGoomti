@@ -423,7 +423,7 @@ export const updateAppointment = async (req, res) => {
             ? appointmentTime.split(':').slice(0, 2).join(':')
             : appointmentTime;
 
-        // Check time slot availability (excluding current appointment)
+        // Check time slot availability 
         const isAvailable = await isTimeSlotAvailable(
             appointment[0].propertyID,
             formattedDate,
@@ -461,7 +461,7 @@ export const updateAppointment = async (req, res) => {
             message: 'Appointment updated successfully',
             appointment: {
                 ...updated[0],
-                buyerID: appointment[0].buyerID // Ensure buyerID is included in response
+                buyerID: appointment[0].buyerID 
             }
         });
     } catch (error) {
@@ -473,20 +473,3 @@ export const updateAppointment = async (req, res) => {
     }
 };
 
-// Helper function to format time for display
-function formatTimeForDisplay(time) {
-    if (!time) return '';
-    
-    // If already in AM/PM format, return as-is
-    if (time.includes('AM') || time.includes('PM')) {
-        return time;
-    }
-    
-    // Convert 24-hour to 12-hour format
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours, 10);
-    const suffix = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour % 12 || 12;
-    
-    return `${displayHour}:${minutes} ${suffix}`;
-}

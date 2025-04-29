@@ -37,7 +37,7 @@ export const registerUser = async (req, res) => {
 
     let profileImageUrl = null;
     
-    // Upload image to Cloudinary if provided
+    // Upload image to Cloudinary 
     if (image && image.path) {
       try {
         const result = await cloudinary.uploader.upload(image.path, {
@@ -71,11 +71,11 @@ export const registerUser = async (req, res) => {
     const [results] = await db.query(
       'INSERT INTO users (userFirstName, userLastName, userContact, userEmail, userAge, password, role, profile_picture, otp, otp_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
-        userFirstName.toString(), // Ensure string conversion
+        userFirstName.toString(), 
         userLastName.toString(),
         userContact.toString(),
         userEmail.toString(),
-        parseInt(userAge), // Ensure age is a number
+        parseInt(userAge), 
         hashedPassword,
         role.toString(),
         profileImageUrl,
@@ -89,7 +89,6 @@ export const registerUser = async (req, res) => {
       await sendemail(userEmail, 'Registration Successful', otp.toString());
     } catch (emailError) {
       console.error('Email sending failed:', emailError);
-      // Don't fail the registration if email fails
     }
 
     res.status(201).json({
@@ -115,7 +114,6 @@ export const registerUser = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;
 
-  // Check if email or OTP are missing
   if (!email || !otp) {
     return res.status(400).json({ error: "Email and OTP are required" });
   }
@@ -252,7 +250,7 @@ export const google = async (req, res) => {
       expiresIn: "1d",
     });
 
-    // Set cookies like your regular login
+    // Set cookies 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
